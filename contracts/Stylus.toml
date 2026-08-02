@@ -1,0 +1,7 @@
+# Stylus compilation config
+[target.wasm32-unknown-unknown]
+rustflags = [
+  "-C", "link-arg=-e",
+  "-C", "link-arg=user_main",
+  "-C", "target-feature=+bulk-memory",
+]

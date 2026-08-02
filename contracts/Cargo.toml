@@ -1,0 +1,25 @@
+[package]
+name = "lexius-pay-escrow"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+keywords = ["arbitrum", "stylus", "escrow", "ai-oracle", "wasm"]
+
+[dependencies]
+stylus-sdk = "0.6.0"
+alloy-primitives = "0.7.6"
+alloy-sol-types = "0.7.6"
+mini-alloc = "0.4.2"
+
+[features]
+default = []
+export-abi = ["stylus-sdk/export-abi"]
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "z"
+panic = "abort"
+strip = true
+
+[workspace]
