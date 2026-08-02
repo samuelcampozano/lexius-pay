@@ -1,0 +1,40 @@
+name: 🚀 Lexius Pay GCP Cloud Run Deployment CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  deploy-ai-oracle:
+    name: Build & Deploy AI Oracle to GCP Cloud Run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Authorize Docker to GCP Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build & Deploy Container to Cloud Run
+        run: |
+          gcloud run deploy lexius-ai-oracle \
+            --source ./ai-oracle \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --set-secrets="ORACLE_PRIVATE_KEY=ORACLE_PRIVATE_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,STYLUS_RPC_URL=STYLUS_RPC_URL:latest" \
+            --min-instances=0 \
+            --max-instances=10 \
+            --memory=512Mi \
+            --cpu=1 \
+            --port=8080 \
+            --project=lexius-pay-2026
