@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  ai-oracle:
+    build:
+      context: ./ai-oracle
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - NODE_ENV=development
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-dummy-key-for-local-test}
+      - ORACLE_PRIVATE_KEY=${ORACLE_PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
+      - STYLUS_RPC_URL=${STYLUS_RPC_URL:-https://sepolia-rollup.arbitrum.io/rpc}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_AI_ORACLE_URL=http://localhost:8080
+      - NEXT_PUBLIC_STYLUS_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
+    depends_on:
+      - ai-oracle
