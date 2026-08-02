@@ -12,7 +12,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'clxxxxxxx0000xxxxxxx';
+  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cm00000000000000000000000';
 
   useEffect(() => {
     initTelegramWebApp();
