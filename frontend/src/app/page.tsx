@@ -1,15 +1,36 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Shield, Sparkles, Link as LinkIcon, Lock, CheckCircle2, Copy, Send, ArrowRight, Zap } from 'lucide-react';
+import {
+  Shield,
+  Sparkles,
+  Link as LinkIcon,
+  Lock,
+  CheckCircle2,
+  Copy,
+  Send,
+  ArrowRight,
+  Zap,
+  Cpu,
+  FileCheck,
+  Globe,
+  ExternalLink,
+  ChevronRight,
+  RefreshCw,
+  Scale,
+} from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState('VIP Concert Ticket — ETH Lima Afterparty 2026');
   const [amount, setAmount] = useState('50');
   const [sellerAddress, setSellerAddress] = useState('');
   const [generatedId, setGeneratedId] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+
+  // AI Simulator State
+  const [simulatingAI, setSimulatingAI] = useState(false);
+  const [aiResult, setAiResult] = useState<any>(null);
 
   const handleCreateLink = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,38 +46,86 @@ export default function HomePage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  const runAISimulator = () => {
+    setSimulatingAI(true);
+    setAiResult(null);
+
+    setTimeout(() => {
+      setSimulatingAI(false);
+      setAiResult({
+        escrowId: '101',
+        winner: '0x3C44CdD459193653841586395bcfA5A7b42d506e (Buyer)',
+        confidenceScore: 0.98,
+        reasoning:
+          'GPT-4o Vision OCR verified the event ticket receipt. Barcode mismatch detected against official organizer database. Refund granted to Buyer.',
+        summary: 'Verdict in favor of Buyer (Refund Executed)',
+        signature: '0x3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b',
+        v: 27,
+        r: '0x1111111111111111111111111111111111111111111111111111111111111111',
+        s: '0x2222222222222222222222222222222222222222222222222222222222222222',
+        oracleHost: 'Google Cloud Run (us-central1)',
+      });
+    }, 1800);
+  };
+
   return (
-    <div className="space-y-16">
-      {/* Hero Section */}
-      <section className="relative text-center max-w-3xl mx-auto pt-6 space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
+    <div className="space-y-20 pb-16">
+      {/* HERO SECTION */}
+      <section className="relative text-center max-w-4xl mx-auto pt-6 space-y-6">
+        {/* Glow backdrop */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-blue-600/15 blur-[120px] rounded-full pointer-events-none" />
+
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider shadow-inner">
           <Zap className="w-3.5 h-3.5" />
-          <span>Arbitrum Stylus WASM + GCP AI Mediator</span>
+          <span>ETH Lima 2026 • Arbitrum Stylus WASM + GCP AI Oracle</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-          P2P Social Escrow Links with{' '}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.15]">
+          Autonomous P2P Escrow Links with{' '}
           <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-            Autonomous AI Mediation
+            AI Dispute Mediation
           </span>
         </h1>
 
-        <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed">
+        <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed max-w-2xl mx-auto">
           Create a 10-second payment link for Telegram or WhatsApp. Funds freeze safely in Rust WASM contracts. Conflicts are settled in seconds by GPT-4o Vision on Google Cloud.
         </p>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          <a
+            href="#generator"
+            className="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center gap-2 text-base"
+          >
+            <LinkIcon className="w-5 h-5" />
+            <span>Generate Escrow Link</span>
+          </a>
+          <a
+            href="#ai-simulator"
+            className="px-6 py-3.5 bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 border border-purple-500/30 font-semibold rounded-xl transition-all flex items-center gap-2 text-base"
+          >
+            <Sparkles className="w-5 h-5 text-purple-400" />
+            <span>Test AI Mediator Demo</span>
+          </a>
+        </div>
       </section>
 
-      {/* Generator Form Section */}
-      <section className="max-w-xl mx-auto">
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-            <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
-              <LinkIcon className="w-5 h-5" />
+      {/* INTERACTIVE LINK GENERATOR MODAL */}
+      <section id="generator" className="max-w-xl mx-auto scroll-mt-24">
+        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 glow-blue">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
+                <LinkIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Create Escrow Link</h2>
+                <p className="text-xs text-slate-400">Generate a secure payment agreement in seconds</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">Create Escrow Link</h2>
-              <p className="text-xs text-slate-400">Generate a secure payment agreement in seconds</p>
-            </div>
+            <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-full uppercase">
+              Stylus WASM
+            </span>
           </div>
 
           {!generatedId ? (
@@ -92,10 +161,10 @@ export default function HomePage() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                    Network
+                    Target Network
                   </label>
                   <div className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-blue-400 font-medium text-sm flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                     Arbitrum Sepolia
                   </div>
                 </div>
@@ -116,7 +185,7 @@ export default function HomePage() {
 
               <button
                 type="submit"
-                className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-base"
+                className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-base active:scale-95"
               >
                 <Sparkles className="w-5 h-5" />
                 <span>Generate Escrow Link</span>
@@ -129,16 +198,20 @@ export default function HomePage() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-white">Escrow Link Created!</h3>
-                <p className="text-xs text-slate-400">Escrow #{generatedId} is ready for sharing on Telegram or WhatsApp</p>
+                <p className="text-xs text-slate-400">
+                  Escrow #{generatedId} is ready for sharing on Telegram or WhatsApp
+                </p>
               </div>
 
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
                 <span className="text-xs font-mono text-blue-400 truncate">
-                  {typeof window !== 'undefined' ? `${window.location.origin}/pay/${generatedId}` : `/pay/${generatedId}`}
+                  {typeof window !== 'undefined'
+                    ? `${window.location.origin}/pay/${generatedId}`
+                    : `/pay/${generatedId}`}
                 </span>
                 <button
                   onClick={copyToClipboard}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   <span>{isCopied ? 'Copied!' : 'Copy'}</span>
@@ -148,14 +221,14 @@ export default function HomePage() {
               <div className="flex gap-3">
                 <Link
                   href={`/pay/${generatedId}`}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
                 >
-                  <span>Open Payment Page</span>
+                  <span>Open Buyer Payment Page</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <button
                   onClick={() => setGeneratedId(null)}
-                  className="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-slate-400 text-sm font-medium rounded-xl border border-slate-800"
+                  className="px-4 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-400 text-sm font-medium rounded-xl border border-slate-800"
                 >
                   New Link
                 </button>
@@ -165,7 +238,91 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Feature Pillars */}
+      {/* AI MEDIATOR SIMULATOR SECTION */}
+      <section id="ai-simulator" className="max-w-4xl mx-auto scroll-mt-24 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Interactive Demo</span>
+          </div>
+          <h2 className="text-3xl font-extrabold text-white">Autonomous AI Mediator Simulator</h2>
+          <p className="text-xs text-slate-400">
+            Simulate how GPT-4o Vision evaluates dispute receipts on GCP Cloud Run and signs ECDSA verdicts on Arbitrum Stylus.
+          </p>
+        </div>
+
+        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-purple-500/30">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+                <Scale className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-lg">Sample Dispute: Fake Event Ticket Claim</h3>
+                <p className="text-xs text-slate-400">Buyer claims barcode OCR scan failed at venue gate</p>
+              </div>
+            </div>
+            <button
+              onClick={runAISimulator}
+              disabled={simulatingAI}
+              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 disabled:opacity-50"
+            >
+              {simulatingAI ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Evaluating Vision AI...</span>
+                </>
+              ) : (
+                <>
+                  <Cpu className="w-4 h-4" />
+                  <span>Run GPT-4o Resolution</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* AI Verdict Output */}
+          {aiResult && (
+            <div className="bg-slate-950 p-6 rounded-xl border border-purple-500/40 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300 glow-purple">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  GCP AI Oracle Verdict Rendered
+                </span>
+                <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full">
+                  Confidence: {Math.round(aiResult.confidenceScore * 100)}%
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-200 leading-relaxed font-medium bg-slate-900 p-3 rounded-lg border border-slate-800">
+                {aiResult.reasoning}
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                  <span className="text-slate-500 block mb-1 text-[10px] uppercase font-semibold">Declared Winner</span>
+                  <span className="font-mono text-emerald-400 font-bold truncate block">{aiResult.winner}</span>
+                </div>
+                <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                  <span className="text-slate-500 block mb-1 text-[10px] uppercase font-semibold">Oracle Host</span>
+                  <span className="font-mono text-blue-400 font-bold truncate block">{aiResult.oracleHost}</span>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800 font-mono text-[10px] space-y-1 text-slate-400">
+                <div className="truncate">ECDSA Signature: {aiResult.signature}</div>
+                <div className="flex gap-4 text-slate-500">
+                  <span>v: {aiResult.v}</span>
+                  <span className="truncate">r: {aiResult.r.slice(0, 16)}...</span>
+                  <span className="truncate">s: {aiResult.s.slice(0, 16)}...</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* FEATURE PILLARS */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         <div className="glass-card glass-card-hover rounded-2xl p-6 space-y-3">
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
