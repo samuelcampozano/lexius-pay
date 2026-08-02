@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Sparkles, Upload, ShieldCheck, AlertCircle, CheckCircle2, ArrowRight, RefreshCw, FileText, Cpu, Lock } from 'lucide-react';
+import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock } from 'lucide-react';
 import { DisputeVerdict } from '@/types';
-import Link from 'next/link';
 
 export default function DisputePage() {
   const params = useParams();
@@ -13,9 +12,8 @@ export default function DisputePage() {
   const [claimText, setClaimText] = useState(
     'The seller sent a forged PDF ticket for the concert. The barcode fails validation at the venue gate.'
   );
-  const [proofUrl, setProofUrl] = useState(
-    'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=800&q=80'
-  );
+  const [proofUrl, setProofUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
   const [verdict, setVerdict] = useState<DisputeVerdict | null>(null);
   const [executingTx, setExecutingTx] = useState(false);
@@ -92,6 +90,19 @@ export default function DisputePage() {
     }, 1500);
   };
 
+  const handleReceiptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const previewUrl = URL.createObjectURL(file);
+
+    setTimeout(() => {
+      setProofUrl(previewUrl);
+      setUploading(false);
+    }, 600);
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Header */}
@@ -144,15 +155,18 @@ export default function DisputePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Receipt / Chat Evidence Image URL
+                Receipt / Chat Evidence
               </label>
-              <input
-                type="url"
-                required
-                value={proofUrl}
-                onChange={(e) => setProofUrl(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 text-xs font-mono"
-              />
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-950 px-3 py-4 text-sm text-slate-300 transition hover:border-purple-500 hover:text-white">
+                <Upload className="h-4 w-4" />
+                <span>{uploading ? 'Uploading...' : 'Upload receipt image'}</span>
+                <input type="file" accept="image/*" className="hidden" onChange={handleReceiptUpload} />
+              </label>
+              {proofUrl ? (
+                <p className="mt-2 text-[11px] text-emerald-400">Receipt preview ready</p>
+              ) : (
+                <p className="mt-2 text-[11px] text-slate-500">PNG, JPG or WEBP accepted</p>
+              )}
             </div>
 
             <button

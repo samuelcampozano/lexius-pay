@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import { PrivyProvider } from '@privy-io/react-auth';
 import { arbitrumSepolia } from 'viem/chains';
+import { initTelegramWebApp } from '@/lib/telegram';
 
 export default function RootLayout({
   children,
@@ -12,6 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'clxxxxxxx0000xxxxxxx';
+
+  useEffect(() => {
+    initTelegramWebApp();
+  }, []);
 
   return (
     <html lang="en">

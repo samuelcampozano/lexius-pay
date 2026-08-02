@@ -11,7 +11,7 @@
   "dependencies": {
     "@privy-io/react-auth": "^1.74.0",
     "@telegram-apps/sdk-react": "^2.0.0",
-    "@twa-dev/sdk": "^7.0.0",
+    "@twa-dev/sdk": "^7.10.1",
     "clsx": "^2.1.1",
     "ethers": "^6.13.1",
     "framer-motion": "^11.2.12",
