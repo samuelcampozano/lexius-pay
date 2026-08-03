@@ -70,6 +70,34 @@ export const dictionary = {
     // Dispute page
     disputeTitle: 'Resolución de Disputa con IA',
     disputeSub: 'Carga pruebas de chat o fotos de recibos para mediación automática con GPT-4o Vision',
+
+    // Pay page
+    payTitle: 'Acuerdo de Escrow Lexius',
+    paySubtitle: 'Contrato WASM en Arbitrum Stylus',
+    payItemDesc: 'Descripción del Artículo',
+    payTotalAmount: 'Monto Total',
+    payNetwork: 'Red',
+    payParticipants: 'Participantes del Acuerdo',
+    paySeller: 'Vendedor',
+    payBuyer: 'Comprador',
+    payYou: '(Tú)',
+    paySellerName: 'Nombre del Vendedor',
+    payBuyerName: 'Nombre del Comprador',
+    payCopyAddress: 'Copiar dirección',
+    payAddressCopied: '¡Dirección copiada!',
+    payWaitingBuyer: 'Esperando depósito del comprador...',
+    payDepositBtn: 'Depositar Fondos en Escrow',
+    payConnectDeposit: 'Conectar Billetera y Depositar',
+    payConfirmRelease: 'Confirmar Recepción y Liberar Fondos',
+    payOpenDispute: 'Abrir Centro de Resolución IA',
+    payEscrowReleased: '¡Escrow Liberado con Éxito!',
+    payFundsTransferred: 'Fondos transferidos al vendedor en Arbitrum Sepolia.',
+    payBackGenerator: '← Volver al Generador',
+    payUnknown: 'Desconocido',
+
+    // Generator name field
+    labelSellerName: 'Tu Nombre (visible en el enlace)',
+    placeholderSellerName: 'ej. Carlos López',
   },
   en: {
     // Navbar
@@ -140,6 +168,34 @@ export const dictionary = {
     // Dispute page
     disputeTitle: 'AI Dispute Resolution',
     disputeSub: 'Upload chat receipts or evidence photos for automated GPT-4o Vision mediation',
+
+    // Pay page
+    payTitle: 'Lexius Escrow Agreement',
+    paySubtitle: 'Arbitrum Stylus WASM Contract',
+    payItemDesc: 'Item Description',
+    payTotalAmount: 'Total Amount',
+    payNetwork: 'Network',
+    payParticipants: 'Agreement Participants',
+    paySeller: 'Seller',
+    payBuyer: 'Buyer',
+    payYou: '(You)',
+    paySellerName: 'Seller Name',
+    payBuyerName: 'Buyer Name',
+    payCopyAddress: 'Copy address',
+    payAddressCopied: 'Address copied!',
+    payWaitingBuyer: 'Waiting for buyer deposit...',
+    payDepositBtn: 'Deposit Funds in Escrow',
+    payConnectDeposit: 'Connect Wallet & Deposit',
+    payConfirmRelease: 'Confirm Receipt & Release Funds',
+    payOpenDispute: 'Open AI Resolution Center',
+    payEscrowReleased: 'Escrow Released Successfully!',
+    payFundsTransferred: 'Funds transferred to seller on Arbitrum Sepolia.',
+    payBackGenerator: '← Back to Generator',
+    payUnknown: 'Unknown',
+
+    // Generator name field
+    labelSellerName: 'Your Name (visible on the link)',
+    placeholderSellerName: 'e.g. John Doe',
   },
 };
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import WebApp from '@twa-dev/sdk';
 
 export interface TelegramWebApp {
@@ -55,4 +56,10 @@ export function initTelegramWebApp(): TelegramWebApp | null {
     console.warn('Telegram WebApp initialization skipped:', error);
     return null;
   }
+}
+
+export function useTelegramWebApp() {
+  useEffect(() => {
+    initTelegramWebApp();
+  }, []);
 }

@@ -14,11 +14,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_PRIVY_APP_ID: ${NEXT_PUBLIC_PRIVY_APP_ID}
+        NEXT_PUBLIC_AI_ORACLE_URL: ${NEXT_PUBLIC_AI_ORACLE_URL:-http://localhost:8080}
+        NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS: ${NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS}
+        NEXT_PUBLIC_STYLUS_RPC_URL: ${NEXT_PUBLIC_STYLUS_RPC_URL}
     ports:
       - "3000:3000"
     env_file:
       - .env
     environment:
+      - PORT=3000
       - NEXT_PUBLIC_AI_ORACLE_URL=http://localhost:8080
     depends_on:
       - ai-oracle
