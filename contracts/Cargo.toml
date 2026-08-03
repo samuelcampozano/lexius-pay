@@ -5,11 +5,13 @@ edition = "2021"
 license = "MIT"
 keywords = ["arbitrum", "stylus", "escrow", "ai-oracle", "wasm"]
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
-stylus-sdk = "0.6.0"
-alloy-primitives = "0.7.6"
-alloy-sol-types = "0.7.6"
-mini-alloc = "0.4.2"
+stylus-sdk = "0.10.8"
+alloy-primitives = "1.6.1"
+alloy-sol-types = "1.6.1"
 
 [features]
 default = []

@@ -1,3 +1,4 @@
+#![cfg_attr(not(any(feature = "export-abi", test)), no_main)]
 #![no_std]
 extern crate alloc;
 
@@ -7,17 +8,17 @@ mod types;
 #[cfg(test)]
 mod tests;
 
-use alloy_primitives::{Address, B256, U256, U8};
+use alloc::vec;
+use alloc::vec::Vec;
 use stylus_sdk::{
-    contract, evm, msg,
+    alloy_primitives::{Address, B256, U256, U8},
     prelude::*,
 };
 
-#[global_allocator]
-static ALLOC: mini_alloc::MiniAlloc = mini_alloc::MiniAlloc::INIT;
+
 
 // Define ERC-20 Interface for external token contract calls
-stylus_sdk::sol_interface! {
+sol_interface! {
     interface IERC20 {
         function transfer(address recipient, uint256 amount) external returns (bool);
         function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
@@ -25,20 +26,39 @@ stylus_sdk::sol_interface! {
 }
 
 stylus_sdk::alloy_sol_types::sol! {
+    #[derive(Debug)]
     event EscrowCreated(uint256 indexed escrow_id, address indexed buyer, address indexed seller, uint256 amount, bytes32 details_hash);
+    #[derive(Debug)]
     event EscrowDeposited(uint256 indexed escrow_id, address indexed buyer, uint256 amount);
+    #[derive(Debug)]
     event EscrowDisputed(uint256 indexed escrow_id, address indexed initiator);
+    #[derive(Debug)]
     event EscrowResolved(uint256 indexed escrow_id, address indexed winner, address indexed oracle);
+    #[derive(Debug)]
     event EscrowRefunded(uint256 indexed escrow_id, address indexed buyer);
 
+    #[derive(Debug)]
     error Unauthorized();
+    #[derive(Debug)]
     error InvalidState();
+    #[derive(Debug)]
     error InvalidSignature();
+    #[derive(Debug)]
     error TransferFailed();
+    #[derive(Debug)]
     error InvalidAmount();
 }
 
-stylus_sdk::sol_storage! {
+#[derive(SolidityError, Debug)]
+pub enum LexiusEscrowError {
+    Unauthorized(Unauthorized),
+    InvalidState(InvalidState),
+    InvalidSignature(InvalidSignature),
+    TransferFailed(TransferFailed),
+    InvalidAmount(InvalidAmount),
+}
+
+sol_storage! {
     #[entrypoint]
     pub struct LexiusEscrow {
         uint256 escrow_counter;
@@ -57,14 +77,15 @@ stylus_sdk::sol_storage! {
     }
 }
 
-#[external]
+#[public]
 impl LexiusEscrow {
     /// Initialize the contract with Oracle public address and USDC token address
     pub fn init(&mut self, oracle: Address, token: Address) -> Result<(), LexiusEscrowError> {
         if self.owner.get() != Address::ZERO {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
-        self.owner.set(msg::sender());
+        let sender = self.vm().msg_sender();
+        self.owner.set(sender);
         self.oracle_address.set(oracle);
         self.token_address.set(token);
         Ok(())
@@ -77,7 +98,8 @@ impl LexiusEscrow {
 
     /// Set new oracle address (only owner)
     pub fn set_oracle(&mut self, new_oracle: Address) -> Result<(), LexiusEscrowError> {
-        if msg::sender() != self.owner.get() {
+        let sender = self.vm().msg_sender();
+        if sender != self.owner.get() {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
         self.oracle_address.set(new_oracle);
@@ -91,7 +113,8 @@ impl LexiusEscrow {
 
     /// Set new token address (only owner)
     pub fn set_token(&mut self, new_token: Address) -> Result<(), LexiusEscrowError> {
-        if msg::sender() != self.owner.get() {
+        let sender = self.vm().msg_sender();
+        if sender != self.owner.get() {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
         self.token_address.set(new_token);
@@ -120,7 +143,7 @@ impl LexiusEscrow {
         escrow.status.set(U8::from(0)); // Pending
         escrow.details_hash.set(details_hash);
 
-        evm::log(EscrowCreated {
+        self.vm().log(EscrowCreated {
             escrow_id: next_id,
             buyer,
             seller,
@@ -133,7 +156,7 @@ impl LexiusEscrow {
 
     /// Buyer deposits ERC-20 (USDC) funds into escrow
     pub fn deposit(&mut self, escrow_id: U256) -> Result<(), LexiusEscrowError> {
-        let mut escrow = self.escrows.setter(escrow_id);
+        let escrow = self.escrows.get(escrow_id);
         let buyer = escrow.buyer.get();
         let amount = escrow.amount.get();
         let status = escrow.status.get();
@@ -142,25 +165,29 @@ impl LexiusEscrow {
             return Err(LexiusEscrowError::InvalidState(InvalidState {}));
         }
 
-        let sender = msg::sender();
+        let sender = self.vm().msg_sender();
         if sender != buyer {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
 
-        escrow.status.set(U8::from(1)); // Deposited
+        let token_addr = self.token_address.get();
+        let contract_addr = self.vm().contract_address();
 
         // Transfer ERC-20 tokens from buyer to escrow contract via transferFrom
-        let token = IERC20::new(self.token_address.get());
-        let config = stylus_sdk::call::Call::new_in(self);
+        let token = IERC20::new(token_addr);
+        let config = Call::new_mutating(self);
         let success = token
-            .transfer_from(config, buyer, contract::address(), amount)
+            .transfer_from(self.vm(), config, buyer, contract_addr, amount)
             .map_err(|_| LexiusEscrowError::TransferFailed(TransferFailed {}))?;
 
         if !success {
             return Err(LexiusEscrowError::TransferFailed(TransferFailed {}));
         }
 
-        evm::log(EscrowDeposited {
+        let mut escrow = self.escrows.setter(escrow_id);
+        escrow.status.set(U8::from(1)); // Deposited
+
+        self.vm().log(EscrowDeposited {
             escrow_id,
             buyer: sender,
             amount,
@@ -171,7 +198,7 @@ impl LexiusEscrow {
 
     /// Buyer or Seller releases funds upon successful agreement
     pub fn release(&mut self, escrow_id: U256) -> Result<(), LexiusEscrowError> {
-        let mut escrow = self.escrows.setter(escrow_id);
+        let escrow = self.escrows.get(escrow_id);
         let buyer = escrow.buyer.get();
         let seller = escrow.seller.get();
         let amount = escrow.amount.get();
@@ -181,25 +208,26 @@ impl LexiusEscrow {
             return Err(LexiusEscrowError::InvalidState(InvalidState {}));
         }
 
-        let sender = msg::sender();
+        let sender = self.vm().msg_sender();
         if sender != buyer && sender != seller {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
 
-        escrow.status.set(U8::from(3)); // Completed
-
-        // Transfer ERC-20 tokens to seller
-        let token = IERC20::new(self.token_address.get());
-        let config = stylus_sdk::call::Call::new_in(self);
+        let token_addr = self.token_address.get();
+        let token = IERC20::new(token_addr);
+        let config = Call::new_mutating(self);
         let success = token
-            .transfer(config, seller, amount)
+            .transfer(self.vm(), config, seller, amount)
             .map_err(|_| LexiusEscrowError::TransferFailed(TransferFailed {}))?;
 
         if !success {
             return Err(LexiusEscrowError::TransferFailed(TransferFailed {}));
         }
 
-        evm::log(EscrowResolved {
+        let mut escrow = self.escrows.setter(escrow_id);
+        escrow.status.set(U8::from(3)); // Completed
+
+        self.vm().log(EscrowResolved {
             escrow_id,
             winner: seller,
             oracle: sender,
@@ -210,7 +238,7 @@ impl LexiusEscrow {
 
     /// Seller refunds buyer voluntarily
     pub fn refund(&mut self, escrow_id: U256) -> Result<(), LexiusEscrowError> {
-        let mut escrow = self.escrows.setter(escrow_id);
+        let escrow = self.escrows.get(escrow_id);
         let buyer = escrow.buyer.get();
         let seller = escrow.seller.get();
         let amount = escrow.amount.get();
@@ -220,31 +248,33 @@ impl LexiusEscrow {
             return Err(LexiusEscrowError::InvalidState(InvalidState {}));
         }
 
-        if msg::sender() != seller {
+        let sender = self.vm().msg_sender();
+        if sender != seller {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
 
-        escrow.status.set(U8::from(4)); // Refunded
-
-        // Transfer ERC-20 tokens back to buyer
-        let token = IERC20::new(self.token_address.get());
-        let config = stylus_sdk::call::Call::new_in(self);
+        let token_addr = self.token_address.get();
+        let token = IERC20::new(token_addr);
+        let config = Call::new_mutating(self);
         let success = token
-            .transfer(config, buyer, amount)
+            .transfer(self.vm(), config, buyer, amount)
             .map_err(|_| LexiusEscrowError::TransferFailed(TransferFailed {}))?;
 
         if !success {
             return Err(LexiusEscrowError::TransferFailed(TransferFailed {}));
         }
 
-        evm::log(EscrowRefunded { escrow_id, buyer });
+        let mut escrow = self.escrows.setter(escrow_id);
+        escrow.status.set(U8::from(4)); // Refunded
+
+        self.vm().log(EscrowRefunded { escrow_id, buyer });
 
         Ok(())
     }
 
     /// Either party raises a dispute
     pub fn raise_dispute(&mut self, escrow_id: U256) -> Result<(), LexiusEscrowError> {
-        let mut escrow = self.escrows.setter(escrow_id);
+        let escrow = self.escrows.get(escrow_id);
         let buyer = escrow.buyer.get();
         let seller = escrow.seller.get();
         let status = escrow.status.get();
@@ -253,13 +283,15 @@ impl LexiusEscrow {
             return Err(LexiusEscrowError::InvalidState(InvalidState {}));
         }
 
-        let sender = msg::sender();
+        let sender = self.vm().msg_sender();
         if sender != buyer && sender != seller {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
 
+        let mut escrow = self.escrows.setter(escrow_id);
         escrow.status.set(U8::from(2)); // Disputed
-        evm::log(EscrowDisputed {
+
+        self.vm().log(EscrowDisputed {
             escrow_id,
             initiator: sender,
         });
@@ -276,7 +308,7 @@ impl LexiusEscrow {
         r: B256,
         s: B256,
     ) -> Result<(), LexiusEscrowError> {
-        let mut escrow = self.escrows.setter(escrow_id);
+        let escrow = self.escrows.get(escrow_id);
         let buyer = escrow.buyer.get();
         let seller = escrow.seller.get();
         let amount = escrow.amount.get();
@@ -290,38 +322,31 @@ impl LexiusEscrow {
             return Err(LexiusEscrowError::Unauthorized(Unauthorized {}));
         }
 
-        // 1. Construct Ethereum Signed Message Hash
+        let oracle = self.oracle_address.get();
         let eth_hash = crypto::eth_signed_message_hash(escrow_id, winner);
 
-        // 2. Format 65-byte ECDSA signature: r (32) + s (32) + v (1)
-        let mut sig = [0u8; 65];
-        sig[..32].copy_from_slice(r.as_slice());
-        sig[32..64].copy_from_slice(s.as_slice());
-        sig[64] = if v < 27 { v + 27 } else { v };
-
-        // 3. ECRECOVER signature verification using Stylus host precompile
-        let recovered_oracle = stylus_sdk::crypto::ec_recover(&eth_hash.0, &sig)
+        let recovered_oracle = crypto::ecrecover(self, eth_hash, v, r, s)
             .map_err(|_| LexiusEscrowError::InvalidSignature(InvalidSignature {}))?;
 
-        let oracle = self.oracle_address.get();
         if recovered_oracle != oracle {
             return Err(LexiusEscrowError::InvalidSignature(InvalidSignature {}));
         }
 
-        // 4. Update escrow state and transfer tokens to winner
-        escrow.status.set(if winner == seller { U8::from(3) } else { U8::from(4) });
-
-        let token = IERC20::new(self.token_address.get());
-        let config = stylus_sdk::call::Call::new_in(self);
+        let token_addr = self.token_address.get();
+        let token = IERC20::new(token_addr);
+        let config = Call::new_mutating(self);
         let success = token
-            .transfer(config, winner, amount)
+            .transfer(self.vm(), config, winner, amount)
             .map_err(|_| LexiusEscrowError::TransferFailed(TransferFailed {}))?;
 
         if !success {
             return Err(LexiusEscrowError::TransferFailed(TransferFailed {}));
         }
 
-        evm::log(EscrowResolved {
+        let mut escrow = self.escrows.setter(escrow_id);
+        escrow.status.set(if winner == seller { U8::from(3) } else { U8::from(4) });
+
+        self.vm().log(EscrowResolved {
             escrow_id,
             winner,
             oracle,

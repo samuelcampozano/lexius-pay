@@ -1,6 +1,4 @@
-#![no_std]
-
-use alloy_primitives::U8;
+use stylus_sdk::alloy_primitives::U8;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
