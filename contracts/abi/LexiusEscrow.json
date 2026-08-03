@@ -1,0 +1,143 @@
+[
+  {
+    "type": "function",
+    "name": "init",
+    "inputs": [
+      { "name": "oracle", "type": "address" },
+      { "name": "token", "type": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "get_oracle",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "set_oracle",
+    "inputs": [{ "name": "new_oracle", "type": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "get_token",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "set_token",
+    "inputs": [{ "name": "new_token", "type": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "create_escrow",
+    "inputs": [
+      { "name": "buyer", "type": "address" },
+      { "name": "seller", "type": "address" },
+      { "name": "amount", "type": "uint256" },
+      { "name": "details_hash", "type": "bytes32" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "deposit",
+    "inputs": [{ "name": "escrow_id", "type": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "release",
+    "inputs": [{ "name": "escrow_id", "type": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "refund",
+    "inputs": [{ "name": "escrow_id", "type": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "raise_dispute",
+    "inputs": [{ "name": "escrow_id", "type": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "resolve_dispute_with_signature",
+    "inputs": [
+      { "name": "escrow_id", "type": "uint256" },
+      { "name": "winner", "type": "address" },
+      { "name": "v", "type": "uint8" },
+      { "name": "r", "type": "bytes32" },
+      { "name": "s", "type": "bytes32" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "EscrowCreated",
+    "inputs": [
+      { "name": "escrow_id", "type": "uint256", "indexed": true },
+      { "name": "buyer", "type": "address", "indexed": true },
+      { "name": "seller", "type": "address", "indexed": true },
+      { "name": "amount", "type": "uint256", "indexed": false },
+      { "name": "details_hash", "type": "bytes32", "indexed": false }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EscrowDeposited",
+    "inputs": [
+      { "name": "escrow_id", "type": "uint256", "indexed": true },
+      { "name": "buyer", "type": "address", "indexed": true },
+      { "name": "amount", "type": "uint256", "indexed": false }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EscrowDisputed",
+    "inputs": [
+      { "name": "escrow_id", "type": "uint256", "indexed": true },
+      { "name": "initiator", "type": "address", "indexed": true }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EscrowResolved",
+    "inputs": [
+      { "name": "escrow_id", "type": "uint256", "indexed": true },
+      { "name": "winner", "type": "address", "indexed": true },
+      { "name": "oracle", "type": "address", "indexed": true }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EscrowRefunded",
+    "inputs": [
+      { "name": "escrow_id", "type": "uint256", "indexed": true },
+      { "name": "buyer", "type": "address", "indexed": true }
+    ],
+    "anonymous": false
+  }
+]
