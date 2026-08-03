@@ -3,3 +3,6 @@
 .gitignore
 node_modules/
 .next/
+
+# Forzar a Google Cloud a incluir el .env en la compilación
+!.env
