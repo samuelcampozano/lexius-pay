@@ -18,6 +18,7 @@ export default function RootLayout({
   useEffect(() => {
     initTelegramWebApp();
   }, []);
+  const isValidPrivyAppId = Boolean(process.env.NEXT_PUBLIC_PRIVY_APP_ID && !process.env.NEXT_PUBLIC_PRIVY_APP_ID.includes('0000'));
 
   return (
     <html lang="es">
@@ -30,9 +31,11 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <script src="https://telegram.org/js/telegram-web-app.js" async></script>
       </head>
+
       <body className="min-h-screen bg-[#050811] text-slate-100 antialiased flex flex-col">
         <LanguageProvider>
-          <PrivyProvider
+          {isValidPrivyAppId ? (
+            <PrivyProvider
             appId={privyAppId}
             config={{
               loginMethods: ['email', 'google', 'telegram', 'wallet'],
@@ -56,7 +59,33 @@ export default function RootLayout({
               <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus & Google Cloud Platform</p>
             </footer>
           </PrivyProvider>
+        ) : (
+          <>
+            <Navbar />
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {children}
+            </main>
+            <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+              <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus & Google Cloud Platform</p>
+            </footer>
+          </>
+        )}
         </LanguageProvider>
+              <p>Lexius Pay &copy; 2026 — Built on Arbitrum Stylus & Google Cloud Platform</p>
+            </footer>
+          </PrivyProvider>
+        ) : (
+          <>
+            <Navbar />
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {children}
+            </main>
+            <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+              <p>Lexius Pay &copy; 2026 — Built on Arbitrum Stylus & Google Cloud Platform</p>
+            </footer>
+          </>
+        )}
+>>>>>>> Stashed changes
       </body>
     </html>
   );
