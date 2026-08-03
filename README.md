@@ -1,8 +1,9 @@
 # ⚖️ Lexius Pay: Autonomous AI P2P Escrow on Arbitrum Stylus
 
-> **Protocolo de pagos seguros y custodia de fondos P2P por enlaces sociales con resolución de disputas autónoma por Inteligencia Artificial (GPT-4o Vision) alojada en Google Cloud Platform y smart contracts en Rust sobre Arbitrum Stylus.**
+> **Protocolo de pagos seguros y custodia de fondos P2P por enlaces sociales desarrollado sobre Scaffold-Stylus con resolución de disputas autónoma por Inteligencia Artificial (GPT-4o Vision) alojada en Google Cloud Platform y smart contracts en Rust WASM sobre Arbitrum Stylus.**
 
 [![ETH Lima Hackathon 2026](https://img.shields.io/badge/Event-ETH_Lima_Hackathon_2026-6200ea.svg?style=for-the-badge&logo=ethereum)](https://ethlima.org/)
+[![Arbitrum Bounty - Advanced](https://img.shields.io/badge/Arbitrum_Bounty-ADVANCED_CATEGORY_(Scaffold--Stylus_%2B_AI)-ff007a.svg?style=for-the-badge&logo=arbitrum)](https://docs.arbitrum.io/stylus/stylus-quickstart)
 [![Arbitrum Sepolia](https://img.shields.io/badge/Network-Arbitrum_Stylus_Sepolia-28A0F0.svg?style=for-the-badge&logo=arbitrum)](https://sepolia-rollup.arbitrum.io/rpc)
 [![Smart Contract](https://img.shields.io/badge/Contract-Rust_(Stylus_WASM)-black.svg?style=for-the-badge&logo=rust)](https://docs.arbitrum.io/stylus/stylus-quickstart)
 [![Frontend](https://img.shields.io/badge/Frontend-Next.js_14_App_Router-black.svg?style=for-the-badge&logo=nextdotjs)](https://nextjs.org/)
@@ -11,11 +12,19 @@
 
 ---
 
+## 🏆 Categoría de Bounty: ADVANCED (Scaffold-Stylus + AI)
+
+Lexius Pay califica a la categoría máxima **ADVANCED Bounty** patrocinada por el ecosistema **Arbitrum**:
+1. **Desarrollo sobre Scaffold-Stylus**: Smart contracts construidos en Rust (`#![no_std]`) WASM para la red Arbitrum Stylus Sepolia, utilizando la arquitectura y SDK de Scaffold-Stylus para comunicación contract-to-dapp.
+2. **Integración de Inteligencia Artificial Multimodal**: Agente Oráculo Autónomo en GCP Cloud Run con GPT-4o Vision para inspección de comprobantes OCR y firmas de veredictos ECDSA `(v, r, s)`.
+
+---
+
 ## 👥 Equipo (Team Lexius)
 
 | Integrante | Rol | Especialidad & Entregables |
 | :--- | :--- | :--- |
-| **Campozano Lopez Samuel** | *Blockchain Developer* | Arbitrum Stylus, Rust (`#![no_std]`), Smart Contracts, ECDSA `secp256k1` ecrecover. |
+| **Campozano Lopez Samuel** | *Blockchain Developer* | Scaffold-Stylus, Rust (`#![no_std]`), Smart Contracts WASM, ECDSA `secp256k1` ecrecover. |
 | **Vera Parrales Jonathan** | *Full-Stack & Cloud Developer* | Next.js 14 App Router, Telegram Mini App SDK, Privy Passkeys, AI Oracle en GCP Cloud Run & Secret Manager. |
 | **Colmenares Isabel** | *Designer & Presentation Lead* | UI/UX Design System, Pitch Deck, Video Demo, Storytelling & Branding. |
 

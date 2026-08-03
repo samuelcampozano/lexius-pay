@@ -6,11 +6,13 @@
 
 * **Nombre del Proyecto:** Lexius Pay (`lexius-pay`)
 * **Tagline:** "Escrow P2P descentralizado por links con mediación de disputas autónoma por IA en Arbitrum Stylus."
-* **Evento / Hackathon:** ETH Lima Hackathon 2026 (31 de julio al 12 de agosto de 2026).
+* **Evento / Hackathon:** ETH Lima Hackathon 2026.
+* **Categoría de Bounty Objetivo:** **ADVANCED (Scaffold-Stylus + Inteligencia Artificial)** — Máximo nivel de premiación.
 * **Tracks y Bounties Objetivo:** 
-  1. **Arbitrum Stylus Bounty** (Contratos inteligentes en Rust compilados a WebAssembly/WASM).
-  2. **AI Agents Track** (Resolución autónoma e imparcial de disputas con visión multimodal).
-  3. **Consumer & Social Use Cases** (Links de pago integrados en Telegram/WhatsApp con UX Web2).
+  1. **Arbitrum Advanced Bounty**: Desarrollo utilizando **Scaffold-Stylus** e integración de funcionalidades de **Inteligencia Artificial**.
+  2. **Arbitrum Stylus WASM Track**: Smart contracts en Rust (`#![no_std]`) compilados a WebAssembly.
+  3. **AI Agents Track**: Resolución autónoma de disputas con GPT-4o Vision en GCP Cloud Run & GCP Secret Manager.
+  4. **Consumer & Social Use Cases**: Links de pago integrados en Telegram/WhatsApp con UX Web2.
 * **Equipo:** 3 Integrantes.
 
 ---
