@@ -18,6 +18,7 @@ export default function RootLayout({
   useEffect(() => {
     initTelegramWebApp();
   }, []);
+
   const isValidPrivyAppId = Boolean(process.env.NEXT_PUBLIC_PRIVY_APP_ID && !process.env.NEXT_PUBLIC_PRIVY_APP_ID.includes('0000'));
 
   return (
@@ -36,56 +37,43 @@ export default function RootLayout({
         <LanguageProvider>
           {isValidPrivyAppId ? (
             <PrivyProvider
-            appId={privyAppId}
-            config={{
-              loginMethods: ['email', 'google', 'telegram', 'wallet'],
-              appearance: {
-                theme: 'dark',
-                accentColor: '#3b82f6',
-                showWalletLoginFirst: false,
-              },
-              embeddedWallets: {
-                createOnLogin: 'users-without-wallets',
-              },
-              defaultChain: arbitrumSepolia,
-              supportedChains: [arbitrumSepolia],
-            }}
-          >
-            <Navbar />
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {children}
-            </main>
-            <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
-              <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus & Google Cloud Platform</p>
-            </footer>
-          </PrivyProvider>
-        ) : (
-          <>
-            <Navbar />
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {children}
-            </main>
-            <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
-              <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus & Google Cloud Platform</p>
-            </footer>
-          </>
-        )}
+              appId={privyAppId}
+              config={{
+                // Limit login methods to passkey and Google as requested
+                loginMethods: ['google', 'telegram'],
+                appearance: {
+                  theme: 'dark',
+                  accentColor: '#3b82f6',
+                  showWalletLoginFirst: false,
+                },
+                // Automatically create embedded wallets for users on successful login
+                embeddedWallets: {
+                  createOnLogin: 'users-without-wallets',
+                },
+                defaultChain: arbitrumSepolia,
+                supportedChains: [arbitrumSepolia],
+              }}
+            >
+              <Navbar />
+              <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {children}
+              </main>
+              <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+                <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus & Google Cloud Platform</p>
+              </footer>
+            </PrivyProvider>
+          ) : (
+            <>
+              <Navbar />
+              <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {children}
+              </main>
+              <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+                <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus & Google Cloud Platform</p>
+              </footer>
+            </>
+          )}
         </LanguageProvider>
-              <p>Lexius Pay &copy; 2026 — Built on Arbitrum Stylus & Google Cloud Platform</p>
-            </footer>
-          </PrivyProvider>
-        ) : (
-          <>
-            <Navbar />
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {children}
-            </main>
-            <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
-              <p>Lexius Pay &copy; 2026 — Built on Arbitrum Stylus & Google Cloud Platform</p>
-            </footer>
-          </>
-        )}
->>>>>>> Stashed changes
       </body>
     </html>
   );
