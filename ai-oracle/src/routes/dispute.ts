@@ -12,7 +12,7 @@ router.post('/resolve', async (req: Request, res: Response) => {
       sellerAddress,
       itemDescription,
       claimText,
-      proofImageUrl,
+      evidenceImageUrls,
     } = req.body;
 
     if (!escrowId || !buyerAddress || !sellerAddress || !claimText) {
@@ -21,44 +21,38 @@ router.post('/resolve', async (req: Request, res: Response) => {
       });
     }
 
-    const oraclePrivateKey =
-      process.env.ORACLE_PRIVATE_KEY ||
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+    const resolvedEvidence = Array.isArray(evidenceImageUrls)
+      ? evidenceImageUrls
+      : evidenceImageUrls
+      ? [evidenceImageUrls]
+      : [];
 
-    console.log(`[AI Oracle] Evaluating dispute for Escrow #${escrowId}...`);
-
-    // 1. Run GPT-4o Vision evaluation
     const aiVerdict = await evaluateDisputeWithAI({
       escrowId,
       buyerAddress,
       sellerAddress,
       itemDescription: itemDescription || 'P2P Deal',
       claimText,
-      proofImageUrl,
+      evidenceImageUrls: resolvedEvidence,
     });
 
-    // 2. Sign verdict hash with Oracle Private Key
+    const oraclePrivateKey =
+      process.env.ORACLE_PRIVATE_KEY ||
+      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
     const signedPayload = await signDisputeVerdict(
       escrowId,
       aiVerdict.winnerAddress,
       oraclePrivateKey
     );
 
-    console.log(`[AI Oracle] Verdict rendered! Winner: ${aiVerdict.winnerAddress}`);
-
-    return res.json({
-      success: true,
-      escrowId,
+    return res.status(200).json({
       winner: aiVerdict.winnerAddress,
-      reasoning: aiVerdict.reasoning,
-      summary: aiVerdict.summary,
-      confidenceScore: aiVerdict.confidenceScore,
+      reason: aiVerdict.reasoning,
       signature: signedPayload.signature,
       v: signedPayload.v,
       r: signedPayload.r,
       s: signedPayload.s,
-      oracleAddress: signedPayload.oracleAddress,
-      timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
     console.error('[AI Oracle Error]', error);
