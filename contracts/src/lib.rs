@@ -1,6 +1,10 @@
 #![cfg_attr(not(any(feature = "export-abi", test)), no_main)]
-#![no_std]
+#![cfg_attr(not(any(feature = "export-abi", test)), no_std)]
+#[cfg(not(any(feature = "export-abi", test)))]
 extern crate alloc;
+#[cfg(any(feature = "export-abi", test))]
+extern crate std as alloc;
+
 
 mod crypto;
 mod types;
