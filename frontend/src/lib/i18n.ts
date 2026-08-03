@@ -10,15 +10,15 @@ export const dictionary = {
     
     // Hero
     heroBadge: 'ETH Lima 2026 • Arbitrum Stylus WASM + GCP IA Oráculo',
-    heroTitle1: 'Enlaces de Escrow P2P Autónomos con ',
+    heroTitle1: 'Enlaces de Pagos Protegidos con ',
     heroTitleGradient: 'Mediación de Disputas por IA',
-    heroSub: 'Crea un enlace de pago en 10 segundos para Telegram o WhatsApp. Los fondos se congelan de forma segura en contratos Rust WASM. Los conflictos se resuelven en segundos mediante GPT-4o Vision en Google Cloud.',
-    btnGenerate: 'Generar Enlace Escrow',
-    btnDemo: 'Probar Demo Mediador IA',
+    heroSub: 'Crea un enlace de pago seguro en 10 segundos para Telegram o WhatsApp. Tus fondos se protegen en contratos inteligentes Rust WASM y los conflictos se resuelven en segundos con GPT-4o Vision en Google Cloud.',
+    btnGenerate: 'Crear Enlace Protegido',
+    btnDemo: 'Probar Demo Árbitro IA',
 
     // Escrow Generator
-    genTitle: 'Crear Enlace de Escrow',
-    genSub: 'Genera un acuerdo de pago seguro en segundos',
+    genTitle: 'Crear Enlace de Pago Protegido',
+    genSub: 'Genera un acuerdo de compra o venta seguro en segundos',
     genWasmBadge: 'Stylus WASM',
     labelDesc: 'Descripción del Producto o Servicio',
     placeholderDesc: 'ej. Entrada VIP Concierto / Trabajo Diseño Freelance',
@@ -26,16 +26,16 @@ export const dictionary = {
     labelNetwork: 'Red Destino',
     labelSeller: 'Billetera Vendedor (Opcional)',
     placeholderSeller: '0x... (Déjalo vacío para usar tu billetera)',
-    btnCreate: 'Generar Enlace Escrow',
-    createdTitle: '¡Enlace de Escrow Creado!',
+    btnCreate: 'Crear Enlace Protegido',
+    createdTitle: '¡Enlace de Pago Protegido Creado!',
     createdSub: 'Comparte este enlace por Telegram, WhatsApp o correo con tu contraparte:',
-    btnCopy: 'Copiar Enlace Escrow',
+    btnCopy: 'Copiar Enlace de Pago',
     copied: '¡Copiado al Portapapeles!',
     btnPayPage: 'Abrir Enlace de Pago',
 
     // AI Simulator
     simBadge: 'Demo Interactivo',
-    simTitle: 'Simulador de Mediador de IA Autónomo',
+    simTitle: 'Simulador de Árbitro IA Autónomo',
     simSub: 'Simula cómo GPT-4o Vision evalúa recibos de disputas en GCP Cloud Run y firma veredictos ECDSA en Arbitrum Stylus.',
     sampleClaimTitle: 'Disputa de Ejemplo: Reclamo de Entrada Falsa a Evento',
     sampleClaimSub: 'El comprador afirma que el escaneo del código de barras falló en la puerta del evento',
@@ -63,9 +63,9 @@ export const dictionary = {
     footerText: 'Lexius Pay © 2026 — Desarrollado en Arbitrum Stylus y Google Cloud Platform',
 
     // Dashboard
-    dashTitle: 'Panel de Control Escrow',
-    dashSub: 'Gestiona tus depósitos activos y disputas en Arbitrum Stylus',
-    noEscrows: 'No se encontraron depósitos de escrow activos.',
+    dashTitle: 'Panel de Control de Pagos',
+    dashSub: 'Gestiona tus depósitos activos y disputas protegidas en Arbitrum Stylus',
+    noEscrows: 'No se encontraron depósitos de pago activos.',
     
     // Dispute page
     disputeTitle: 'Resolución de Disputa con IA',
@@ -80,14 +80,14 @@ export const dictionary = {
 
     // Hero
     heroBadge: 'ETH Lima 2026 • Arbitrum Stylus WASM + GCP AI Oracle',
-    heroTitle1: 'Autonomous P2P Escrow Links with ',
+    heroTitle1: 'Protected Payment Links with ',
     heroTitleGradient: 'AI Dispute Mediation',
-    heroSub: 'Create a 10-second payment link for Telegram or WhatsApp. Funds freeze safely in Rust WASM contracts. Conflicts are settled in seconds by GPT-4o Vision on Google Cloud.',
-    btnGenerate: 'Generate Escrow Link',
+    heroSub: 'Create a 10-second payment link for Telegram or WhatsApp. Funds are protected safely in Rust WASM contracts. Conflicts are settled in seconds by GPT-4o Vision on Google Cloud.',
+    btnGenerate: 'Create Protected Link',
     btnDemo: 'Test AI Mediator Demo',
 
     // Escrow Generator
-    genTitle: 'Create Escrow Link',
+    genTitle: 'Create Protected Payment Link',
     genSub: 'Generate a secure payment agreement in seconds',
     genWasmBadge: 'Stylus WASM',
     labelDesc: 'Item or Service Description',
@@ -96,10 +96,10 @@ export const dictionary = {
     labelNetwork: 'Target Network',
     labelSeller: 'Seller Wallet Address (Optional)',
     placeholderSeller: '0x... (Leave empty to use your wallet)',
-    btnCreate: 'Generate Escrow Link',
-    createdTitle: 'Escrow Link Created!',
+    btnCreate: 'Create Protected Link',
+    createdTitle: 'Protected Payment Link Created!',
     createdSub: 'Share this link via Telegram, WhatsApp, or email with your counterpart:',
-    btnCopy: 'Copy Escrow Link',
+    btnCopy: 'Copy Payment Link',
     copied: 'Copied to Clipboard!',
     btnPayPage: 'Open Payment Page',
 
@@ -133,12 +133,13 @@ export const dictionary = {
     footerText: 'Lexius Pay © 2026 — Built on Arbitrum Stylus & Google Cloud Platform',
 
     // Dashboard
-    dashTitle: 'Escrow Dashboard',
-    dashSub: 'Manage your active deposits and disputes on Arbitrum Stylus',
-    noEscrows: 'No active escrow deposits found.',
+    dashTitle: 'Payment Dashboard',
+    dashSub: 'Manage your active deposits and protected disputes on Arbitrum Stylus',
+    noEscrows: 'No active payment deposits found.',
 
     // Dispute page
     disputeTitle: 'AI Dispute Resolution',
     disputeSub: 'Upload chat receipts or evidence photos for automated GPT-4o Vision mediation',
   },
 };
+

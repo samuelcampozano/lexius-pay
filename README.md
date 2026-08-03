@@ -1,6 +1,6 @@
-# ⚖️ Lexius Pay: Autonomous AI P2P Escrow on Arbitrum Stylus
+# ⚖️ Lexius Pay: Enlaces de Pagos Seguros con Árbitro IA en Arbitrum Stylus
 
-> **Protocolo de pagos seguros y custodia de fondos P2P por enlaces sociales desarrollado sobre Scaffold-Stylus con resolución de disputas autónoma por Inteligencia Artificial (GPT-4o Vision) alojada en Google Cloud Platform y smart contracts en Rust WASM sobre Arbitrum Stylus.**
+> **Protocolo de pagos seguros y protección de compras por enlaces sociales desarrollado sobre Scaffold-Stylus con resolución de disputas autónoma por Inteligencia Artificial (GPT-4o Vision) alojada en Google Cloud Platform y smart contracts en Rust WASM sobre Arbitrum Stylus.**
 
 [![ETH Lima Hackathon 2026](https://img.shields.io/badge/Event-ETH_Lima_Hackathon_2026-6200ea.svg?style=for-the-badge&logo=ethereum)](https://ethlima.org/)
 [![Arbitrum Bounty - Advanced](https://img.shields.io/badge/Arbitrum_Bounty-ADVANCED_CATEGORY_(Scaffold--Stylus_%2B_AI)-ff007a.svg?style=for-the-badge&logo=arbitrum)](https://docs.arbitrum.io/stylus/stylus-quickstart)
@@ -32,9 +32,10 @@ Lexius Pay califica a la categoría máxima **ADVANCED Bounty** patrocinada por 
 
 ## 📌 Resumen Ejecutivo
 
-**Lexius Pay** (`lexius-pay`) es un protocolo descentralizado de custodia de fondos (**P2P Escrow**) por enlaces sociales (Telegram, WhatsApp, Instagram Marketplace). 
+**Lexius Pay** (`lexius-pay`) es un protocolo descentralizado de **pagos protegidos por enlaces sociales** (Telegram, WhatsApp, Instagram Marketplace). 
 
 Permite que cualquier persona compre o venda productos y servicios en redes sociales de forma 100% segura: el vendedor genera un link de pago en **10 segundos**, el comprador deposita stablecoins (USDC) en un contrato inteligente de **Arbitrum Stylus en Rust** mediante **Passkeys / Social Login (Privy)** sin fricción Web3, y en caso de conflicto, un **Agente de Inteligencia Artificial (GPT-4o Vision)** alojado en **Google Cloud Run** evalúa las evidencias (capturas de chats, recibos OCR) y emite un veredicto firmado criptográficamente que ejecuta el reembolso o pago automáticamente on-chain.
+
 
 ---
 
