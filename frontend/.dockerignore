@@ -1,0 +1,17 @@
+node_modules
+.next
+.env
+.env.local
+.env.development
+dist
+build
+coverage
+.git
+Dockerfile
+docker-compose.yml
+**/__tests__
+*.log
+*.tgz
+.vscode
+/.idea
+.DS_Store

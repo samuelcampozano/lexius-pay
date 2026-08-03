@@ -22,27 +22,44 @@ export function useStylusContract() {
     });
   };
 
-  const depositFunds = async (escrowId: bigint, amountEth: string) => {
+
+  const create_escrow = async (
+    buyer: `0x${string}`,
+    seller: `0x${string}`,
+    amountEth: string,
+    detailsHash: `0x${string}`
+  ) => {
     const client = await getClient();
-    const hash = await client.writeContract({
+    const txHash = await client.writeContract({
+      address: STYLUS_ESCROW_ADDRESS,
+      abi: STYLUS_ESCROW_ABI,
+      functionName: 'create_escrow',
+      args: [buyer, seller, parseEther(amountEth), detailsHash],
+    });
+    return txHash;
+  };
+
+  const deposit = async (escrowId: bigint, amountEth: string) => {
+    const client = await getClient();
+    const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'deposit',
       args: [escrowId],
       value: parseEther(amountEth),
     });
-    return hash;
+    return txHash;
   };
 
-  const releaseFunds = async (escrowId: bigint) => {
+  const release = async (escrowId: bigint) => {
     const client = await getClient();
-    const hash = await client.writeContract({
+    const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'release',
       args: [escrowId],
     });
-    return hash;
+    return txHash;
   };
 
   const resolveDisputeWithSignature = async (
@@ -63,8 +80,9 @@ export function useStylusContract() {
   };
 
   return {
-    depositFunds,
-    releaseFunds,
+    create_escrow,
+    deposit,
+    release,
     resolveDisputeWithSignature,
   };
 }

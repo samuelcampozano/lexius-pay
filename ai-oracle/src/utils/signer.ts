@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { Wallet, solidityPackedKeccak256 } from 'ethers';
 
 export interface SignedVerdict {
   escrowId: string;
@@ -15,25 +15,24 @@ export async function signDisputeVerdict(
   winnerAddress: string,
   privateKey: string
 ): Promise<SignedVerdict> {
-  const wallet = new ethers.Wallet(privateKey);
+  const wallet = new Wallet(privateKey);
 
   // 1. Construct message payload: keccak256(concat(escrowId, winnerAddress))
-  const messageHash = ethers.solidityPackedKeccak256(
+  const messageHash = solidityPackedKeccak256(
     ['uint256', 'address'],
     [BigInt(escrowId), winnerAddress]
   );
 
-  // 2. Sign Ethereum Signed Message Hash
-  const signatureBytes = await wallet.signMessage(ethers.getBytes(messageHash));
-  const sig = ethers.Signature.from(signatureBytes);
+  // 2. Sign the raw digest directly so the signature can be verified with ecrecover
+  const signature = wallet.signingKey.sign(messageHash);
 
   return {
     escrowId,
     winner: winnerAddress,
-    signature: signatureBytes,
-    v: sig.v,
-    r: sig.r,
-    s: sig.s,
+    signature: signature.serialized,
+    v: signature.v,
+    r: signature.r,
+    s: signature.s,
     oracleAddress: wallet.address,
   };
 }

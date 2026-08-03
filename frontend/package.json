@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^1.95.0",
+    "@privy-io/react-auth": "^1.99.1",
     "@telegram-apps/sdk-react": "^2.0.18",
     "@twa-dev/sdk": "^7.10.1",
     "clsx": "^2.1.1",

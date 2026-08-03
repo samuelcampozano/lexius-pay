@@ -24,9 +24,11 @@ export default function HomePage() {
   const [description, setDescription] = useState(
     lang === 'es' ? 'Entrada VIP Concierto — ETH Lima Afterparty 2026' : 'VIP Concert Ticket — ETH Lima Afterparty 2026'
   );
-  const [amount, setAmount] = useState('50');
+  const [amount, setAmount] = useState(50);
+  const [sellerName, setSellerName] = useState('');
   const [sellerAddress, setSellerAddress] = useState('');
   const [generatedId, setGeneratedId] = useState<string | null>(null);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
   // AI Simulator State
@@ -36,12 +38,20 @@ export default function HomePage() {
   const handleCreateLink = (e: React.FormEvent) => {
     e.preventDefault();
     const newEscrowId = Math.floor(100 + Math.random() * 900).toString();
+    const params = new URLSearchParams({
+      description,
+      amount: String(amount),
+      seller: sellerAddress,
+      sellerName: sellerName,
+    });
+    const nextLink = `/pay/${newEscrowId}?${params.toString()}`;
     setGeneratedId(newEscrowId);
+    setGeneratedLink(nextLink);
   };
 
   const copyToClipboard = () => {
     if (!generatedId) return;
-    const url = `${window.location.origin}/pay/${generatedId}`;
+    const url = `${window.location.origin}${generatedLink ?? `/pay/${generatedId}`}`;
     navigator.clipboard.writeText(url);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
@@ -155,7 +165,7 @@ export default function HomePage() {
                     min="1"
                     step="any"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => setAmount(Number(e.target.value))}
                     className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm font-mono"
                   />
                 </div>
@@ -168,6 +178,19 @@ export default function HomePage() {
                     Arbitrum Sepolia
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                  {t('labelSellerName')}
+                </label>
+                <input
+                  type="text"
+                  placeholder={t('placeholderSellerName')}
+                  value={sellerName}
+                  onChange={(e) => setSellerName(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm"
+                />
               </div>
 
               <div>
@@ -201,31 +224,42 @@ export default function HomePage() {
                 <p className="text-xs text-slate-400">{t('createdSub')}</p>
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
-                <span className="text-xs font-mono text-blue-400 truncate">
-                  {typeof window !== 'undefined'
-                    ? `${window.location.origin}/pay/${generatedId}`
-                    : `/pay/${generatedId}`}
-                </span>
-                <button
-                  onClick={copyToClipboard}
-                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{isCopied ? t('copied') : t('btnCopy')}</span>
-                </button>
+              <div className="space-y-3 rounded-xl border border-slate-800 bg-slate-950 p-4 text-left">
+                <div className="text-xs text-slate-400">
+                  <p className="font-semibold text-white">{description}</p>
+                  <p className="mt-1">Amount: {amount} USDC</p>
+                  {sellerName ? <p className="mt-1">{t('paySeller')}: {sellerName}</p> : null}
+                  {sellerAddress ? <p className="mt-1 font-mono text-[11px]">{sellerAddress}</p> : null}
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-mono text-blue-400 truncate">
+                    {typeof window !== 'undefined'
+                      ? `${window.location.origin}${generatedLink ?? `/pay/${generatedId}`}`
+                      : `${generatedLink ?? `/pay/${generatedId}`}`}
+                  </span>
+                  <button
+                    onClick={copyToClipboard}
+                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>{isCopied ? t('copied') : t('btnCopy')}</span>
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-3">
                 <Link
-                  href={`/pay/${generatedId}`}
+                  href={generatedLink ?? `/pay/${generatedId}`}
                   className="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
                 >
                   <span>{t('btnPayPage')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <button
-                  onClick={() => setGeneratedId(null)}
+                  onClick={() => {
+                    setGeneratedId(null);
+                    setGeneratedLink(null);
+                  }}
                   className="px-4 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-400 text-sm font-medium rounded-xl border border-slate-800"
                 >
                   +

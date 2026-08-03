@@ -2,40 +2,67 @@
 
 import React from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Wallet, LogOut, ShieldCheck } from 'lucide-react';
+import { LogOut, ShieldCheck } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function WalletLogin() {
-  const { login, logout, authenticated, user } = usePrivy();
+  const { login, logout, authenticated, ready, user } = usePrivy();
   const { wallets } = useWallets();
+  const { t } = useLanguage();
 
-  const embeddedWallet = wallets.find((w) => w.walletClientType === 'privy') || wallets[0];
+  const activeWallet = wallets[0];
+  const address = activeWallet?.address || '';
+  
+  const shortAddress = address
+    ? `${address.slice(0, 6)}...${address.slice(-4)}`
+    : '';
+
+  const getAvatarHue = (addr: string) => {
+    if (!addr || addr.length < 8) return 0;
+    return parseInt(addr.slice(2, 8), 16) % 360;
+  };
+
+  const hue = getAvatarHue(address);
 
   if (!authenticated) {
     return (
       <button
-        onClick={login}
-        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 hover:scale-105 active:scale-95"
+        onClick={() => login()}
+        disabled={!ready}
+        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <ShieldCheck className="w-4 h-4" />
-        <span>Connect / Passkey</span>
+        <span className="text-sm font-medium">{t('navConnect')}</span>
       </button>
     );
   }
 
-  const shortAddress = embeddedWallet
-    ? `${embeddedWallet.address.slice(0, 6)}...${embeddedWallet.address.slice(-4)}`
-    : 'Connecting...';
+  const displayName = user?.google?.name || user?.email?.address;
 
   return (
-    <div className="flex items-center gap-3 bg-slate-900/80 border border-slate-800 rounded-xl p-1.5 pl-3">
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="text-xs font-mono text-slate-300">{shortAddress}</span>
+    <div className="flex items-center gap-3 pl-2 pr-1 py-1 bg-slate-800 rounded-full border border-slate-700 shadow-sm">
+      <div 
+        className="w-8 h-8 rounded-full shadow-inner flex-shrink-0"
+        style={{ 
+          background: `linear-gradient(135deg, hsl(${hue}, 80%, 60%), hsl(${(hue + 40) % 360}, 80%, 40%))` 
+        }}
+      />
+      
+      <div className="flex flex-col justify-center">
+        {displayName && (
+          <span className="text-xs text-white font-medium truncate max-w-[120px]">
+            {displayName}
+          </span>
+        )}
+        <span className="text-[10px] text-slate-400 font-mono leading-tight mt-0.5">
+          {shortAddress}
+        </span>
       </div>
+
       <button
-        onClick={logout}
-        title="Disconnect Wallet"
-        className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 rounded-lg transition-colors"
+        onClick={() => logout()}
+        className="p-1.5 ml-1 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors"
+        title="Log out"
       >
         <LogOut className="w-4 h-4" />
       </button>

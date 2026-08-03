@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import { PrivyProvider } from '@privy-io/react-auth';
 import { arbitrumSepolia } from 'viem/chains';
-import { initTelegramWebApp } from '@/lib/telegram';
+import { useTelegramWebApp } from '@/lib/telegram';
 import { LanguageProvider } from '@/context/LanguageContext';
 
 export default function RootLayout({
@@ -13,11 +13,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cm00000000000000000000000';
+  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || '';
 
-  useEffect(() => {
-    initTelegramWebApp();
-  }, []);
+  useTelegramWebApp();
 
   return (
     <html lang="es">
@@ -30,12 +28,13 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <script src="https://telegram.org/js/telegram-web-app.js" async></script>
       </head>
+
       <body className="min-h-screen bg-[#050811] text-slate-100 antialiased flex flex-col">
         <LanguageProvider>
           <PrivyProvider
             appId={privyAppId}
             config={{
-              loginMethods: ['email', 'google', 'telegram', 'wallet'],
+              loginMethods: ['google', 'telegram', 'wallet'],
               appearance: {
                 theme: 'dark',
                 accentColor: '#3b82f6',
