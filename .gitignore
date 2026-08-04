@@ -31,3 +31,14 @@ Cargo.lock
 Thumbs.db
 .vscode/
 .idea/
+
+# Private Architecture & Context Documents (DO NOT COMMIT)
+GCP_INTEGRATION_GUIDE.md
+PROJECT_CONTEXT.md
+*_GUIDE.md
+*_CONTEXT.md
+
+# Agent & AI tooling
+.agents/
+skills-lock.json
+rustup-init.exe
