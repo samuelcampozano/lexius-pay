@@ -1,4 +1,4 @@
-name: 🚀 Lexius Pay GCP Cloud Run Deployment CI/CD
+name: 🚀 Lexius Pay — CI/CD Pipeline
 
 on:
   push:
@@ -6,10 +6,46 @@ on:
       - main
       - staging
 
+env:
+  PROJECT_ID: lexius-pay-2026
+  REGION: us-central1
+  CONTRACT_ADDRESS: 0x001978310e430a4831f8e3f060f87af3ebb56c7a
+
+# ─────────────────────────────────────────────
+# Resolve environment names based on branch
+# ─────────────────────────────────────────────
 jobs:
-  deploy-ai-oracle:
-    name: Build & Deploy AI Oracle to GCP Cloud Run
+  setup:
+    name: 🔧 Resolve Environment
     runs-on: ubuntu-latest
+    outputs:
+      environment:       ${{ steps.vars.outputs.environment }}
+      oracle_service:    ${{ steps.vars.outputs.oracle_service }}
+      frontend_service:  ${{ steps.vars.outputs.frontend_service }}
+      oracle_url:        ${{ steps.vars.outputs.oracle_url }}
+    steps:
+      - id: vars
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "environment=production"                                                        >> $GITHUB_OUTPUT
+            echo "oracle_service=lexius-ai-oracle"                                              >> $GITHUB_OUTPUT
+            echo "frontend_service=lexius-frontend"                                             >> $GITHUB_OUTPUT
+            echo "oracle_url=https://lexius-ai-oracle-265650435557.us-central1.run.app"        >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging"                                                          >> $GITHUB_OUTPUT
+            echo "oracle_service=lexius-ai-oracle-staging"                                     >> $GITHUB_OUTPUT
+            echo "frontend_service=lexius-frontend-staging"                                    >> $GITHUB_OUTPUT
+            echo "oracle_url=https://lexius-ai-oracle-staging-265650435557.us-central1.run.app" >> $GITHUB_OUTPUT
+          fi
+
+  # ─────────────────────────────────────────────
+  # Deploy AI Oracle
+  # ─────────────────────────────────────────────
+  deploy-oracle:
+    name: 🤖 Deploy AI Oracle → ${{ needs.setup.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: setup
+    environment: ${{ needs.setup.outputs.environment }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -23,18 +59,78 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Authorize Docker to GCP Artifact Registry
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      - name: Build & Deploy Container to Cloud Run
+      - name: Build & Deploy AI Oracle to Cloud Run
         run: |
-          gcloud run deploy lexius-ai-oracle \
+          gcloud run deploy ${{ needs.setup.outputs.oracle_service }} \
             --source ./ai-oracle \
-            --region us-central1 \
+            --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --set-secrets="ORACLE_PRIVATE_KEY=ORACLE_PRIVATE_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,STYLUS_RPC_URL=STYLUS_RPC_URL:latest" \
+            --set-env-vars="STYLUS_CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }},NODE_ENV=${{ needs.setup.outputs.environment }}" \
             --min-instances=0 \
             --max-instances=10 \
             --memory=512Mi \
             --cpu=1 \
             --port=8080 \
-            --project=lexius-pay-2026
+            --project=${{ env.PROJECT_ID }}
+
+  # ─────────────────────────────────────────────
+  # Deploy Frontend (depends on oracle URL)
+  # ─────────────────────────────────────────────
+  deploy-frontend:
+    name: 🌐 Deploy Frontend → ${{ needs.setup.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-oracle]
+    environment: ${{ needs.setup.outputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Authorize Docker to GCP Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build & Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy ${{ needs.setup.outputs.frontend_service }} \
+            --source ./frontend \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --set-env-vars="NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }},NEXT_PUBLIC_STYLUS_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc,NEXT_PUBLIC_AI_ORACLE_URL=${{ needs.setup.outputs.oracle_url }}" \
+            --min-instances=0 \
+            --max-instances=10 \
+            --memory=512Mi \
+            --cpu=1 \
+            --port=3000 \
+            --project=${{ env.PROJECT_ID }}
+
+  # ─────────────────────────────────────────────
+  # Summary
+  # ─────────────────────────────────────────────
+  summary:
+    name: ✅ Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-oracle, deploy-frontend]
+    if: always()
+    steps:
+      - name: Print Summary
+        run: |
+          echo "## 🚀 Lexius Pay Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | ${{ needs.setup.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **AI Oracle Service** | ${{ needs.setup.outputs.oracle_service }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Frontend Service** | ${{ needs.setup.outputs.frontend_service }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Contract Address** | ${{ env.CONTRACT_ADDRESS }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
