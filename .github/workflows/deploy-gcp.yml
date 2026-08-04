@@ -68,6 +68,16 @@ jobs:
         if: ${{ env.GCP_SA_KEY != '' }}
         run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
+      - name: Create production env file
+        if: ${{ env.GCP_SA_KEY != '' }}
+        run: |
+          cat <<EOF > ./frontend/.env
+          NEXT_PUBLIC_PRIVY_APP_ID="${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID }}"
+          NEXT_PUBLIC_AI_ORACLE_URL="${{ secrets.NEXT_PUBLIC_AI_ORACLE_URL }}"
+          NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS="${{ secrets.NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS }}"
+          NEXT_PUBLIC_STYLUS_RPC_URL="${{ secrets.NEXT_PUBLIC_STYLUS_RPC_URL }}"
+          EOF
+
       - name: Build & Deploy Frontend to Cloud Run
         if: ${{ env.GCP_SA_KEY != '' }}
         run: |
@@ -81,4 +91,5 @@ jobs:
             --cpu=1 \
             --port=3000 \
             --project=lexius-pay-2026
+
 
