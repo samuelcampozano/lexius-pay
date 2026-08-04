@@ -9,7 +9,7 @@ on:
 env:
   PROJECT_ID: lexius-pay-2026
   REGION: us-central1
-  CONTRACT_ADDRESS: 0x001978310e430a4831f8e3f060f87af3ebb56c7a
+  CONTRACT_ADDRESS: "0x001978310e430a4831f8e3f060f87af3ebb56c7a"
 
 # ─────────────────────────────────────────────
 # Resolve environment names based on branch
