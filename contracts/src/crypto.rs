@@ -1,8 +1,7 @@
 use alloc::vec::Vec;
 use stylus_sdk::{
-    alloy_primitives::{address, Address, B256, U256},
+    alloy_primitives::{address, keccak256, Address, B256, U256},
     call::call,
-    crypto::keccak,
     prelude::*,
 };
 
@@ -13,13 +12,13 @@ pub fn eth_signed_message_hash(escrow_id: U256, winner: Address) -> B256 {
     let mut msg_bytes = [0u8; 52];
     msg_bytes[..32].copy_from_slice(&escrow_id.to_be_bytes::<32>());
     msg_bytes[32..52].copy_from_slice(winner.as_slice());
-    let raw_hash = keccak(&msg_bytes);
+    let raw_hash = keccak256(&msg_bytes);
 
     let prefix = b"\x19Ethereum Signed Message:\n32";
     let mut eth_msg = [0u8; 60];
     eth_msg[..28].copy_from_slice(prefix);
     eth_msg[28..60].copy_from_slice(raw_hash.as_slice());
-    keccak(&eth_msg)
+    keccak256(&eth_msg)
 }
 
 /// Call EVM ECRECOVER precompile at address 0x01 using Stylus call
