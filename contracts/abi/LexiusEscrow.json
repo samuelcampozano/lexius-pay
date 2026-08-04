@@ -39,6 +39,33 @@
   },
   {
     "type": "function",
+    "name": "get_owner",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "get_escrow_count",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "get_escrow",
+    "inputs": [{ "name": "escrow_id", "type": "uint256" }],
+    "outputs": [
+      { "name": "buyer", "type": "address" },
+      { "name": "seller", "type": "address" },
+      { "name": "amount", "type": "uint256" },
+      { "name": "status", "type": "uint8" },
+      { "name": "details_hash", "type": "bytes32" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "create_escrow",
     "inputs": [
       { "name": "buyer", "type": "address" },
@@ -47,6 +74,13 @@
       { "name": "details_hash", "type": "bytes32" }
     ],
     "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "cancel_escrow",
+    "inputs": [{ "name": "escrow_id", "type": "uint256" }],
+    "outputs": [],
     "stateMutability": "nonpayable"
   },
   {
@@ -139,5 +173,39 @@
       { "name": "buyer", "type": "address", "indexed": true }
     ],
     "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EscrowCancelled",
+    "inputs": [
+      { "name": "escrow_id", "type": "uint256", "indexed": true },
+      { "name": "buyer", "type": "address", "indexed": true }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "Unauthorized",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidState",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidSignature",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TransferFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAmount",
+    "inputs": []
   }
 ]
