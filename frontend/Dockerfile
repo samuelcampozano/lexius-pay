@@ -1,35 +1,17 @@
-FROM node:22-alpine AS base
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY package*.json tsconfig.json ./
+RUN npm install --frozen-lockfile || npm install
+COPY src ./src
+COPY public ./public
+COPY tailwind.config.ts postcss.config.js next.config.js ./
+RUN npm run build
 
-FROM base AS deps
+FROM node:22-alpine AS runner
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
-
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Next.js inlines NEXT_PUBLIC_* at build time — must be present during `next build`
-ARG NEXT_PUBLIC_PRIVY_APP_ID
-ARG NEXT_PUBLIC_AI_ORACLE_URL
-ARG NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS
-ARG NEXT_PUBLIC_STYLUS_RPC_URL
-
-RUN if [ -n "$NEXT_PUBLIC_PRIVY_APP_ID" ]; then export NEXT_PUBLIC_PRIVY_APP_ID; fi && \
-    if [ -n "$NEXT_PUBLIC_AI_ORACLE_URL" ]; then export NEXT_PUBLIC_AI_ORACLE_URL; fi && \
-    if [ -n "$NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS" ]; then export NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS; fi && \
-    if [ -n "$NEXT_PUBLIC_STYLUS_RPC_URL" ]; then export NEXT_PUBLIC_STYLUS_RPC_URL; fi && \
-    npm run build
-
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
+RUN npm install --omit=dev
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
