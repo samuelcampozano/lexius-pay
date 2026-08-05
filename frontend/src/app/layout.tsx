@@ -33,11 +33,13 @@ export default function RootLayout({
         <PrivyProvider
           appId={privyAppId}
           config={{
-            loginMethods: ['email', 'google', 'telegram', 'wallet'],
+            // Login methods ordered for Web2-first UX (Google → Email → Wallet)
+            loginMethods: ['google', 'email', 'telegram', 'wallet'],
             appearance: {
               theme: 'dark',
               accentColor: '#3b82f6',
               showWalletLoginFirst: false,
+              logo: 'https://i.imgur.com/placeholder-lexius.png',
             },
             embeddedWallets: {
               createOnLogin: 'users-without-wallets',
