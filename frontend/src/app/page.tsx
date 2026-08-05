@@ -78,7 +78,7 @@ export default function HomePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                    Amount (USDC / ETH)
+                    Amount (USDC)
                   </label>
                   <input
                     type="number"

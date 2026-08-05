@@ -22,14 +22,13 @@ export function useStylusContract() {
     });
   };
 
-  const depositFunds = async (escrowId: bigint, amountEth: string) => {
+  const depositFunds = async (escrowId: bigint) => {
     const client = await getClient();
     const hash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'deposit',
       args: [escrowId],
-      value: parseEther(amountEth),
     });
     return hash;
   };
