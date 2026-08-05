@@ -15,8 +15,8 @@
 
 | Integrante | Rol | Especialidad & Entregables |
 | :--- | :--- | :--- |
-| **Campozano Lopez Samuel** | *Blockchain Developer* | Arbitrum Stylus, Rust (`#![no_std]`), Smart Contracts, ECDSA `secp256k1` ecrecover. |
-| **Vera Parrales Jonathan** | *Full-Stack & Cloud Developer* | Next.js 14 App Router, Telegram Mini App SDK, Privy Passkeys, AI Oracle en GCP Cloud Run & Secret Manager. |
+| **Campozano Lopez Samuel** | *Blockchain & Cloud Infrastructure Developer* | Arbitrum Stylus, Rust (`#![no_std]`), Smart Contracts, ECDSA `secp256k1` ecrecover. GCP Cloud Run deployments, GCP Secret Manager integration, Docker multi-stage builds, GitHub Actions CI/CD pipeline (staging & production environments). |
+| **Vera Parrales Jonathan** | *Full-Stack Developer* | Next.js 14 App Router, Telegram Mini App SDK, Privy Passkeys, AI Oracle (Node.js/Express) & GPT-4o Vision integration. |
 | **Colmenares Isabel** | *Designer & Presentation Lead* | UI/UX Design System, Pitch Deck, Video Demo, Storytelling & Branding. |
 
 ---
