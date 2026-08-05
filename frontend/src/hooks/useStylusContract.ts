@@ -22,13 +22,7 @@ export function useStylusContract() {
     });
   };
 
-
-  const create_escrow = async (
-    buyer: `0x${string}`,
-    seller: `0x${string}`,
-    amountEth: string,
-    detailsHash: `0x${string}`
-  ) => {
+  const depositFunds = async (escrowId: bigint) => {
     const client = await getClient();
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
@@ -46,7 +40,6 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'deposit',
       args: [escrowId],
-      value: parseEther(amountEth),
     });
     return txHash;
   };
