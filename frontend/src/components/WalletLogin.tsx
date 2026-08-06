@@ -24,10 +24,14 @@ export default function WalletLogin() {
 
   const hue = getAvatarHue(address);
 
+  const handleLogin = () => {
+    login({ loginMethods: ['google', 'telegram', 'wallet'] } as any);
+  };
+
   if (!authenticated) {
     return (
       <button
-        onClick={() => login()}
+        onClick={handleLogin}
         disabled={!ready}
         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all disabled:opacity-60 disabled:cursor-not-allowed"
       >

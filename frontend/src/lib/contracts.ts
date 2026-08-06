@@ -1,58 +1,22 @@
-export const STYLUS_ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS ||
-  '0x0000000000000000000000000000000000000000') as `0x${string}`;
+/**
+ * Lexius Escrow Contract Integration
+ * 
+ * Uses the official ABI from contracts/abi/LexiusEscrow.json deployed by Samuel (DEV 1).
+ * Contract Address: Arbitrum Sepolia Testnet
+ */
 
-export const STYLUS_ESCROW_ABI = [
-  {
-    name: 'create_escrow',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'buyer', type: 'address' },
-      { name: 'seller', type: 'address' },
-      { name: 'amount', type: 'uint256' },
-      { name: 'details_hash', type: 'bytes32' },
-    ],
-    outputs: [{ name: '', type: 'uint256' }],
-  },
-  {
-    name: 'deposit',
-    type: 'function',
-    stateMutability: 'payable',
-    inputs: [{ name: 'escrow_id', type: 'uint256' }],
-    outputs: [],
-  },
-  {
-    name: 'release',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [{ name: 'escrow_id', type: 'uint256' }],
-    outputs: [],
-  },
-  {
-    name: 'refund',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [{ name: 'escrow_id', type: 'uint256' }],
-    outputs: [],
-  },
-  {
-    name: 'raise_dispute',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [{ name: 'escrow_id', type: 'uint256' }],
-    outputs: [],
-  },
-  {
-    name: 'resolve_dispute_with_signature',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'escrow_id', type: 'uint256' },
-      { name: 'winner', type: 'address' },
-      { name: 'v', type: 'uint8' },
-      { name: 'r', type: 'bytes32' },
-      { name: 's', type: 'bytes32' },
-    ],
-    outputs: [],
-  },
-] as const;
+// Import the official ABI generated from the Rust Stylus contract
+import EscrowABIJson from './LexiusEscrow.json';
+
+// Export the ABI for use with viem
+export const EscrowABI = EscrowABIJson;
+
+// Legacy alias — kept for backward compatibility with existing components
+export const STYLUS_ESCROW_ABI = EscrowABIJson;
+
+// Contract address from environment (set in .env.local)
+export const STYLUS_ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS ||
+  '0xc03bfde0441130dbce84128500b77d3edd5c8e33') as `0x${string}`;
+
+// Also export with a cleaner name
+export const STYLUS_CONTRACT_ADDRESS = STYLUS_ESCROW_ADDRESS;

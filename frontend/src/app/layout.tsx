@@ -13,7 +13,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || '';
+  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cmsdomun500060dk3xvzqpgoy';
 
   useTelegramWebApp();
 
@@ -42,6 +42,7 @@ export default function RootLayout({
               },
               embeddedWallets: {
                 createOnLogin: 'users-without-wallets',
+                requireUserPasswordOnCreate: false,
               },
               defaultChain: arbitrumSepolia,
               supportedChains: [arbitrumSepolia],
@@ -52,7 +53,7 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
-              <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus & Google Cloud Platform</p>
+              <p>Lexius Pay &copy; 2026 — Desarrollado en Arbitrum Stylus &amp; Google Cloud Platform</p>
             </footer>
           </PrivyProvider>
         </LanguageProvider>
@@ -60,3 +61,4 @@ export default function RootLayout({
     </html>
   );
 }
+

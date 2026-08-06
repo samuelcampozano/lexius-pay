@@ -56,8 +56,10 @@ export default function PaymentPage() {
   // Parse link params
   const description = searchParams?.get('description') || 'VIP Concert Ticket — ETH Lima Afterparty 2026';
   const amount = searchParams?.get('amount') || '50';
-  const seller = searchParams?.get('seller') || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
-  const sellerName = searchParams?.get('sellerName') || '';
+  const sellerRaw = searchParams?.get('seller')?.trim();
+  const seller = sellerRaw && sellerRaw.length > 0 ? sellerRaw : '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+  const sellerNameRaw = searchParams?.get('sellerName')?.trim();
+  const sellerName = sellerNameRaw && sellerNameRaw.length > 0 ? sellerNameRaw : '';
 
   // Determine if the authenticated user is the seller
   const isSeller =
@@ -72,6 +74,19 @@ export default function PaymentPage() {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
+  const updateLocalStorageStatus = (newStatus: 'Deposited' | 'Completed' | 'Disputed') => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+      const updated = stored.map((item: any) => {
+        if (item.id === escrowId) {
+          return { ...item, status: newStatus, buyer: buyerWallet };
+        }
+        return item;
+      });
+      localStorage.setItem('lexius_user_escrows', JSON.stringify(updated));
+    } catch (e) {}
+  };
+
   const handleDeposit = async () => {
     if (!authenticated) {
       login();
@@ -80,6 +95,7 @@ export default function PaymentPage() {
     setLoading(true);
     setTimeout(() => {
       setStatus('Deposited');
+      updateLocalStorageStatus('Deposited');
       setTxHash('0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b');
       setLoading(false);
     }, 1500);
@@ -89,6 +105,7 @@ export default function PaymentPage() {
     setLoading(true);
     setTimeout(() => {
       setStatus('Completed');
+      updateLocalStorageStatus('Completed');
       setLoading(false);
     }, 1200);
   };

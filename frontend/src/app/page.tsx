@@ -16,10 +16,15 @@ import {
   Scale,
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function HomePage() {
   const { lang, t } = useLanguage();
+  const { authenticated, user } = usePrivy();
+  const { wallets } = useWallets();
+
+  const activeWalletAddress = wallets?.[0]?.address || user?.wallet?.address || '';
 
   const [description, setDescription] = useState(
     lang === 'es' ? 'Entrada VIP Concierto — ETH Lima Afterparty 2026' : 'VIP Concert Ticket — ETH Lima Afterparty 2026'
@@ -31,6 +36,22 @@ export default function HomePage() {
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
+  // Auto-fill seller address and name ONLY when the user is logged in
+  React.useEffect(() => {
+    if (authenticated) {
+      if (activeWalletAddress && !sellerAddress) {
+        setSellerAddress(activeWalletAddress);
+      }
+      if (!sellerName) {
+        if (user?.google?.name) {
+          setSellerName(user.google.name);
+        } else if (user?.email?.address) {
+          setSellerName(user.email.address);
+        }
+      }
+    }
+  }, [authenticated, activeWalletAddress, user]);
+
   // AI Simulator State
   const [simulatingAI, setSimulatingAI] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
@@ -38,13 +59,33 @@ export default function HomePage() {
   const handleCreateLink = (e: React.FormEvent) => {
     e.preventDefault();
     const newEscrowId = Math.floor(100 + Math.random() * 900).toString();
+    const finalSeller = sellerAddress.trim() || activeWalletAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
     const params = new URLSearchParams({
       description,
       amount: String(amount),
-      seller: sellerAddress,
-      sellerName: sellerName,
+      seller: finalSeller,
+      sellerName: sellerName.trim(),
     });
     const nextLink = `/pay/${newEscrowId}?${params.toString()}`;
+
+    // Save to local storage for user's dashboard tracking
+    try {
+      const existing = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+      const newEscrowRecord = {
+        id: newEscrowId,
+        description,
+        amount: `${amount} USDC`,
+        status: 'Pending',
+        role: 'Seller',
+        seller: finalSeller,
+        sellerName: sellerName.trim(),
+        counterparty: 'En espera de comprador',
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        link: nextLink,
+      };
+      localStorage.setItem('lexius_user_escrows', JSON.stringify([newEscrowRecord, ...existing]));
+    } catch (e) {}
+
     setGeneratedId(newEscrowId);
     setGeneratedLink(nextLink);
   };

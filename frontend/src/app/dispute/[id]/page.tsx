@@ -1,13 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock } from 'lucide-react';
+import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play } from 'lucide-react';
 import { DisputeVerdict } from '@/types';
+import { useStylusContract } from '@/hooks/useStylusContract';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function DisputePage() {
   const params = useParams();
-  const escrowId = (params.id as string) || '101';
+  const escrowId = (params.id as string) || '1';
+
+  const { resolveDisputeWithSignature, get_oracle } = useStylusContract();
+  const { authenticated, login } = usePrivy();
 
   const [claimText, setClaimText] = useState(
     'The seller sent a forged PDF ticket for the concert. The barcode fails validation at the venue gate.'
@@ -18,14 +23,57 @@ export default function DisputePage() {
   const [verdict, setVerdict] = useState<DisputeVerdict | null>(null);
   const [executingTx, setExecutingTx] = useState(false);
   const [txSuccess, setTxSuccess] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [txError, setTxError] = useState<string | null>(null);
 
-  const mockBuyer = '0x3C44CdD459193653841586395bcfA5A7b42d506e';
+  // Oracle address check
+  const [onChainOracle, setOnChainOracle] = useState<string | null>(null);
+
+  const mockBuyer = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
   const mockSeller = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+
+  // Fetch the authorized oracle address from the Stylus contract on Sepolia
+  useEffect(() => {
+    async function fetchOnChainOracle() {
+      try {
+        const oracle = await get_oracle();
+        if (oracle) {
+          setOnChainOracle(oracle as string);
+        }
+      } catch (err) {
+        console.warn('Could not fetch on-chain oracle address:', err);
+      }
+    }
+    fetchOnChainOracle();
+  }, []);
+
+  /**
+   * Load exact test data provided by Jonathan for quick E2E verification
+   */
+  const handleLoadMockData = () => {
+    setVerdict({
+      escrowId: '1',
+      winner: '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E',
+      reasoning: 'GPT-4o Vision OCR verified receipt. Barcode mismatch detected against event organizers database. Refund granted to Buyer.',
+      summary: 'Verdict in favor of Buyer (Refund Executed)',
+      confidenceScore: 0.99,
+      signature: '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb1b',
+      v: 27,
+      r: '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b',
+      s: '0x340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb',
+      oracleAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+      timestamp: new Date().toISOString(),
+    });
+    setTxSuccess(false);
+    setTxError(null);
+    setTxHash(null);
+  };
 
   const handleEvaluateAI = async (e: React.FormEvent) => {
     e.preventDefault();
     setEvaluating(true);
     setVerdict(null);
+    setTxError(null);
 
     try {
       const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
@@ -38,56 +86,74 @@ export default function DisputePage() {
           sellerAddress: mockSeller,
           itemDescription: 'VIP Concert Ticket — ETH Lima Afterparty 2026',
           claimText,
-          proofImageUrl: proofUrl,
+          evidenceImageUrls: proofUrl ? [proofUrl] : [],
         }),
       });
 
       if (!response.ok) {
-        throw new Error('API server returned error');
+        throw new Error(`API server returned HTTP ${response.status}`);
       }
 
       const data = await response.json();
       setVerdict({
-        escrowId: data.escrowId,
+        escrowId: String(data.escrowId || escrowId),
         winner: data.winner,
-        reasoning: data.reasoning,
-        summary: data.summary,
-        confidenceScore: data.confidenceScore,
+        reasoning: data.reason || data.reasoning,
+        summary: data.summary || 'AI Dispute Decision',
+        confidenceScore: data.confidenceScore || 0.95,
         signature: data.signature,
-        v: data.v,
-        r: data.r,
-        s: data.s,
-        oracleAddress: data.oracleAddress,
-        timestamp: data.timestamp,
+        v: Number(data.v),
+        r: data.r as `0x${string}`,
+        s: data.s as `0x${string}`,
+        oracleAddress: data.oracleAddress || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+        timestamp: data.timestamp || new Date().toISOString(),
       });
-    } catch (err) {
-      console.warn('Falling back to local AI simulation');
-      // Fallback verdict simulation if backend is offline
-      setVerdict({
-        escrowId,
-        winner: mockBuyer,
-        reasoning:
-          'GPT-4o Vision OCR verified the venue ticket receipt. Barcode mismatch detected against event organizers database. Refund granted to Buyer.',
-        summary: 'Verdict in favor of Buyer (Refund Executed)',
-        confidenceScore: 0.98,
-        signature: '0x3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b',
-        v: 27,
-        r: '0x1111111111111111111111111111111111111111111111111111111111111111',
-        s: '0x2222222222222222222222222222222222222222222222222222222222222222',
-        oracleAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-        timestamp: new Date().toISOString(),
-      });
+    } catch (err: any) {
+      console.warn('Backend connection failed, loading local mock data for testing:', err);
+      handleLoadMockData();
     } finally {
       setEvaluating(false);
     }
   };
 
-  const handleExecuteOnChain = () => {
+  /**
+   * Execute the on-chain payout transaction calling Stylus `resolve_dispute_with_signature`
+   */
+  const handleExecuteOnChain = async () => {
+    if (!verdict) return;
     setExecutingTx(true);
-    setTimeout(() => {
-      setExecutingTx(false);
+    setTxError(null);
+
+    try {
+      if (!authenticated) {
+        await login();
+        setExecutingTx(false);
+        return;
+      }
+
+      // Exact parameters expected by Rust Stylus contract resolve_dispute_with_signature:
+      // escrow_id: uint256 (bigint)
+      // winner: address (0x...)
+      // v: uint8 (number, 27 or 28)
+      // r: bytes32 (0x...)
+      // s: bytes32 (0x...)
+      const hash = await resolveDisputeWithSignature(
+        BigInt(verdict.escrowId),
+        verdict.winner as `0x${string}`,
+        verdict.v,
+        verdict.r as `0x${string}`,
+        verdict.s as `0x${string}`
+      );
+
+      console.log('Dispute resolution transaction sent! Hash:', hash);
+      setTxHash(hash);
       setTxSuccess(true);
-    }, 1500);
+    } catch (err: any) {
+      console.error('On-chain execution failed:', err);
+      setTxError(err.message || 'Transaction reverted or failed');
+    } finally {
+      setExecutingTx(false);
+    }
   };
 
   const handleReceiptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +169,11 @@ export default function DisputePage() {
     }, 600);
   };
 
+  const isOracleMismatch =
+    onChainOracle &&
+    verdict?.oracleAddress &&
+    onChainOracle.toLowerCase() !== verdict.oracleAddress.toLowerCase();
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Header */}
@@ -117,6 +188,17 @@ export default function DisputePage() {
         <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
           Submit claim details and evidence screenshots. Our AI Mediator runs multi-modal vision analysis and signs a cryptographic ECDSA verdict.
         </p>
+
+        {/* Quick Mock Load Button for Testing */}
+        <div className="pt-2">
+          <button
+            onClick={handleLoadMockData}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition"
+          >
+            <Play className="w-3.5 h-3.5 text-purple-400" />
+            <span>Cargar veredicto de prueba</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -212,8 +294,10 @@ export default function DisputePage() {
               <span className="text-purple-400 font-mono">GCP Cloud Run</span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
-              <span>Key Storage:</span>
-              <span className="text-purple-400 font-mono">GCP Secret Manager</span>
+              <span>On-Chain Contract Oracle:</span>
+              <span className="text-emerald-400 font-mono text-[11px] truncate max-w-[150px]">
+                {onChainOracle ? `${onChainOracle.slice(0, 6)}...${onChainOracle.slice(-4)}` : 'Loading...'}
+              </span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
               <span>Contract Verifier:</span>
@@ -253,10 +337,23 @@ export default function DisputePage() {
                 <span className="font-mono text-emerald-400 font-bold truncate block">{verdict.winner}</span>
               </div>
               <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                <span className="text-slate-500 block mb-1">Oracle Address</span>
+                <span className="text-slate-500 block mb-1">Signer Oracle Address</span>
                 <span className="font-mono text-blue-400 truncate block">{verdict.oracleAddress}</span>
               </div>
             </div>
+
+            {/* Security Warning: Oracle Mismatch Check */}
+            {isOracleMismatch && (
+              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-3 text-amber-300 text-xs">
+                <AlertTriangle className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-bold block">⚠️ Advertencia de Seguridad: Desajuste de Oráculo</span>
+                  <p className="text-[11px] leading-relaxed text-amber-200/80">
+                    La dirección que firmó este veredicto (<code className="bg-amber-950 px-1 py-0.5 rounded text-amber-300">{verdict.oracleAddress.slice(0, 8)}...</code>) difiere de la dirección autorizada en el contrato de Sepolia (<code className="bg-amber-950 px-1 py-0.5 rounded text-amber-300">{onChainOracle ? `${onChainOracle.slice(0, 8)}...` : 'cargando'}</code>). La transacción revertirá on-chain a menos que `set_oracle` sea actualizado en el contrato.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Cryptographic Signature Breakdown */}
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-900 font-mono text-[10px] space-y-1 text-slate-400">
@@ -267,18 +364,24 @@ export default function DisputePage() {
                 <span className="truncate">s: {verdict.s.slice(0, 16)}...</span>
               </div>
             </div>
+
+            {txError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-mono">
+                Error de Transacción: {txError}
+              </div>
+            )}
           </div>
 
           {!txSuccess ? (
             <button
               onClick={handleExecuteOnChain}
               disabled={executingTx}
-              className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 text-base"
+              className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50"
             >
               {executingTx ? (
                 <>
                   <RefreshCw className="w-5 h-5 animate-spin" />
-                  <span>Executing Stylus Payout Transaction...</span>
+                  <span>Ejecutando Pago en Stylus...</span>
                 </>
               ) : (
                 <>
@@ -288,10 +391,20 @@ export default function DisputePage() {
               )}
             </button>
           ) : (
-            <div className="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-center space-y-1">
+            <div className="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-center space-y-2">
               <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
               <h4 className="font-bold text-white">Dispute Resolved On-Chain!</h4>
               <p className="text-xs text-slate-400">Funds transferred to winner on Arbitrum Sepolia.</p>
+              {txHash && (
+                <a
+                  href={`https://sepolia.arbiscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-xs font-mono text-emerald-400 hover:underline pt-1"
+                >
+                  Ver transacción en Arbiscan ↗
+                </a>
+              )}
             </div>
           )}
         </div>
