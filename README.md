@@ -24,8 +24,8 @@ Lexius Pay califica a la categoría máxima **ADVANCED Bounty** patrocinada por 
 
 | Integrante | Rol | Especialidad & Entregables |
 | :--- | :--- | :--- |
-| **Campozano Lopez Samuel** | *Blockchain Developer* | Scaffold-Stylus, Rust (`#![no_std]`), Smart Contracts WASM, ECDSA `secp256k1` ecrecover. |
-| **Vera Parrales Jonathan** | *Full-Stack & Cloud Developer* | Next.js 14 App Router, Telegram Mini App SDK, Privy Passkeys, AI Oracle en GCP Cloud Run & Secret Manager. |
+| **Campozano Lopez Samuel** | *Blockchain & Cloud Infrastructure Developer* | Scaffold-Stylus, Rust (`#![no_std]`), Smart Contracts WASM, ECDSA `secp256k1` ecrecover. Google Cloud Platform (GCP Cloud Run, Secret Manager, GCS), Docker Multi-stage Builds, GitHub Actions CI/CD Pipeline (Staging & Production). |
+| **Vera Parrales Jonathan** | *Full-Stack Developer* | Next.js 14 App Router, Telegram Mini App SDK, Privy Passkeys, AI Oracle Integration (Node.js/Express) & GPT-4o Vision. |
 | **Colmenares Isabel** | *Designer & Presentation Lead* | UI/UX Design System, Pitch Deck, Video Demo, Storytelling & Branding. |
 
 ---
