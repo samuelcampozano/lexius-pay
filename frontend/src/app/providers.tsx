@@ -13,7 +13,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId={privyAppId}
       config={{
-        loginMethods: ['google', 'email', 'telegram', 'wallet'],
+        loginMethods: ['google', 'telegram', 'wallet'],
         appearance: {
           theme: 'dark',
           accentColor: '#3b82f6',
