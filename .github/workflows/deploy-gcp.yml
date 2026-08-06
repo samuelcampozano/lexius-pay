@@ -50,6 +50,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Verify GCP_SA_KEY secret
+        run: |
+          if [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "❌ ERROR: secrets.GCP_SA_KEY is empty or not accessible in job context!"
+            echo "Please ensure GCP_SA_KEY is added under Repository Secrets (Settings -> Secrets and variables -> Actions)."
+            exit 1
+          fi
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -87,6 +95,14 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Verify GCP_SA_KEY secret
+        run: |
+          if [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "❌ ERROR: secrets.GCP_SA_KEY is empty or not accessible in job context!"
+            echo "Please ensure GCP_SA_KEY is added under Repository Secrets (Settings -> Secrets and variables -> Actions)."
+            exit 1
+          fi
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
