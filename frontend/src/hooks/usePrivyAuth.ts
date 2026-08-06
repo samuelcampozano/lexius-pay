@@ -47,11 +47,9 @@ export function usePrivyAuth() {
    * In browser: uses Privy's default modal (popup or redirect per Privy config).
    */
   const smartLogin = useCallback(() => {
-    // Privy handles the TMA/redirect logic internally when loginMethods
-    // includes 'google'. The COOP header fix in next.config.js is what
-    // unblocks the popup communication channel for standard browsers.
-    // Calling login() here is safe for both contexts.
-    login();
+    login({
+      loginMethods: ['google', 'telegram', 'wallet'],
+    } as any);
   }, [login]);
 
   const googleLogin = useCallback(() => {

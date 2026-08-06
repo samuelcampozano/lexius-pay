@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { LogOut, ShieldCheck, Loader2 } from 'lucide-react';
-import { usePrivyAuth } from '@/hooks/usePrivyAuth';
 
 export default function WalletLogin() {
-  const { login, logout, authenticated, ready, user, embeddedWallet } =
-    usePrivyAuth();
+  const { login, logout, authenticated, ready, user } = usePrivy();
+  const { wallets } = useWallets();
 
-  // Loading state — Privy hasn't initialised yet
+  // Loading state — Privy initializing
   if (!ready) {
     return (
       <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/60 border border-slate-700/50">
@@ -18,14 +18,15 @@ export default function WalletLogin() {
     );
   }
 
-  // ── Authenticated state ───────────────────────────────────────────────────
+  // ── Authenticated State ───────────────────────────────────────────────────
   if (authenticated) {
+    const embeddedWallet =
+      wallets.find((w) => w.walletClientType === 'privy') || wallets[0];
     const addr = embeddedWallet?.address;
     const shortAddr = addr
       ? `${addr.slice(0, 6)}…${addr.slice(-4)}`
       : 'Wallet';
 
-    // Privy v1.x Google type metadata safely cast
     const googleMeta = user?.google as
       | { name?: string; picture?: string }
       | undefined;
@@ -75,10 +76,17 @@ export default function WalletLogin() {
     );
   }
 
-  // ── Unauthenticated state — single Connect CTA ────────────────────────────
+  // ── Unauthenticated State — Single Connect Button ──────────────────────────
+  const handleConnect = () => {
+    login({
+      loginMethods: ['google', 'telegram', 'wallet'],
+    } as any);
+  };
+
   return (
     <button
-      onClick={login}
+      onClick={handleConnect}
+      disabled={!ready}
       aria-label="Connect wallet or sign in"
       className={[
         'group flex items-center gap-2 px-4 py-2.5',
@@ -88,6 +96,7 @@ export default function WalletLogin() {
         'text-white text-sm font-semibold rounded-xl',
         'shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35',
         'transition-all duration-200 hover:-translate-y-px active:translate-y-0',
+        'disabled:opacity-60 disabled:cursor-not-allowed',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500',
       ].join(' ')}
     >
