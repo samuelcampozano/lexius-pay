@@ -12,7 +12,7 @@ env:
   CONTRACT_ADDRESS: "0xc03bfde0441130dbce84128500b77d3edd5c8e33"
 
 # ─────────────────────────────────────────────
-# Resolve environment names based on branch
+# Resolve environment & service targets
 # ─────────────────────────────────────────────
 jobs:
   setup:
@@ -39,7 +39,7 @@ jobs:
           fi
 
   # ─────────────────────────────────────────────
-  # Deploy AI Oracle
+  # Build & Deploy AI Oracle
   # ─────────────────────────────────────────────
   deploy-oracle:
     name: 🤖 Deploy AI Oracle → ${{ needs.setup.outputs.environment }}
@@ -53,8 +53,7 @@ jobs:
       - name: Verify GCP_SA_KEY secret
         run: |
           if [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
-            echo "❌ ERROR: secrets.GCP_SA_KEY is empty or not accessible in job context!"
-            echo "Please ensure GCP_SA_KEY is added under Repository Secrets (Settings -> Secrets and variables -> Actions)."
+            echo "❌ ERROR: secrets.GCP_SA_KEY is missing!"
             exit 1
           fi
 
@@ -66,13 +65,31 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Authorize Docker to GCP Artifact Registry
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build & Deploy AI Oracle to Cloud Run
+      - name: Log in to GCP Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGION }}-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build & Push AI Oracle Image (with GHA caching)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai-oracle
+          push: true
+          tags: |
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.oracle_service }}:latest
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.oracle_service }}:${{ github.sha }}
+          cache-from: type=gha,scope=oracle-${{ needs.setup.outputs.environment }}
+          cache-to: type=gha,mode=max,scope=oracle-${{ needs.setup.outputs.environment }}
+
+      - name: Deploy AI Oracle Image to Cloud Run
         run: |
           gcloud run deploy ${{ needs.setup.outputs.oracle_service }} \
-            --source ./ai-oracle \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.oracle_service }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --set-secrets="ORACLE_PRIVATE_KEY=ORACLE_PRIVATE_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,STYLUS_RPC_URL=STYLUS_RPC_URL:latest" \
@@ -85,7 +102,7 @@ jobs:
             --project=${{ env.PROJECT_ID }}
 
   # ─────────────────────────────────────────────
-  # Deploy Frontend (depends on oracle URL)
+  # Build & Deploy Frontend
   # ─────────────────────────────────────────────
   deploy-frontend:
     name: 🌐 Deploy Frontend → ${{ needs.setup.outputs.environment }}
@@ -99,8 +116,7 @@ jobs:
       - name: Verify GCP_SA_KEY secret
         run: |
           if [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
-            echo "❌ ERROR: secrets.GCP_SA_KEY is empty or not accessible in job context!"
-            echo "Please ensure GCP_SA_KEY is added under Repository Secrets (Settings -> Secrets and variables -> Actions)."
+            echo "❌ ERROR: secrets.GCP_SA_KEY is missing!"
             exit 1
           fi
 
@@ -112,13 +128,31 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Authorize Docker to GCP Artifact Registry
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build & Deploy Frontend to Cloud Run
+      - name: Log in to GCP Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGION }}-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build & Push Frontend Image (with GHA caching)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.frontend_service }}:latest
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.frontend_service }}:${{ github.sha }}
+          cache-from: type=gha,scope=frontend-${{ needs.setup.outputs.environment }}
+          cache-to: type=gha,mode=max,scope=frontend-${{ needs.setup.outputs.environment }}
+
+      - name: Deploy Frontend Image to Cloud Run
         run: |
           gcloud run deploy ${{ needs.setup.outputs.frontend_service }} \
-            --source ./frontend \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.frontend_service }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --set-env-vars="NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }},NEXT_PUBLIC_STYLUS_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc,NEXT_PUBLIC_AI_ORACLE_URL=${{ needs.setup.outputs.oracle_url }}" \
@@ -130,7 +164,7 @@ jobs:
             --project=${{ env.PROJECT_ID }}
 
   # ─────────────────────────────────────────────
-  # Summary
+  # Deployment Summary & Version Tracking
   # ─────────────────────────────────────────────
   summary:
     name: ✅ Deployment Summary
@@ -138,15 +172,16 @@ jobs:
     needs: [setup, deploy-oracle, deploy-frontend]
     if: always()
     steps:
-      - name: Print Summary
+      - name: Print Deployment Summary
         run: |
-          echo "## 🚀 Lexius Pay Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Lexius Pay Enterprise Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Environment** | ${{ needs.setup.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Branch** | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **AI Oracle Service** | ${{ needs.setup.outputs.oracle_service }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Frontend Service** | ${{ needs.setup.outputs.frontend_service }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Contract Address** | ${{ env.CONTRACT_ADDRESS }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Commit** | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Target / Output |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | \`${{ needs.setup.outputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit SHA** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **AI Oracle Service** | \`${{ needs.setup.outputs.oracle_service }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Frontend Service** | \`${{ needs.setup.outputs.frontend_service }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Stylus Escrow Address** | \`${{ env.CONTRACT_ADDRESS }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Artifact Registry Tag** | \`:${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
