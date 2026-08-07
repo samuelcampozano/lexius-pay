@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import disputeRouter from './routes/dispute';
 import faucetRouter from './routes/faucet';
 import telegramRouter from './routes/telegram';
-import swapRouter from './routes/swap';
 import { initBot } from './services/telegram';
 
 dotenv.config();
@@ -27,7 +26,6 @@ app.get('/health', (req, res) => {
 app.use('/api/dispute', disputeRouter);
 app.use('/api/faucet', faucetRouter);
 app.use('/api/telegram', telegramRouter);
-app.use('/api/swap', swapRouter);
 
 app.listen(PORT, () => {
   console.log(`🚀 Lexius Pay AI Oracle service listening on port ${PORT}`);

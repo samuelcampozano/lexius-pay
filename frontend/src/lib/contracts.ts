@@ -16,7 +16,7 @@ export const STYLUS_ESCROW_ABI = EscrowABIJson;
 
 // Contract address from environment (set in .env.local)
 export const STYLUS_ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS ||
-  '0xc03bfde0441130dbce84128500b77d3edd5c8e33') as `0x${string}`;
+  '0x33f54de59419570a9442e788f5dd5cf635b3c7ac') as `0x${string}`;
 
 // Also export with a cleaner name
 export const STYLUS_CONTRACT_ADDRESS = STYLUS_ESCROW_ADDRESS;
