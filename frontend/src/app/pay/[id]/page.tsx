@@ -184,27 +184,32 @@ export default function PaymentPage() {
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
               <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">
-                Lexius AI Assistant Status
+                {t('aiStatusTitle')}
               </span>
             </div>
             <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30">
-              GCP GPT-4o Oracle Active
+              {t('aiOracleActive')}
             </span>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
             {status === 'Pending' && (
               <>
-                ⏳ <strong>Waiting for Buyer:</strong> The seller (<strong>{sellerName || 'Samuel'}</strong>) has created this payment link for <strong>{amount} USDC</strong>. When the buyer deposits, funds will be locked safely in the Arbitrum Stylus smart contract.
+                ⏳ <strong>{t('aiStatusPendingTitle')}:</strong>{' '}
+                {t('aiStatusPendingDesc')
+                  .replace('{seller}', sellerName || 'Samuel')
+                  .replace('{amount}', amount)}
               </>
             )}
             {status === 'Deposited' && (
               <>
-                🔒 <strong>Funds Secured in Vault:</strong> <strong>{amount} USDC</strong> is locked on-chain. Seller should send the VIP ticket. Once received, buyer clicks "Confirm & Release". If there is any issue, either party can open an AI Dispute for GPT-4o Vision to inspect proof!
+                🔒 <strong>{t('aiStatusDepositedTitle')}:</strong>{' '}
+                {t('aiStatusDepositedDesc').replace('{amount}', amount)}
               </>
             )}
             {status === 'Completed' && (
               <>
-                ✅ <strong>Escrow Released:</strong> <strong>{amount} USDC</strong> has been transferred to the seller's wallet. Agreement completed on Arbitrum Sepolia!
+                ✅ <strong>{t('aiStatusCompletedTitle')}:</strong>{' '}
+                {t('aiStatusCompletedDesc').replace('{amount}', amount)}
               </>
             )}
           </p>

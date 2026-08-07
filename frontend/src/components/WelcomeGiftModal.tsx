@@ -3,9 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { Gift, CheckCircle2, ExternalLink, Sparkles, X } from 'lucide-react';
 import { usePrivyAuth } from '@/hooks/usePrivyAuth';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function WelcomeGiftModal() {
   const { authenticated, walletAddress } = usePrivyAuth();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [txDetails, setTxDetails] = useState<{
@@ -82,30 +84,28 @@ export default function WelcomeGiftModal() {
         {/* Title */}
         <div className="text-center space-y-1.5 mb-5">
           <h3 className="text-xl font-bold text-white flex items-center justify-center gap-2">
-            <span>Welcome Gift Claimed!</span>
+            <span>{t('giftTitle')}</span>
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           </h3>
-          <p className="text-sm text-slate-300">
-            We funded your account with testnet assets so you can try Lexius Pay immediately!
-          </p>
+          <p className="text-sm text-slate-300">{t('giftSub')}</p>
         </div>
 
         {/* Badge Details */}
         <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-4 space-y-3 mb-6">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400">Bonus Stablecoin</span>
+            <span className="text-xs text-slate-400">{t('giftBonusStable')}</span>
             <span className="text-sm font-semibold text-emerald-400 flex items-center gap-1.5">
               +1.00 USDC
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400">Arbitrum Gas Fee</span>
+            <span className="text-xs text-slate-400">{t('giftGasFee')}</span>
             <span className="text-sm font-semibold text-blue-400">
               +0.001 Sepolia ETH
             </span>
           </div>
           <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-700/60">
-            <span>Network</span>
+            <span>{t('payNetwork')}</span>
             <span>Arbitrum Sepolia Testnet</span>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function WelcomeGiftModal() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 hover:underline font-mono"
             >
-              <span>View USDC Transfer on Arbiscan</span>
+              <span>{t('giftExplorerLink')}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
@@ -130,7 +130,7 @@ export default function WelcomeGiftModal() {
           onClick={() => setIsOpen(false)}
           className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-200"
         >
-          Start Exploring Escrows 🚀
+          {t('giftCta')}
         </button>
       </div>
     </div>

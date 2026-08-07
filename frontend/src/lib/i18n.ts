@@ -98,6 +98,24 @@ export const dictionary = {
     // Generator name field
     labelSellerName: 'Tu Nombre (visible en el enlace)',
     placeholderSellerName: 'ej. Carlos López',
+
+    // AI Status Banner
+    aiStatusTitle: 'Estado del Asistente IA Lexius',
+    aiOracleActive: 'GCP Oráculo GPT-4o Activo',
+    aiStatusPendingTitle: 'Esperando al Comprador',
+    aiStatusPendingDesc: 'El vendedor ({seller}) creó este enlace por {amount} USDC. Al depositar, los fondos quedarán congelados en el contrato inteligente Arbitrum Stylus.',
+    aiStatusDepositedTitle: 'Fondos Protegidos en Bóveda',
+    aiStatusDepositedDesc: '{amount} USDC congelados on-chain. El vendedor debe enviar el producto o entrada. Al recibirlo, el comprador presiona "Confirmar y Liberar". Si hay algún conflicto, cualquiera puede abrir una Disputa IA.',
+    aiStatusCompletedTitle: 'Escrow Liberado',
+    aiStatusCompletedDesc: '{amount} USDC transferidos exitosamente a la billetera del vendedor. ¡Acuerdo completado en Arbitrum Sepolia!',
+
+    // Welcome Gift Modal
+    giftTitle: '¡Regalo de Bienvenida Reclamado!',
+    giftSub: '¡Hemos acreditado activos de prueba en tu billetera para que pruebes Lexius Pay inmediatamente!',
+    giftBonusStable: 'Establecoin de Bono',
+    giftGasFee: 'Gas de Arbitrum',
+    giftExplorerLink: 'Ver Transferencia USDC en Arbiscan',
+    giftCta: 'Comenzar a Explorar 🚀',
   },
   en: {
     // Navbar
@@ -196,6 +214,24 @@ export const dictionary = {
     // Generator name field
     labelSellerName: 'Your Name (visible on the link)',
     placeholderSellerName: 'e.g. John Doe',
+
+    // AI Status Banner
+    aiStatusTitle: 'Lexius AI Assistant Status',
+    aiOracleActive: 'GCP GPT-4o Oracle Active',
+    aiStatusPendingTitle: 'Waiting for Buyer',
+    aiStatusPendingDesc: 'The seller ({seller}) created this link for {amount} USDC. Upon deposit, funds will be locked safely in the Arbitrum Stylus smart contract vault.',
+    aiStatusDepositedTitle: 'Funds Secured in Vault',
+    aiStatusDepositedDesc: '{amount} USDC locked on-chain. Seller should deliver the product or ticket. Once received, buyer clicks "Confirm & Release". If any conflict arises, either party can open an AI Dispute.',
+    aiStatusCompletedTitle: 'Escrow Released',
+    aiStatusCompletedDesc: '{amount} USDC successfully transferred to seller wallet. Agreement completed on Arbitrum Sepolia!',
+
+    // Welcome Gift Modal
+    giftTitle: 'Welcome Gift Claimed!',
+    giftSub: 'We funded your wallet with testnet assets so you can try Lexius Pay immediately!',
+    giftBonusStable: 'Bonus Stablecoin',
+    giftGasFee: 'Arbitrum Gas Fee',
+    giftExplorerLink: 'View USDC Transfer on Arbiscan',
+    giftCta: 'Start Exploring 🚀',
   },
 };
 
