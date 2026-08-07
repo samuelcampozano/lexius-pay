@@ -293,25 +293,39 @@ export default function PaymentPage() {
                     )}
                   </div>
                   <p className="text-sm font-semibold text-white mt-0.5">
-                    {authenticated
-                      ? buyerDisplayName || truncateAddress(buyerWallet)
-                      : t('payWaitingBuyer')}
+                    {status === 'Pending'
+                      ? isSeller
+                        ? t('payWaitingBuyer')
+                        : authenticated
+                        ? buyerDisplayName || truncateAddress(buyerWallet)
+                        : t('payWaitingBuyer')
+                      : buyerDisplayName || truncateAddress(buyerWallet)}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Buyer Wallet */}
-            {authenticated && (
+            {/* Buyer Wallet (Only shown if buyer has actually connected/deposited or if user is non-seller buyer) */}
+            {((status !== 'Pending' && buyerWallet) ||
+              (!isSeller && authenticated)) && (
               <div className="flex items-center justify-between bg-slate-900/60 rounded-lg px-3 py-2">
-                <span className="font-mono text-xs text-slate-300 truncate mr-3">{buyerWallet}</span>
+                <span className="font-mono text-xs text-slate-300 truncate mr-3">
+                  {buyerWallet}
+                </span>
                 <button
                   onClick={() => handleCopyAddress(buyerWallet, 'buyer')}
                   className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-slate-400 hover:text-blue-400 bg-slate-800 hover:bg-slate-700 rounded-md transition-colors shrink-0"
                 >
                   <Copy className="w-3 h-3" />
-                  {copiedField === 'buyer' ? t('payAddressCopied') : t('payCopyAddress')}
+                  {copiedField === 'buyer'
+                    ? t('payAddressCopied')
+                    : t('payCopyAddress')}
                 </button>
+              </div>
+            )}
+            {status === 'Pending' && isSeller && (
+              <div className="flex items-center justify-between bg-slate-900/40 rounded-lg px-3 py-2 text-xs text-slate-500 font-mono">
+                <span>0x... ({t('payWaitingBuyer')})</span>
               </div>
             )}
           </div>
