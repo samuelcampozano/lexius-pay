@@ -168,7 +168,7 @@ export async function initBot(app: import('express').Express): Promise<void> {
   const b = getBot();
 
   // Register /start command
-  b.start(async (ctx) => {
+  b.start(async (ctx: any) => {
     await sendWelcomeMessage(ctx.chat.id);
   });
 

@@ -83,10 +83,13 @@ export default function PaymentPage() {
 
     try {
       const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
-      const res = await fetch(`${oracleUrl}/api/faucet/claim`, {
+      const res = await fetch(`${oracleUrl}/api/swap/eth-to-usdc`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ walletAddress: activeWallet || buyerWallet }),
+        body: JSON.stringify({
+          walletAddress: activeWallet || buyerWallet,
+          usdcAmount: amount,
+        }),
       });
       const data = await res.json();
       if (data.success) {
