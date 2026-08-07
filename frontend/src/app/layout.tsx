@@ -5,6 +5,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Providers from './providers';
 import WelcomeGiftModal from '@/components/WelcomeGiftModal';
+import TmaActionProvider from '@/components/TmaActionProvider';
 import { initTelegramWebApp } from '@/lib/telegram';
 
 export default function RootLayout({
@@ -32,6 +33,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[#050811] text-slate-100 antialiased flex flex-col">
         <Providers>
+          <TmaActionProvider />
           <WelcomeGiftModal />
           <Navbar />
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">

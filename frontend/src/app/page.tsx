@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { useLanguage } from '@/context/LanguageContext';
+import { cacheWalletAddress, getCachedWalletAddress } from '@/lib/telegram';
 import UseCaseSelector from '@/components/UseCaseSelector';
 import EscrowSimulator from '@/components/EscrowSimulator';
 
@@ -37,12 +37,16 @@ export default function HomePage() {
   const [generatedId, setGeneratedId] = useState<string | null>(null);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [telegramChatId, setTelegramChatId] = useState('');
+  const [tgShareStatus, setTgShareStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   // Auto-fill seller address and name ONLY when the user is logged in
   React.useEffect(() => {
     if (authenticated) {
       if (activeWalletAddress && !sellerAddress) {
         setSellerAddress(activeWalletAddress);
+        // Cache wallet address for TMA instant auto-fill
+        cacheWalletAddress(activeWalletAddress);
       }
       if (!sellerName) {
         if (user?.google?.name) {
@@ -50,6 +54,12 @@ export default function HomePage() {
         } else if (user?.email?.address) {
           setSellerName(user.email.address);
         }
+      }
+    } else {
+      // Before Privy loads, try to restore cached wallet for instant fill
+      const cached = getCachedWalletAddress();
+      if (cached && !sellerAddress) {
+        setSellerAddress(cached);
       }
     }
   }, [authenticated, activeWalletAddress, user]);
@@ -121,6 +131,42 @@ export default function HomePage() {
     navigator.clipboard.writeText(url);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  /** Share escrow card to a Telegram chat via the bot */
+  const shareToTelegram = async () => {
+    if (!generatedId || !telegramChatId.trim()) return;
+    setTgShareStatus('sending');
+    try {
+      const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+      const finalSeller = sellerAddress.trim() || activeWalletAddress || '0x0000000000000000000000000000000000000000';
+      const res = await fetch(`${oracleUrl}/api/telegram/send-escrow-card`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: telegramChatId.trim(),
+          escrowId: generatedId,
+          description,
+          amount: String(amount),
+          sellerName: sellerName.trim(),
+          seller: finalSeller,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Store the Telegram message context for future status updates
+        localStorage.setItem(`lexius_tg_msg_${generatedId}`, JSON.stringify({
+          chatId: telegramChatId.trim(),
+          messageId: data.messageId,
+        }));
+        setTgShareStatus('sent');
+      } else {
+        setTgShareStatus('error');
+      }
+    } catch {
+      setTgShareStatus('error');
+    }
+    setTimeout(() => setTgShareStatus('idle'), 3000);
   };
 
   const runAISimulator = () => {
@@ -323,6 +369,50 @@ export default function HomePage() {
                 </div>
               </div>
 
+              {/* Share via Telegram Bot */}
+              <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Send className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">
+                    Share via Telegram Bot
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Telegram Chat ID or @username"
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    className="flex-1 px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs font-mono"
+                  />
+                  <button
+                    onClick={shareToTelegram}
+                    disabled={!telegramChatId.trim() || tgShareStatus === 'sending'}
+                    className="px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                  >
+                    {tgShareStatus === 'sending' ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : tgShareStatus === 'sent' ? (
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5" />
+                    )}
+                    <span>
+                      {tgShareStatus === 'sending'
+                        ? 'Sending...'
+                        : tgShareStatus === 'sent'
+                        ? 'Sent!'
+                        : tgShareStatus === 'error'
+                        ? 'Error'
+                        : 'Send'}
+                    </span>
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  The bot will send an interactive payment card to the specified Telegram chat.
+                </p>
+              </div>
+
               <div className="flex gap-3">
                 <Link
                   href={generatedLink ?? `/pay/${generatedId}`}
@@ -335,6 +425,8 @@ export default function HomePage() {
                   onClick={() => {
                     setGeneratedId(null);
                     setGeneratedLink(null);
+                    setTgShareStatus('idle');
+                    setTelegramChatId('');
                   }}
                   className="px-4 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-400 text-sm font-medium rounded-xl border border-slate-800"
                 >
