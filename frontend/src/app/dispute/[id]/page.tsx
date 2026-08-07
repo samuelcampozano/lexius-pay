@@ -102,7 +102,7 @@ export default function DisputePage() {
         summary: data.summary || 'AI Dispute Decision',
         confidenceScore: data.confidenceScore || 0.95,
         signature: data.signature,
-        v: Number(data.v),
+        v: Number(data.v) < 27 ? Number(data.v) + 27 : Number(data.v),
         r: data.r as `0x${string}`,
         s: data.s as `0x${string}`,
         oracleAddress: data.oracleAddress || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',

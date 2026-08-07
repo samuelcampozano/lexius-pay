@@ -228,8 +228,18 @@ export default function HomePage() {
                     required
                     min="1"
                     step="any"
-                    value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
+                    value={amount === 0 ? '' : amount}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setAmount(0);
+                      } else {
+                        const parsed = parseFloat(val);
+                        if (!isNaN(parsed) && parsed >= 0) {
+                          setAmount(parsed);
+                        }
+                      }
+                    }}
                     className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm font-mono"
                   />
                 </div>
