@@ -21,7 +21,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 export default function HomePage() {
   const { lang, t } = useLanguage();
-  const { authenticated, user } = usePrivy();
+  const { authenticated, user, login } = usePrivy();
   const { wallets } = useWallets();
 
   const activeWalletAddress = wallets?.[0]?.address || user?.wallet?.address || '';
