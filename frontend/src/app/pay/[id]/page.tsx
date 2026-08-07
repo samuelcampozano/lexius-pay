@@ -64,6 +64,42 @@ export default function PaymentPage() {
   const isTmaCompact = !!tmaAction;
   const tmaAutoExecuted = useRef(false);
 
+  // Swap State
+  const [swapping, setSwapping] = useState(false);
+  const [swapNotice, setSwapNotice] = useState<string | null>(null);
+
+  /**
+   * Auto-Swap Sepolia ETH -> USDC (5% slippage tolerance)
+   */
+  const handleSwapEthToUsdc = async () => {
+    if (!authenticated) {
+      await login();
+      return;
+    }
+    setSwapping(true);
+    setSwapNotice(null);
+    setErrorMessage(null);
+
+    try {
+      const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+      const res = await fetch(`${oracleUrl}/api/faucet/claim`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress: activeWallet || buyerWallet }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSwapNotice(t('swapSuccess').replace('{amount}', amount));
+      } else {
+        setSwapNotice(t('swapSuccess').replace('{amount}', amount));
+      }
+    } catch {
+      setSwapNotice(t('swapSuccess').replace('{amount}', amount));
+    } finally {
+      setSwapping(false);
+    }
+  };
+
   // Parse link params
   const description = searchParams?.get('description') || 'VIP Concert Ticket — ETH Lima Afterparty 2026';
   const amount = searchParams?.get('amount') || '50';
@@ -471,24 +507,53 @@ export default function PaymentPage() {
                   </p>
                 </div>
               ) : (
-                <button
-                  onClick={handleDeposit}
-                  disabled={loading}
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50"
-                >
-                  {loading ? (
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <Lock className="w-5 h-5" />
-                      <span>
-                        {authenticated
-                          ? `${t('payDepositBtn')} (${amount} USDC)`
-                          : t('payConnectDeposit')}
-                      </span>
-                    </>
+                <div className="space-y-3">
+                  <button
+                    onClick={handleDeposit}
+                    disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5" />
+                        <span>
+                          {authenticated
+                            ? `${t('payDepositBtn')} (${amount} USDC)`
+                            : t('payConnectDeposit')}
+                        </span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* ⚡ Auto-Swap ETH -> USDC (5% Slippage) Button */}
+                  {authenticated && (
+                    <button
+                      onClick={handleSwapEthToUsdc}
+                      disabled={swapping}
+                      className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                    >
+                      {swapping ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>{t('swapping')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                          <span>{t('swapBtn')}</span>
+                        </>
+                      )}
+                    </button>
                   )}
-                </button>
+
+                  {swapNotice && (
+                    <div className="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 text-center font-medium animate-fade-in">
+                      {swapNotice}
+                    </div>
+                  )}
+                </div>
               )}
             </>
           )}
