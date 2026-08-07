@@ -14,6 +14,7 @@ import {
   Store,
   ShoppingBag,
   AlertTriangle,
+  Zap,
 } from 'lucide-react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Link from 'next/link';
