@@ -115,6 +115,10 @@ export const dictionary = {
     statusCompleted: 'Completado',
     statusDisputed: 'En Disputa',
     escrowBadge: 'Acuerdo #{id}',
+    paySellerSelfWarning: '⚠️ Eres el vendedor de este acuerdo. Comparte este enlace con tu comprador para que realice el depósito de {amount} USDC.',
+    payDepositError: 'Error de transacción en Arbitrum Stylus: ',
+    payReleaseError: 'Error al liberar fondos en el contrato: ',
+    payInsufficientBalance: 'Saldo insuficiente de USDC en Arbitrum Sepolia. Usa el Regalo de Bienvenida para obtener fondos de prueba.',
 
     // Welcome Gift Modal
     giftTitle: '¡Regalo de Bienvenida Reclamado!',
@@ -238,6 +242,10 @@ export const dictionary = {
     statusCompleted: 'Completed',
     statusDisputed: 'Disputed',
     escrowBadge: 'Escrow #{id}',
+    paySellerSelfWarning: '⚠️ You are the seller of this agreement. Share this link with your buyer so they can deposit {amount} USDC.',
+    payDepositError: 'Arbitrum Stylus transaction error: ',
+    payReleaseError: 'Error releasing contract funds: ',
+    payInsufficientBalance: 'Insufficient USDC balance on Arbitrum Sepolia. Use the Welcome Gift to receive testnet funds.',
 
     // Welcome Gift Modal
     giftTitle: 'Welcome Gift Claimed!',
