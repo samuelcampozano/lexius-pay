@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { useLanguage } from '@/context/LanguageContext';
 import { cacheWalletAddress, getCachedWalletAddress } from '@/lib/telegram';
 import UseCaseSelector from '@/components/UseCaseSelector';
 import EscrowSimulator from '@/components/EscrowSimulator';
