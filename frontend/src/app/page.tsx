@@ -18,6 +18,8 @@ import {
 import Link from 'next/link';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useLanguage } from '@/context/LanguageContext';
+import UseCaseSelector from '@/components/UseCaseSelector';
+import EscrowSimulator from '@/components/EscrowSimulator';
 
 export default function HomePage() {
   const { lang, t } = useLanguage();
@@ -344,90 +346,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI MEDIATOR SIMULATOR SECTION */}
-      <section id="ai-simulator" className="max-w-4xl mx-auto scroll-mt-24 space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('simBadge')}</span>
-          </div>
-          <h2 className="text-3xl font-extrabold text-white">{t('simTitle')}</h2>
-          <p className="text-xs text-slate-400">{t('simSub')}</p>
-        </div>
+      {/* SECTION 1: INTERACTIVE USE CASE SELECTOR */}
+      <section id="use-cases" className="scroll-mt-24">
+        <UseCaseSelector />
+      </section>
 
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-purple-500/30">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
-                <Scale className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white text-lg">{t('sampleClaimTitle')}</h3>
-                <p className="text-xs text-slate-400">{t('sampleClaimSub')}</p>
-              </div>
-            </div>
-            <button
-              onClick={runAISimulator}
-              disabled={simulatingAI}
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 disabled:opacity-50"
-            >
-              {simulatingAI ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>{t('simulatingAi')}</span>
-                </>
-              ) : (
-                <>
-                  <Cpu className="w-4 h-4" />
-                  <span>{t('btnRunAi')}</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* AI Verdict Output */}
-          {aiResult && (
-            <div className="bg-slate-950 p-6 rounded-xl border border-purple-500/40 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300 glow-purple">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  {t('verdictTitle')}
-                </span>
-                <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full">
-                  {t('confidenceLabel')} {Math.round(aiResult.confidenceScore * 100)}%
-                </span>
-              </div>
-
-              <p className="text-xs text-slate-200 leading-relaxed font-medium bg-slate-900 p-3 rounded-lg border border-slate-800">
-                {aiResult.reasoning}
-              </p>
-
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                  <span className="text-slate-500 block mb-1 text-[10px] uppercase font-semibold">
-                    {t('winnerLabel')}
-                  </span>
-                  <span className="font-mono text-emerald-400 font-bold truncate block">{aiResult.winner}</span>
-                </div>
-                <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                  <span className="text-slate-500 block mb-1 text-[10px] uppercase font-semibold">
-                    {t('hostLabel')}
-                  </span>
-                  <span className="font-mono text-blue-400 font-bold truncate block">{aiResult.oracleHost}</span>
-                </div>
-              </div>
-
-              <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800 font-mono text-[10px] space-y-1 text-slate-400">
-                <div className="truncate">{t('signatureLabel')} {aiResult.signature}</div>
-                <div className="flex gap-4 text-slate-500">
-                  <span>v: {aiResult.v}</span>
-                  <span className="truncate">r: {aiResult.r.slice(0, 16)}...</span>
-                  <span className="truncate">s: {aiResult.s.slice(0, 16)}...</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      {/* SECTION 2: INTERACTIVE ESCROW FLOW SIMULATOR */}
+      <section id="ai-simulator" className="scroll-mt-24">
+        <EscrowSimulator />
       </section>
 
       {/* FEATURE PILLARS */}
