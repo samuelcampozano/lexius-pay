@@ -58,19 +58,35 @@ export default function HomePage() {
 
   const handleCreateLink = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // If no seller address provided and user isn't logged in, prompt Privy login so seller gets paid!
+    if (!authenticated && !sellerAddress.trim()) {
+      login();
+      return;
+    }
+
     const newEscrowId = Math.floor(100 + Math.random() * 900).toString();
-    const finalSeller = sellerAddress.trim() || activeWalletAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+    const finalSeller =
+      sellerAddress.trim() ||
+      activeWalletAddress ||
+      '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+    const finalSellerName =
+      sellerName.trim() ||
+      (authenticated ? user?.google?.name || user?.email?.address || 'Vendedor' : 'Vendedor');
+
     const params = new URLSearchParams({
       description,
       amount: String(amount),
       seller: finalSeller,
-      sellerName: sellerName.trim(),
+      sellerName: finalSellerName,
     });
     const nextLink = `/pay/${newEscrowId}?${params.toString()}`;
 
     // Save to local storage for user's dashboard tracking
     try {
-      const existing = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+      const existing = JSON.parse(
+        localStorage.getItem('lexius_user_escrows') || '[]'
+      );
       const newEscrowRecord = {
         id: newEscrowId,
         description,
@@ -78,12 +94,19 @@ export default function HomePage() {
         status: 'Pending',
         role: 'Seller',
         seller: finalSeller,
-        sellerName: sellerName.trim(),
+        sellerName: finalSellerName,
         counterparty: 'En espera de comprador',
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        date: new Date().toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
         link: nextLink,
       };
-      localStorage.setItem('lexius_user_escrows', JSON.stringify([newEscrowRecord, ...existing]));
+      localStorage.setItem(
+        'lexius_user_escrows',
+        JSON.stringify([newEscrowRecord, ...existing])
+      );
     } catch (e) {}
 
     setGeneratedId(newEscrowId);
