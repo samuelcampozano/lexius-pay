@@ -6,6 +6,8 @@ import { Shield, Sparkles, ExternalLink, Clock, CheckCircle2, AlertCircle, Plus,
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import WalletLogin from '@/components/WalletLogin';
 
+import { useLanguage } from '@/context/LanguageContext';
+
 export interface EscrowRecord {
   id: string;
   description: string;
@@ -20,15 +22,22 @@ export interface EscrowRecord {
 }
 
 export default function DashboardPage() {
+  const { t } = useLanguage();
   const { authenticated, login, ready, user } = usePrivy();
   const { wallets } = useWallets();
-  const activeWallet = (wallets?.[0]?.address || user?.wallet?.address || '').toLowerCase();
+  const activeWallet = (
+    wallets?.[0]?.address ||
+    user?.wallet?.address ||
+    ''
+  ).toLowerCase();
 
   const [escrows, setEscrows] = useState<EscrowRecord[]>([]);
 
   useEffect(() => {
     try {
-      const stored: EscrowRecord[] = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+      const stored: EscrowRecord[] = JSON.parse(
+        localStorage.getItem('lexius_user_escrows') || '[]'
+      );
       if (activeWallet) {
         // Filter escrows associated with the logged-in user
         const userItems = stored.filter(
@@ -51,17 +60,15 @@ export default function DashboardPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-white">Escrow Dashboard</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Track and manage your active Stylus escrow agreements and AI dispute resolutions
-          </p>
+          <h1 className="text-3xl font-extrabold text-white">{t('dashTitle')}</h1>
+          <p className="text-xs text-slate-400 mt-1">{t('dashSub')}</p>
         </div>
         <Link
           href="/"
           className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-1.5"
         >
           <Plus className="w-4 h-4" />
-          <span>New Escrow Link</span>
+          <span>{t('btnGenerate')}</span>
         </Link>
       </div>
 
