@@ -118,7 +118,7 @@ export default function PaymentPage() {
           {t('payBackGenerator')}
         </Link>
         <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/20">
-          Escrow #{escrowId}
+          {t('escrowBadge').replace('{id}', escrowId)}
         </span>
       </div>
 
@@ -146,7 +146,13 @@ export default function PaymentPage() {
                 : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
             }`}
           >
-            {status}
+            {status === 'Pending'
+              ? t('statusPending')
+              : status === 'Deposited'
+              ? t('statusDeposited')
+              : status === 'Completed'
+              ? t('statusCompleted')
+              : t('statusDisputed')}
           </span>
         </div>
 

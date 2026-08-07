@@ -148,7 +148,13 @@ export default function DashboardPage() {
                           : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                       }`}
                     >
-                      {item.status}
+                      {item.status === 'Pending'
+                        ? t('statusPending')
+                        : item.status === 'Deposited'
+                        ? t('statusDeposited')
+                        : item.status === 'Completed'
+                        ? t('statusCompleted')
+                        : t('statusDisputed')}
                     </span>
                   </div>
                 </div>

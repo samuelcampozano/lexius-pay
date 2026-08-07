@@ -109,6 +109,13 @@ export const dictionary = {
     aiStatusCompletedTitle: 'Escrow Liberado',
     aiStatusCompletedDesc: '{amount} USDC transferidos exitosamente a la billetera del vendedor. ¡Acuerdo completado en Arbitrum Sepolia!',
 
+    // Status & Badges
+    statusPending: 'En Espera',
+    statusDeposited: 'Depositado',
+    statusCompleted: 'Completado',
+    statusDisputed: 'En Disputa',
+    escrowBadge: 'Acuerdo #{id}',
+
     // Welcome Gift Modal
     giftTitle: '¡Regalo de Bienvenida Reclamado!',
     giftSub: '¡Hemos acreditado activos de prueba en tu billetera para que pruebes Lexius Pay inmediatamente!',
@@ -224,6 +231,13 @@ export const dictionary = {
     aiStatusDepositedDesc: '{amount} USDC locked on-chain. Seller should deliver the product or ticket. Once received, buyer clicks "Confirm & Release". If any conflict arises, either party can open an AI Dispute.',
     aiStatusCompletedTitle: 'Escrow Released',
     aiStatusCompletedDesc: '{amount} USDC successfully transferred to seller wallet. Agreement completed on Arbitrum Sepolia!',
+
+    // Status & Badges
+    statusPending: 'Pending',
+    statusDeposited: 'Deposited',
+    statusCompleted: 'Completed',
+    statusDisputed: 'Disputed',
+    escrowBadge: 'Escrow #{id}',
 
     // Welcome Gift Modal
     giftTitle: 'Welcome Gift Claimed!',
