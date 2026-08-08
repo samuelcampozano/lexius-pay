@@ -40,6 +40,7 @@ export default function HomePage() {
   const [isCopied, setIsCopied] = useState(false);
   const [telegramChatId, setTelegramChatId] = useState('');
   const [tgShareStatus, setTgShareStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [tgShareError, setTgShareError] = useState<string | null>(null);
 
   // Auto-fill seller address and name ONLY when the user is logged in
   React.useEffect(() => {
@@ -140,7 +141,7 @@ export default function HomePage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const [tgShareError, setTgShareError] = useState<string | null>(null);
+
 
   /** Share escrow card to a Telegram chat via the bot */
   const shareToTelegram = async () => {

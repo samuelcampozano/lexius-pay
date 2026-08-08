@@ -138,7 +138,7 @@ export default function DisputePage() {
       // r: bytes32 (0x...)
       // s: bytes32 (0x...)
       const hash = await resolveDisputeWithSignature(
-        BigInt(verdict.escrowId),
+        BigInt(escrowId.replace('#', '')),
         verdict.winner as `0x${string}`,
         verdict.v,
         verdict.r as `0x${string}`,

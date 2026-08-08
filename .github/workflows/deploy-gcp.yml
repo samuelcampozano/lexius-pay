@@ -155,6 +155,7 @@ jobs:
             NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }}
             NEXT_PUBLIC_STYLUS_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
             NEXT_PUBLIC_AI_ORACLE_URL=${{ needs.setup.outputs.oracle_url }}
+            NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=${{ needs.setup.outputs.bot_username }}
           tags: |
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.frontend_service }}:latest
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.frontend_service }}:${{ github.sha }}

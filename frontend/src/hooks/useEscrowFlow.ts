@@ -239,19 +239,19 @@ export function useEscrowFlow() {
         escrowId === 'demo' ? '101' : escrowId.replace('#', '')
       );
 
+      let needsCreation = false;
+
       // Check on-chain escrow state to ensure escrow exists before deposit
       try {
-        const escrowInfo = (await publicClient.readContract({
+        const count = (await publicClient.readContract({
           address: STYLUS_ESCROW_ADDRESS,
           abi: STYLUS_ESCROW_ABI,
-          functionName: 'get_escrow',
-          args: [targetEscrowId],
-        })) as [string, string, bigint, number, string];
+          functionName: 'get_escrow_count',
+        })) as bigint;
 
-        const buyerOnChain = escrowInfo[0];
-        // If buyer is 0x0000... (uninitialized slot on-chain), initialize with create_escrow first
-        if (!buyerOnChain || buyerOnChain === '0x0000000000000000000000000000000000000000') {
-          console.log(`[useEscrowFlow] Escrow #${targetEscrowId} not initialized on-chain. Creating escrow slot...`);
+        // If targetEscrowId exceeds on-chain count, initialize new slot on-chain
+        if (targetEscrowId > count || count === BigInt(0)) {
+          console.log(`[useEscrowFlow] Escrow #${targetEscrowId} exceeds on-chain count (${count}). Creating new escrow slot on-chain...`);
           const dummyDetails = '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`;
           const createTxHash = await walletClient.writeContract({
             address: STYLUS_ESCROW_ADDRESS,
@@ -266,19 +266,80 @@ export function useEscrowFlow() {
             gas: BigInt(350000),
           });
           await publicClient.waitForTransactionReceipt({ hash: createTxHash });
-          await new Promise((r) => setTimeout(r, 1000));
-          // Get the newly created escrow count ID
-          const count = (await publicClient.readContract({
+          await new Promise((r) => setTimeout(r, 1200));
+
+          const newCount = (await publicClient.readContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
             functionName: 'get_escrow_count',
           })) as bigint;
-          targetEscrowId = count;
+          targetEscrowId = newCount;
+        } else {
+          // Slot is within count range, check if initialized
+          const escrowInfo = (await publicClient.readContract({
+            address: STYLUS_ESCROW_ADDRESS,
+            abi: STYLUS_ESCROW_ABI,
+            functionName: 'get_escrow',
+            args: [targetEscrowId],
+          })) as [string, string, bigint, number, string];
+
+          const buyerOnChain = escrowInfo[0];
+          if (!buyerOnChain || buyerOnChain === '0x0000000000000000000000000000000000000000') {
+            console.log(`[useEscrowFlow] Escrow #${targetEscrowId} is uninitialized. Creating slot...`);
+            const dummyDetails = '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`;
+            const createTxHash = await walletClient.writeContract({
+              address: STYLUS_ESCROW_ADDRESS,
+              abi: STYLUS_ESCROW_ABI,
+              functionName: 'create_escrow',
+              args: [
+                activeWalletAddress as `0x${string}`,
+                '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' as `0x${string}`,
+                usdcUnits,
+                dummyDetails,
+              ],
+              gas: BigInt(350000),
+            });
+            await publicClient.waitForTransactionReceipt({ hash: createTxHash });
+            await new Promise((r) => setTimeout(r, 1200));
+
+            const newCount = (await publicClient.readContract({
+              address: STYLUS_ESCROW_ADDRESS,
+              abi: STYLUS_ESCROW_ABI,
+              functionName: 'get_escrow_count',
+            })) as bigint;
+            targetEscrowId = newCount;
+          }
         }
       } catch (checkErr) {
-        console.warn('[useEscrowFlow] Could not check on-chain escrow state:', checkErr);
+        console.warn('[useEscrowFlow] Error checking count, creating fallback escrow:', checkErr);
+        try {
+          const dummyDetails = '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`;
+          const createTxHash = await walletClient.writeContract({
+            address: STYLUS_ESCROW_ADDRESS,
+            abi: STYLUS_ESCROW_ABI,
+            functionName: 'create_escrow',
+            args: [
+              activeWalletAddress as `0x${string}`,
+              '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' as `0x${string}`,
+              usdcUnits,
+              dummyDetails,
+            ],
+            gas: BigInt(350000),
+          });
+          await publicClient.waitForTransactionReceipt({ hash: createTxHash });
+          await new Promise((r) => setTimeout(r, 1200));
+
+          const newCount = (await publicClient.readContract({
+            address: STYLUS_ESCROW_ADDRESS,
+            abi: STYLUS_ESCROW_ABI,
+            functionName: 'get_escrow_count',
+          })) as bigint;
+          targetEscrowId = newCount;
+        } catch (e2) {}
+      }
       }
 
+      console.log(`[useEscrowFlow] Executing deposit for final Escrow ID: #${targetEscrowId}`);
       const depositHash = await walletClient.writeContract({
         address: STYLUS_ESCROW_ADDRESS,
         abi: STYLUS_ESCROW_ABI,
