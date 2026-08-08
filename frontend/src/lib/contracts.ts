@@ -5,7 +5,7 @@
 
 import EscrowABIJson from './LexiusEscrow.json';
 
-export const STYLUS_ESCROW_ADDRESS = '0x33f54de59419570a9442e788f5dd5cf635b3c7ac' as `0x${string}`;
+export const STYLUS_ESCROW_ADDRESS = '0x4135dcb89eeeba36eb8a6549747bd27f72000ad4' as `0x${string}`;
 export const USDC_TOKEN_ADDRESS = '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d' as `0x${string}`;
 
 export const STYLUS_ESCROW_ABI = EscrowABIJson;
