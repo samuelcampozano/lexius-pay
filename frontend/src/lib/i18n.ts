@@ -32,6 +32,13 @@ export const dictionary = {
     btnCopy: 'Copiar Enlace de Pago',
     copied: '¡Copiado al Portapapeles!',
     btnPayPage: 'Abrir Enlace de Pago',
+    tgShareTitle: 'Compartir vía Bot de Telegram',
+    tgPlaceholder: 'Chat ID o @usuario (ej. @usuario)',
+    tgBtnSend: 'Enviar',
+    tgBtnSending: 'Enviando...',
+    tgBtnSent: '¡Enviado!',
+    tgBtnError: 'Error',
+    tgHelperText: 'El bot enviará una tarjeta de pago interactiva al chat. Nota: Para chats privados, el receptor debe haber iniciado una conversación previamente con el bot (@LexiusPayTestBot). Para grupos, el bot debe estar agregado como miembro.',
 
     // AI Simulator
     simBadge: 'Demo Interactivo',
@@ -98,6 +105,50 @@ export const dictionary = {
     // Generator name field
     labelSellerName: 'Tu Nombre (visible en el enlace)',
     placeholderSellerName: 'ej. Carlos López',
+
+    // AI Status Banner
+    aiStatusTitle: 'Estado del Asistente IA Lexius',
+    aiOracleActive: 'GCP Oráculo GPT-4o Activo',
+    aiStatusPendingTitle: 'Esperando al Comprador',
+    aiStatusPendingDesc: 'El vendedor ({seller}) creó este enlace por {amount} USDC. Al depositar, los fondos quedarán congelados en el contrato inteligente Arbitrum Stylus.',
+    aiStatusDepositedTitle: 'Fondos Protegidos en Bóveda',
+    aiStatusDepositedDesc: '{amount} USDC congelados on-chain. El vendedor debe enviar el producto o entrada. Al recibirlo, el comprador presiona "Confirmar y Liberar". Si hay algún conflicto, cualquiera puede abrir una Disputa IA.',
+    aiStatusCompletedTitle: 'Escrow Liberado',
+    aiStatusCompletedDesc: '{amount} USDC transferidos exitosamente a la billetera del vendedor. ¡Acuerdo completado en Arbitrum Sepolia!',
+
+    // Status & Badges
+    roleSeller: 'Vendedor',
+    roleBuyer: 'Comprador',
+    counterpartyLabel: 'Contraparte:',
+    waitingBuyer: 'En espera de comprador',
+    btnCopyLink: 'Copiar Enlace',
+    btnShareTg: 'Re-enviar por Telegram',
+    statusPending: 'En Espera',
+    statusDeposited: 'Depositado',
+    statusCompleted: 'Completado',
+    statusDisputed: 'En Disputa',
+    escrowBadge: 'Acuerdo #{id}',
+    paySellerSelfWarning: '⚠️ Eres el vendedor de este acuerdo. Comparte este enlace con tu comprador para que realice el depósito de {amount} USDC.',
+    userCancelledTx: '⚠️ Transacción cancelada por el usuario en la billetera.',
+    payDepositError: 'Error de transacción en Arbitrum Stylus: ',
+    payReleaseError: 'Error al liberar fondos en el contrato: ',
+    payInsufficientBalance: 'Saldo insuficiente de USDC en Arbitrum Sepolia. Usa el Regalo de Bienvenida o Intercambio ETH.',
+    swapBtn: '⚡ Intercambiar ETH → USDC (Slippage 5%)',
+    swapping: 'Intercambiando ETH en Arbitrum Sepolia...',
+    swapSuccess: '⚡ Intercambio ejecutado: ~0.0015 ETH → {amount} USDC (Slippage: 5%). ¡Saldo listo para depositar!',
+    faucetLabel: 'Fondeo de Prueba Lexius:',
+    faucetBtnRefund: 'Re-Fondear (0.005 ETH + 10 USDC)',
+    faucetRefunding: 'Fondeando 10 USDC...',
+    faucetSuccessMsg: '¡Billetera de prueba fondeada con éxito! +10 USDC y 0.005 ETH de gas agregados.',
+    circleFaucetLink: 'Obtener USDC en Faucet Oficial de Circle ↗',
+
+    // Welcome Gift Modal
+    giftTitle: '¡Regalo de Bienvenida Reclamado!',
+    giftSub: '¡Hemos acreditado activos de prueba en tu billetera para que pruebes Lexius Pay inmediatamente!',
+    giftBonusStable: 'Establecoin de Bono',
+    giftGasFee: 'Gas de Arbitrum',
+    giftExplorerLink: 'Ver Transferencia USDC en Arbiscan',
+    giftCta: 'Comenzar a Explorar 🚀',
   },
   en: {
     // Navbar
@@ -130,6 +181,13 @@ export const dictionary = {
     btnCopy: 'Copy Payment Link',
     copied: 'Copied to Clipboard!',
     btnPayPage: 'Open Payment Page',
+    tgShareTitle: 'Share via Telegram Bot',
+    tgPlaceholder: 'Chat ID or @username (e.g. @username)',
+    tgBtnSend: 'Send',
+    tgBtnSending: 'Sending...',
+    tgBtnSent: 'Sent!',
+    tgBtnError: 'Error',
+    tgHelperText: 'The bot will send an interactive payment card to the specified chat. Note: For private 1-on-1 chats, the recipient must have previously started a conversation with the bot (@LexiusPayTestBot). For groups, the bot must be a member.',
 
     // AI Simulator
     simBadge: 'Interactive Demo',
@@ -196,6 +254,50 @@ export const dictionary = {
     // Generator name field
     labelSellerName: 'Your Name (visible on the link)',
     placeholderSellerName: 'e.g. John Doe',
+
+    // AI Status Banner
+    aiStatusTitle: 'Lexius AI Assistant Status',
+    aiOracleActive: 'GCP GPT-4o Oracle Active',
+    aiStatusPendingTitle: 'Waiting for Buyer',
+    aiStatusPendingDesc: 'The seller ({seller}) created this link for {amount} USDC. Upon deposit, funds will be locked safely in the Arbitrum Stylus smart contract vault.',
+    aiStatusDepositedTitle: 'Funds Secured in Vault',
+    aiStatusDepositedDesc: '{amount} USDC locked on-chain. Seller should deliver the product or ticket. Once received, buyer clicks "Confirm & Release". If any conflict arises, either party can open an AI Dispute.',
+    aiStatusCompletedTitle: 'Escrow Released',
+    aiStatusCompletedDesc: '{amount} USDC successfully transferred to seller wallet. Agreement completed on Arbitrum Sepolia!',
+
+    // Status & Badges
+    roleSeller: 'Seller',
+    roleBuyer: 'Buyer',
+    counterpartyLabel: 'Counterparty:',
+    waitingBuyer: 'Waiting for buyer',
+    btnCopyLink: 'Copy Link',
+    btnShareTg: 'Resend via Telegram',
+    statusPending: 'Pending',
+    statusDeposited: 'Deposited',
+    statusCompleted: 'Completed',
+    statusDisputed: 'Disputed',
+    escrowBadge: 'Escrow #{id}',
+    paySellerSelfWarning: '⚠️ You are the seller of this agreement. Share this link with your buyer so they can deposit {amount} USDC.',
+    userCancelledTx: '⚠️ Transaction cancelled by the user in wallet.',
+    payDepositError: 'Arbitrum Stylus transaction error: ',
+    payReleaseError: 'Error releasing contract funds: ',
+    payInsufficientBalance: 'Insufficient USDC balance on Arbitrum Sepolia. Use the Welcome Gift or ETH Swap.',
+    swapBtn: '⚡ Swap ETH → USDC (5% Slippage)',
+    swapping: 'Swapping ETH on Arbitrum Sepolia...',
+    swapSuccess: '⚡ Swap executed: ~0.0015 ETH → {amount} USDC (5% Slippage). Balance ready for deposit!',
+    faucetLabel: 'Lexius Testnet Funding:',
+    faucetBtnRefund: 'Re-Fund (0.005 ETH + 10 USDC)',
+    faucetRefunding: 'Funding 10 USDC...',
+    faucetSuccessMsg: 'Testnet wallet successfully funded! +10 USDC and 0.005 ETH gas added.',
+    circleFaucetLink: 'Get USDC on Circle Official Faucet ↗',
+
+    // Welcome Gift Modal
+    giftTitle: 'Welcome Gift Claimed!',
+    giftSub: 'We funded your wallet with testnet assets so you can try Lexius Pay immediately!',
+    giftBonusStable: 'Bonus Stablecoin',
+    giftGasFee: 'Arbitrum Gas Fee',
+    giftExplorerLink: 'View USDC Transfer on Arbiscan',
+    giftCta: 'Start Exploring 🚀',
   },
 };
 

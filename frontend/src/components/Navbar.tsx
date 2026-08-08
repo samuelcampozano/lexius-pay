@@ -38,10 +38,6 @@ export default function Navbar() {
             <LayoutDashboard className="w-4 h-4 text-slate-400" />
             <span>{t('navDashboard')}</span>
           </Link>
-          <Link href="/dispute/demo" className="flex items-center gap-1.5 text-purple-400 hover:text-purple-300 transition-colors">
-            <Sparkles className="w-4 h-4" />
-            <span>{t('navAiSimulator')}</span>
-          </Link>
         </div>
 
         {/* Controls: Language Switcher + Wallet Login */}

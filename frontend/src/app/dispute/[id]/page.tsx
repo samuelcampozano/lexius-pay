@@ -102,7 +102,7 @@ export default function DisputePage() {
         summary: data.summary || 'AI Dispute Decision',
         confidenceScore: data.confidenceScore || 0.95,
         signature: data.signature,
-        v: Number(data.v),
+        v: Number(data.v) < 27 ? Number(data.v) + 27 : Number(data.v),
         r: data.r as `0x${string}`,
         s: data.s as `0x${string}`,
         oracleAddress: data.oracleAddress || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
@@ -189,16 +189,18 @@ export default function DisputePage() {
           Submit claim details and evidence screenshots. Our AI Mediator runs multi-modal vision analysis and signs a cryptographic ECDSA verdict.
         </p>
 
-        {/* Quick Mock Load Button for Testing */}
-        <div className="pt-2">
-          <button
-            onClick={handleLoadMockData}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition"
-          >
-            <Play className="w-3.5 h-3.5 text-purple-400" />
-            <span>Cargar veredicto de prueba</span>
-          </button>
-        </div>
+        {/* Quick Mock Load Button for Testing (Demo Mode Only) */}
+        {escrowId === 'demo' && (
+          <div className="pt-2">
+            <button
+              onClick={handleLoadMockData}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition"
+            >
+              <Play className="w-3.5 h-3.5 text-purple-400" />
+              <span>Cargar veredicto de prueba (Demo)</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

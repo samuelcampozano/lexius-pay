@@ -18,10 +18,13 @@ import {
 import Link from 'next/link';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useLanguage } from '@/context/LanguageContext';
+import { cacheWalletAddress, getCachedWalletAddress } from '@/lib/telegram';
+import UseCaseSelector from '@/components/UseCaseSelector';
+import EscrowSimulator from '@/components/EscrowSimulator';
 
 export default function HomePage() {
   const { lang, t } = useLanguage();
-  const { authenticated, user } = usePrivy();
+  const { authenticated, user, login } = usePrivy();
   const { wallets } = useWallets();
 
   const activeWalletAddress = wallets?.[0]?.address || user?.wallet?.address || '';
@@ -35,12 +38,16 @@ export default function HomePage() {
   const [generatedId, setGeneratedId] = useState<string | null>(null);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [telegramChatId, setTelegramChatId] = useState('');
+  const [tgShareStatus, setTgShareStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   // Auto-fill seller address and name ONLY when the user is logged in
   React.useEffect(() => {
     if (authenticated) {
       if (activeWalletAddress && !sellerAddress) {
         setSellerAddress(activeWalletAddress);
+        // Cache wallet address for TMA instant auto-fill
+        cacheWalletAddress(activeWalletAddress);
       }
       if (!sellerName) {
         if (user?.google?.name) {
@@ -48,6 +55,12 @@ export default function HomePage() {
         } else if (user?.email?.address) {
           setSellerName(user.email.address);
         }
+      }
+    } else {
+      // Before Privy loads, try to restore cached wallet for instant fill
+      const cached = getCachedWalletAddress();
+      if (cached && !sellerAddress) {
+        setSellerAddress(cached);
       }
     }
   }, [authenticated, activeWalletAddress, user]);
@@ -58,19 +71,35 @@ export default function HomePage() {
 
   const handleCreateLink = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // If no seller address provided and user isn't logged in, prompt Privy login so seller gets paid!
+    if (!authenticated && !sellerAddress.trim()) {
+      login();
+      return;
+    }
+
     const newEscrowId = Math.floor(100 + Math.random() * 900).toString();
-    const finalSeller = sellerAddress.trim() || activeWalletAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+    const finalSeller =
+      sellerAddress.trim() ||
+      activeWalletAddress ||
+      '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+    const finalSellerName =
+      sellerName.trim() ||
+      (authenticated ? user?.google?.name || user?.email?.address || 'Vendedor' : 'Vendedor');
+
     const params = new URLSearchParams({
       description,
       amount: String(amount),
       seller: finalSeller,
-      sellerName: sellerName.trim(),
+      sellerName: finalSellerName,
     });
     const nextLink = `/pay/${newEscrowId}?${params.toString()}`;
 
     // Save to local storage for user's dashboard tracking
     try {
-      const existing = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+      const existing = JSON.parse(
+        localStorage.getItem('lexius_user_escrows') || '[]'
+      );
       const newEscrowRecord = {
         id: newEscrowId,
         description,
@@ -78,12 +107,19 @@ export default function HomePage() {
         status: 'Pending',
         role: 'Seller',
         seller: finalSeller,
-        sellerName: sellerName.trim(),
+        sellerName: finalSellerName,
         counterparty: 'En espera de comprador',
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        date: new Date().toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
         link: nextLink,
       };
-      localStorage.setItem('lexius_user_escrows', JSON.stringify([newEscrowRecord, ...existing]));
+      localStorage.setItem(
+        'lexius_user_escrows',
+        JSON.stringify([newEscrowRecord, ...existing])
+      );
     } catch (e) {}
 
     setGeneratedId(newEscrowId);
@@ -96,6 +132,57 @@ export default function HomePage() {
     navigator.clipboard.writeText(url);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const [tgShareError, setTgShareError] = useState<string | null>(null);
+
+  /** Share escrow card to a Telegram chat via the bot */
+  const shareToTelegram = async () => {
+    if (!generatedId || !telegramChatId.trim()) return;
+    setTgShareStatus('sending');
+    setTgShareError(null);
+
+    // Auto format username if missing leading @
+    let formattedChat = telegramChatId.trim();
+    if (!formattedChat.startsWith('@') && isNaN(Number(formattedChat))) {
+      formattedChat = `@${formattedChat}`;
+      setTelegramChatId(formattedChat);
+    }
+
+    try {
+      const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+      const finalSeller = sellerAddress.trim() || activeWalletAddress || '0x0000000000000000000000000000000000000000';
+      const res = await fetch(`${oracleUrl}/api/telegram/send-escrow-card`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: formattedChat,
+          escrowId: generatedId,
+          description,
+          amount: String(amount),
+          sellerName: sellerName.trim(),
+          seller: finalSeller,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Store the Telegram message context for future status updates
+        localStorage.setItem(`lexius_tg_msg_${generatedId}`, JSON.stringify({
+          chatId: formattedChat,
+          messageId: data.messageId,
+        }));
+        setTgShareStatus('sent');
+      } else {
+        setTgShareStatus('error');
+        setTgShareError(data.error || 'Failed to send card to Telegram');
+      }
+    } catch (err: any) {
+      setTgShareStatus('error');
+      setTgShareError(err?.message || 'Error connecting to Telegram Bot API');
+    }
+    setTimeout(() => {
+      setTgShareStatus('idle');
+    }, 5000);
   };
 
   const runAISimulator = () => {
@@ -205,8 +292,18 @@ export default function HomePage() {
                     required
                     min="1"
                     step="any"
-                    value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
+                    value={amount === 0 ? '' : amount}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setAmount(0);
+                      } else {
+                        const parsed = parseFloat(val);
+                        if (!isNaN(parsed) && parsed >= 0) {
+                          setAmount(parsed);
+                        }
+                      }
+                    }}
                     className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm font-mono"
                   />
                 </div>
@@ -288,6 +385,55 @@ export default function HomePage() {
                 </div>
               </div>
 
+              {/* Share via Telegram Bot */}
+              <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Send className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">
+                    {t('tgShareTitle')}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={t('tgPlaceholder')}
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    className="flex-1 px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs font-mono"
+                  />
+                  <button
+                    onClick={shareToTelegram}
+                    disabled={!telegramChatId.trim() || tgShareStatus === 'sending'}
+                    className="px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                  >
+                    {tgShareStatus === 'sending' ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : tgShareStatus === 'sent' ? (
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5" />
+                    )}
+                    <span>
+                      {tgShareStatus === 'sending'
+                        ? t('tgBtnSending')
+                        : tgShareStatus === 'sent'
+                        ? t('tgBtnSent')
+                        : tgShareStatus === 'error'
+                        ? t('tgBtnError')
+                        : t('tgBtnSend')}
+                    </span>
+                  </button>
+                </div>
+                {tgShareError && (
+                  <p className="text-[11px] font-semibold text-red-400 bg-red-950/40 p-2 rounded-lg border border-red-500/30">
+                    ⚠️ {tgShareError}
+                  </p>
+                )}
+                <p className="text-[10px] text-slate-400 leading-relaxed">
+                  {t('tgHelperText')}
+                </p>
+              </div>
+
               <div className="flex gap-3">
                 <Link
                   href={generatedLink ?? `/pay/${generatedId}`}
@@ -300,6 +446,8 @@ export default function HomePage() {
                   onClick={() => {
                     setGeneratedId(null);
                     setGeneratedLink(null);
+                    setTgShareStatus('idle');
+                    setTelegramChatId('');
                   }}
                   className="px-4 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-400 text-sm font-medium rounded-xl border border-slate-800"
                 >
@@ -311,90 +459,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI MEDIATOR SIMULATOR SECTION */}
-      <section id="ai-simulator" className="max-w-4xl mx-auto scroll-mt-24 space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('simBadge')}</span>
-          </div>
-          <h2 className="text-3xl font-extrabold text-white">{t('simTitle')}</h2>
-          <p className="text-xs text-slate-400">{t('simSub')}</p>
-        </div>
+      {/* SECTION 1: INTERACTIVE USE CASE SELECTOR */}
+      <section id="use-cases" className="scroll-mt-24">
+        <UseCaseSelector />
+      </section>
 
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-purple-500/30">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
-                <Scale className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white text-lg">{t('sampleClaimTitle')}</h3>
-                <p className="text-xs text-slate-400">{t('sampleClaimSub')}</p>
-              </div>
-            </div>
-            <button
-              onClick={runAISimulator}
-              disabled={simulatingAI}
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 disabled:opacity-50"
-            >
-              {simulatingAI ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>{t('simulatingAi')}</span>
-                </>
-              ) : (
-                <>
-                  <Cpu className="w-4 h-4" />
-                  <span>{t('btnRunAi')}</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* AI Verdict Output */}
-          {aiResult && (
-            <div className="bg-slate-950 p-6 rounded-xl border border-purple-500/40 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300 glow-purple">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  {t('verdictTitle')}
-                </span>
-                <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full">
-                  {t('confidenceLabel')} {Math.round(aiResult.confidenceScore * 100)}%
-                </span>
-              </div>
-
-              <p className="text-xs text-slate-200 leading-relaxed font-medium bg-slate-900 p-3 rounded-lg border border-slate-800">
-                {aiResult.reasoning}
-              </p>
-
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                  <span className="text-slate-500 block mb-1 text-[10px] uppercase font-semibold">
-                    {t('winnerLabel')}
-                  </span>
-                  <span className="font-mono text-emerald-400 font-bold truncate block">{aiResult.winner}</span>
-                </div>
-                <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
-                  <span className="text-slate-500 block mb-1 text-[10px] uppercase font-semibold">
-                    {t('hostLabel')}
-                  </span>
-                  <span className="font-mono text-blue-400 font-bold truncate block">{aiResult.oracleHost}</span>
-                </div>
-              </div>
-
-              <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800 font-mono text-[10px] space-y-1 text-slate-400">
-                <div className="truncate">{t('signatureLabel')} {aiResult.signature}</div>
-                <div className="flex gap-4 text-slate-500">
-                  <span>v: {aiResult.v}</span>
-                  <span className="truncate">r: {aiResult.r.slice(0, 16)}...</span>
-                  <span className="truncate">s: {aiResult.s.slice(0, 16)}...</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      {/* SECTION 2: INTERACTIVE ESCROW FLOW SIMULATOR */}
+      <section id="ai-simulator" className="scroll-mt-24">
+        <EscrowSimulator />
       </section>
 
       {/* FEATURE PILLARS */}

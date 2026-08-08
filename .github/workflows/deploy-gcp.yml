@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+  workflow_dispatch:
 
 env:
   PROJECT_ID: lexius-pay-2026
@@ -23,6 +24,8 @@ jobs:
       oracle_service:    ${{ steps.vars.outputs.oracle_service }}
       frontend_service:  ${{ steps.vars.outputs.frontend_service }}
       oracle_url:        ${{ steps.vars.outputs.oracle_url }}
+      frontend_url:      ${{ steps.vars.outputs.frontend_url }}
+      bot_username:      ${{ steps.vars.outputs.bot_username }}
     steps:
       - id: vars
         run: |
@@ -31,11 +34,15 @@ jobs:
             echo "oracle_service=lexius-ai-oracle"                                              >> $GITHUB_OUTPUT
             echo "frontend_service=lexius-frontend"                                             >> $GITHUB_OUTPUT
             echo "oracle_url=https://lexius-ai-oracle-265650435557.us-central1.run.app"        >> $GITHUB_OUTPUT
+            echo "frontend_url=https://lexius-frontend-265650435557.us-central1.run.app"       >> $GITHUB_OUTPUT
+            echo "bot_username=LexiusPayBot"                                                    >> $GITHUB_OUTPUT
           else
             echo "environment=staging"                                                          >> $GITHUB_OUTPUT
             echo "oracle_service=lexius-ai-oracle-staging"                                     >> $GITHUB_OUTPUT
             echo "frontend_service=lexius-frontend-staging"                                    >> $GITHUB_OUTPUT
             echo "oracle_url=https://lexius-ai-oracle-staging-265650435557.us-central1.run.app" >> $GITHUB_OUTPUT
+            echo "frontend_url=https://lexius-frontend-staging-265650435557.us-central1.run.app" >> $GITHUB_OUTPUT
+            echo "bot_username=LexiusPayTestBot"                                                >> $GITHUB_OUTPUT
           fi
 
   # ─────────────────────────────────────────────
@@ -92,8 +99,8 @@ jobs:
             --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.oracle_service }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-secrets="ORACLE_PRIVATE_KEY=ORACLE_PRIVATE_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,STYLUS_RPC_URL=STYLUS_RPC_URL:latest" \
-            --set-env-vars="STYLUS_CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }},NODE_ENV=${{ needs.setup.outputs.environment }}" \
+            --set-secrets="ORACLE_PRIVATE_KEY=ORACLE_PRIVATE_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,STYLUS_RPC_URL=STYLUS_RPC_URL:latest,TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest" \
+            --set-env-vars="STYLUS_CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }},NODE_ENV=${{ needs.setup.outputs.environment }},TELEGRAM_BOT_USERNAME=${{ needs.setup.outputs.bot_username }},TELEGRAM_WEBHOOK_URL=${{ needs.setup.outputs.oracle_url }},FRONTEND_URL=${{ needs.setup.outputs.frontend_url }}" \
             --min-instances=0 \
             --max-instances=10 \
             --memory=512Mi \
@@ -143,6 +150,11 @@ jobs:
         with:
           context: ./frontend
           push: true
+          build-args: |
+            NEXT_PUBLIC_PRIVY_APP_ID=${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID }}
+            NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS=${{ env.CONTRACT_ADDRESS }}
+            NEXT_PUBLIC_STYLUS_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
+            NEXT_PUBLIC_AI_ORACLE_URL=${{ needs.setup.outputs.oracle_url }}
           tags: |
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.frontend_service }}:latest
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ needs.setup.outputs.frontend_service }}:${{ github.sha }}

@@ -24,18 +24,25 @@ if (!OPENAI_API_KEY) {
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 // Se ha agregado la Regla 1 para manejar la falta de imágenes sin romper el formato JSON
-const SYSTEM_PROMPT = `You are an impartial judge for Web3 escrow disputes. Analyze the dispute description and evidence images objectively.
+const SYSTEM_PROMPT = `You are an expert impartial AI Judicial Arbitrator for Web3 P2P Escrow transactions.
+Your task is to analyze dispute claims, chat logs, OCR bank receipts, and event ticket images objectively.
 
-Rules:
-1. If no images are provided, base your decision solely on the text claims. Do not apologize or state that images are missing.
-2. Respond with valid JSON only.
-3. The response must be a single JSON object with exactly two fields: winner and reason.
-4. winner must be the wallet address of the winning party.
-5. reason must be a concise justification for the decision.
-6. Do not include any additional text, markdown, or explanation outside the JSON object.
+Global & Regional Bank Recognition Capabilities:
+1. You are trained to inspect financial receipts, bank vouchers, and mobile transfer screenshots from LatAm and Global providers:
+   - Peru: Yape, Plin, BCP (Banco de Crédito), Interbank, BBVA Perú, Scotiabank.
+   - Ecuador: Banco Pichincha (Deuna!), Banco Guayaquil, Produbanco, Banco del Pacífico.
+   - Colombia: Nequi, Daviplata, Bancolombia, Banco de Bogotá, Movii.
+   - USA & Global: Zelle, Venmo, Cash App, PayPal, Wise, Revolut, Stripe, Chase, Bank of America.
+2. Analyze image authenticity: check for forged text, font mismatches, edited amounts, fake operation numbers, or barcode serial discrepancies.
+3. If no images are provided, evaluate based on the textual claim facts provided.
+4. Output Language: Write the "reason" field in the SAME language (Spanish or English) as the user's dispute claim text.
+
+Output Rules:
+- Respond ONLY with a valid single JSON object.
+- The JSON object must contain exactly two fields: "winner" (string wallet address) and "reason" (string concise justification).
 
 Example output:
-{"winner":"0x1234...","reason":"Based on the claims..."}`;
+{"winner":"0x1234...","reason":"GPT-4o OCR verified Yape receipt operation #849201. Amount S/180.00 matches transaction terms. Refund authorized."}`;
 
 export async function evaluateDisputeWithAI(
   params: DisputeEvidenceInput
