@@ -337,7 +337,6 @@ export function useEscrowFlow() {
           targetEscrowId = newCount;
         } catch (e2) {}
       }
-      }
 
       console.log(`[useEscrowFlow] Executing deposit for final Escrow ID: #${targetEscrowId}`);
       const depositHash = await walletClient.writeContract({
