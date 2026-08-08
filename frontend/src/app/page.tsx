@@ -38,8 +38,10 @@ export default function HomePage() {
   const [generatedId, setGeneratedId] = useState<string | null>(null);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [isTgCopied, setIsTgCopied] = useState(false);
   const [telegramChatId, setTelegramChatId] = useState('');
   const [tgShareStatus, setTgShareStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [tgShareError, setTgShareError] = useState<string | null>(null);
 
   // Auto-fill seller address and name ONLY when the user is logged in
   React.useEffect(() => {
@@ -140,7 +142,14 @@ export default function HomePage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const [tgShareError, setTgShareError] = useState<string | null>(null);
+  const copyTgLinkToClipboard = () => {
+    if (!generatedId) return;
+    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'LexiusPayBot';
+    const url = `https://t.me/${botUsername}/app?startapp=deposit_${generatedId}`;
+    navigator.clipboard.writeText(url);
+    setIsTgCopied(true);
+    setTimeout(() => setIsTgCopied(false), 2000);
+  };
 
   /** Share escrow card to a Telegram chat via the bot */
   const shareToTelegram = async () => {
@@ -383,10 +392,23 @@ export default function HomePage() {
                   </span>
                   <button
                     onClick={copyToClipboard}
-                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>{isCopied ? t('copied') : t('btnCopy')}</span>
+                  </button>
+                </div>
+                <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-800">
+                  <span className="text-xs font-mono text-cyan-400 truncate flex items-center gap-2">
+                    <Send className="w-3 h-3" />
+                    {`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'LexiusPayBot'}/app?startapp=deposit_${generatedId}`}
+                  </span>
+                  <button
+                    onClick={copyTgLinkToClipboard}
+                    className="px-3.5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>{isTgCopied ? t('copied') : t('btnCopy')}</span>
                   </button>
                 </div>
               </div>
