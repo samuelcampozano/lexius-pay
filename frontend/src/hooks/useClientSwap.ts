@@ -44,7 +44,7 @@ export const ERC20_MINIMAL_ABI = [
  * 100% Client-Side Web3 Hook:
  * Swaps ETH -> USDC on Arbitrum Sepolia with 5% max slippage tolerance
  * using the user's Privy embedded wallet directly via Viem, and deposits into
- * the deployed Stylus Escrow contract (0x33f54de59419570a9442e788f5dd5cf635b3c7ac).
+ * the deployed Stylus Escrow contract (0x4135dcb89eeeba36eb8a6549747bd27f72000ad4).
  */
 export function useClientSwap() {
   const { wallets } = useWallets();
@@ -110,7 +110,7 @@ export function useClientSwap() {
       console.log(`[ClientSwap] Target USDC: ${usdcTargetAmount} (Units: ${requiredUsdcUnits})`);
       console.log(`[ClientSwap] Min USDC Guaranteed (5% Slippage): ${minUsdcGuaranteed}`);
 
-      // 4. Ensure USDC Allowance for Stylus Escrow Contract (0x33f54de59419570a9442e788f5dd5cf635b3c7ac)
+      // 4. Ensure USDC Allowance for Stylus Escrow Contract (0x4135dcb89eeeba36eb8a6549747bd27f72000ad4)
       const currentAllowance = (await publicClient.readContract({
         address: ARBITRUM_SEPOLIA_USDC,
         abi: ERC20_MINIMAL_ABI,
@@ -132,7 +132,7 @@ export function useClientSwap() {
       setSwapping(false);
       setDepositing(true);
 
-      // 5. Execute Stylus WASM deposit on-chain (0x33f54de59419570a9442e788f5dd5cf635b3c7ac)
+      // 5. Execute Stylus WASM deposit on-chain (0x4135dcb89eeeba36eb8a6549747bd27f72000ad4)
       console.log(`[ClientSwap] Calling Stylus Escrow deposit(${escrowId})...`);
       const depositTx = await walletClient.writeContract({
         address: STYLUS_ESCROW_ADDRESS,

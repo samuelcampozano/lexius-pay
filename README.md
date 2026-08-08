@@ -196,7 +196,7 @@ Crea tus archivos `.env.local` en los subdirectorios basados en los templates `.
 # /frontend/.env.local
 NEXT_PUBLIC_PRIVY_APP_ID="clxxxxxxx0000xxxxxxx"
 NEXT_PUBLIC_AI_ORACLE_URL="http://localhost:8080"
-NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS="0x33f54de59419570a9442e788f5dd5cf635b3c7ac"
+NEXT_PUBLIC_STYLUS_CONTRACT_ADDRESS="0x4135dcb89eeeba36eb8a6549747bd27f72000ad4"
 NEXT_PUBLIC_STYLUS_RPC_URL="https://sepolia-rollup.arbitrum.io/rpc"
 
 # /ai-oracle/.env.local (Para pruebas locales antes de GCP Secret Manager)
@@ -231,7 +231,7 @@ docker compose up --build
 
 * **Aplicación Web (Staging):** [https://lexiuspay.app](https://lexiuspay.app)
 * **Bot de Telegram:** [@LexiusPayBot](https://t.me/LexiusPayBot)
-* **Arbitrum Sepolia Contract Address:** [`0x33f54de59419570a9442e788f5dd5cf635b3c7ac`](https://sepolia.arbiscan.io/address/0x33f54de59419570a9442e788f5dd5cf635b3c7ac)
+* **Arbitrum Sepolia Contract Address:** [`0x4135dcb89eeeba36eb8a6549747bd27f72000ad4`](https://sepolia.arbiscan.io/address/0x4135dcb89eeeba36eb8a6549747bd27f72000ad4)
 * **Guía Completa de GCP:** [GCP_INTEGRATION_GUIDE.md](file:///d:/Personal%20Portfolio/Hacthon%202026%20%20Arbitrum%20Stylus/Lexius/GCP_INTEGRATION_GUIDE.md)
 
 ---
