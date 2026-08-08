@@ -390,13 +390,13 @@ export default function HomePage() {
                 <div className="flex items-center gap-2">
                   <Send className="w-4 h-4 text-cyan-400" />
                   <span className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">
-                    Share via Telegram Bot
+                    {t('tgShareTitle')}
                   </span>
                 </div>
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Telegram Chat ID or @username"
+                    placeholder={t('tgPlaceholder')}
                     value={telegramChatId}
                     onChange={(e) => setTelegramChatId(e.target.value)}
                     className="flex-1 px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs font-mono"
@@ -415,12 +415,12 @@ export default function HomePage() {
                     )}
                     <span>
                       {tgShareStatus === 'sending'
-                        ? 'Sending...'
+                        ? t('tgBtnSending')
                         : tgShareStatus === 'sent'
-                        ? 'Sent!'
+                        ? t('tgBtnSent')
                         : tgShareStatus === 'error'
-                        ? 'Error'
-                        : 'Send'}
+                        ? t('tgBtnError')
+                        : t('tgBtnSend')}
                     </span>
                   </button>
                 </div>
@@ -429,8 +429,8 @@ export default function HomePage() {
                     ⚠️ {tgShareError}
                   </p>
                 )}
-                <p className="text-[10px] text-slate-500">
-                  The bot will send an interactive payment card to the specified Telegram chat (@username or Chat ID). Target user must have started @LexiusPayTestBot.
+                <p className="text-[10px] text-slate-400 leading-relaxed">
+                  {t('tgHelperText')}
                 </p>
               </div>
 

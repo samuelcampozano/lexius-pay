@@ -32,6 +32,13 @@ export const dictionary = {
     btnCopy: 'Copiar Enlace de Pago',
     copied: '¡Copiado al Portapapeles!',
     btnPayPage: 'Abrir Enlace de Pago',
+    tgShareTitle: 'Compartir vía Bot de Telegram',
+    tgPlaceholder: 'Chat ID o @usuario (ej. @usuario)',
+    tgBtnSend: 'Enviar',
+    tgBtnSending: 'Enviando...',
+    tgBtnSent: '¡Enviado!',
+    tgBtnError: 'Error',
+    tgHelperText: 'El bot enviará una tarjeta de pago interactiva al chat. Nota: Para chats privados, el receptor debe haber iniciado una conversación previamente con el bot (@LexiusPayTestBot). Para grupos, el bot debe estar agregado como miembro.',
 
     // AI Simulator
     simBadge: 'Demo Interactivo',
@@ -162,6 +169,13 @@ export const dictionary = {
     btnCopy: 'Copy Payment Link',
     copied: 'Copied to Clipboard!',
     btnPayPage: 'Open Payment Page',
+    tgShareTitle: 'Share via Telegram Bot',
+    tgPlaceholder: 'Chat ID or @username (e.g. @username)',
+    tgBtnSend: 'Send',
+    tgBtnSending: 'Sending...',
+    tgBtnSent: 'Sent!',
+    tgBtnError: 'Error',
+    tgHelperText: 'The bot will send an interactive payment card to the specified chat. Note: For private 1-on-1 chats, the recipient must have previously started a conversation with the bot (@LexiusPayTestBot). For groups, the bot must be a member.',
 
     // AI Simulator
     simBadge: 'Interactive Demo',
