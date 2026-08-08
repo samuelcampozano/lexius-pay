@@ -357,38 +357,17 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 pt-2 border-t border-slate-800 text-xs font-mono">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400 font-medium">{t('faucetLabel')}</span>
-              <button
-                onClick={async () => {
-                  await checkAndFundWallet();
-                  await fetchBalances();
-                }}
-                disabled={isFunding}
-                className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1.5 hover:underline disabled:opacity-50 transition-colors"
-              >
-                {isFunding ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Coins className="w-3.5 h-3.5" />
-                )}
-                <span>{isFunding ? t('faucetRefunding') : t('faucetBtnRefund')}</span>
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between text-[11px] pt-1">
-              <span className="text-slate-500">Circle Testnet Faucet:</span>
-              <a
-                href="https://faucet.circle.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 hover:underline"
-              >
-                <span>{t('circleFaucetLink')}</span>
-                <ArrowUpRight className="w-3 h-3" />
-              </a>
-            </div>
+          <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-800 font-mono">
+            <span className="text-slate-500">Circle Testnet Faucet:</span>
+            <a
+              href="https://faucet.circle.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 hover:underline"
+            >
+              <span>{t('circleFaucetLink')}</span>
+              <ArrowUpRight className="w-3 h-3" />
+            </a>
           </div>
         </div>
       )}
