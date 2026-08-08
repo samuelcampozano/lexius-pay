@@ -50,7 +50,7 @@ export function useStylusContract() {
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
-      functionName: 'create_escrow',
+      functionName: 'createEscrow',
       args: [buyer, seller, amount, detailsHash],
       gas: BigInt(350000),
     });
@@ -102,7 +102,7 @@ export function useStylusContract() {
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
-      functionName: 'raise_dispute',
+      functionName: 'raiseDispute',
       args: [escrowId],
       gas: BigInt(350000),
     });
@@ -115,7 +115,7 @@ export function useStylusContract() {
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
-      functionName: 'cancel_escrow',
+      functionName: 'cancelEscrow',
       args: [escrowId],
       gas: BigInt(350000),
     });
@@ -138,7 +138,7 @@ export function useStylusContract() {
     const hash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
-      functionName: 'resolve_dispute_with_signature',
+      functionName: 'resolveDisputeWithSignature',
       args: [escrowId, winner, v, r, s],
       gas: BigInt(450000),
     });
@@ -155,7 +155,7 @@ export function useStylusContract() {
     const result = await publicClient.readContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
-      functionName: 'get_escrow',
+      functionName: 'getEscrow',
       args: [escrowId],
     });
     return result;
@@ -167,7 +167,7 @@ export function useStylusContract() {
     const result = await publicClient.readContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
-      functionName: 'get_escrow_count',
+      functionName: 'getEscrowCount',
     });
     return result;
   };

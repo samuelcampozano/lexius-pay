@@ -46,14 +46,14 @@
   },
   {
     "type": "function",
-    "name": "get_escrow_count",
+    "name": "getEscrowCount",
     "inputs": [],
     "outputs": [{ "name": "", "type": "uint256" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "get_escrow",
+    "name": "getEscrow",
     "inputs": [{ "name": "escrow_id", "type": "uint256" }],
     "outputs": [
       { "name": "buyer", "type": "address" },
@@ -66,7 +66,7 @@
   },
   {
     "type": "function",
-    "name": "create_escrow",
+    "name": "createEscrow",
     "inputs": [
       { "name": "buyer", "type": "address" },
       { "name": "seller", "type": "address" },
@@ -78,7 +78,7 @@
   },
   {
     "type": "function",
-    "name": "cancel_escrow",
+    "name": "cancelEscrow",
     "inputs": [{ "name": "escrow_id", "type": "uint256" }],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -106,14 +106,14 @@
   },
   {
     "type": "function",
-    "name": "raise_dispute",
+    "name": "raiseDispute",
     "inputs": [{ "name": "escrow_id", "type": "uint256" }],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
   {
     "type": "function",
-    "name": "resolve_dispute_with_signature",
+    "name": "resolveDisputeWithSignature",
     "inputs": [
       { "name": "escrow_id", "type": "uint256" },
       { "name": "winner", "type": "address" },

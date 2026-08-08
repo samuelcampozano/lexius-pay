@@ -246,7 +246,7 @@ export function useEscrowFlow() {
         const escrowInfo = (await publicClient.readContract({
           address: STYLUS_ESCROW_ADDRESS,
           abi: STYLUS_ESCROW_ABI,
-          functionName: 'get_escrow',
+          functionName: 'getEscrow',
           args: [targetEscrowId],
         })) as [string, string, bigint, number, string];
 
@@ -265,7 +265,7 @@ export function useEscrowFlow() {
         const createTxHash = await walletClient.writeContract({
           address: STYLUS_ESCROW_ADDRESS,
           abi: STYLUS_ESCROW_ABI,
-          functionName: 'create_escrow',
+          functionName: 'createEscrow',
           args: [
             activeWalletAddress as `0x${string}`,
             '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' as `0x${string}`, // Default seller for now
@@ -283,7 +283,7 @@ export function useEscrowFlow() {
         const count = (await publicClient.readContract({
           address: STYLUS_ESCROW_ADDRESS,
           abi: STYLUS_ESCROW_ABI,
-          functionName: 'get_escrow_count',
+          functionName: 'getEscrowCount',
         })) as bigint;
         
         // Stylus counter is the next ID, so the created one is count - 1 (or count if 1-indexed)
