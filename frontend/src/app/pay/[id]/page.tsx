@@ -332,22 +332,6 @@ export default function PaymentPage() {
               <span className="text-blue-400 font-bold">{usdcBalance} USDC</span>
             </div>
           </div>
-
-          <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-            <span>{lang === 'es' ? 'Auto-Fondeo Faucet Admin:' : 'Auto-Funding Admin Faucet:'}</span>
-            <button
-              onClick={checkAndFundWallet}
-              disabled={isFunding}
-              className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:underline disabled:opacity-50"
-            >
-              {isFunding ? (
-                <RefreshCw className="w-3 h-3 animate-spin" />
-              ) : (
-                <Coins className="w-3 h-3" />
-              )}
-              <span>{lang === 'es' ? 'Re-Fondear (0.005 ETH + 10 USDC)' : 'Refund (0.005 ETH + 10 USDC)'}</span>
-            </button>
-          </div>
         </div>
       )}
 
