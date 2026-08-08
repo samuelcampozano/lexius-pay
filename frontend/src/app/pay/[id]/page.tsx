@@ -576,11 +576,31 @@ export default function PaymentPage() {
         {status === 'Pending' && (
           <>
             {isSeller ? (
-              <div className="p-4 bg-amber-950/30 border border-amber-500/20 rounded-xl text-center space-y-2">
-                <RefreshCw className="w-6 h-6 text-amber-400 mx-auto animate-spin-slow" />
-                <p className="text-xs font-semibold text-amber-300">
+              <div className="p-5 bg-amber-950/30 border border-amber-500/30 rounded-2xl text-center space-y-4 shadow-lg">
+                <div className="flex items-center justify-center gap-2 text-amber-400">
+                  <RefreshCw className="w-5 h-5 animate-spin-slow" />
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    {lang === 'es' ? 'Esperando Depósito del Comprador' : 'Waiting for Buyer Deposit'}
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-amber-200 leading-relaxed">
                   {t('paySellerSelfWarning').replace('{amount}', amount)}
                 </p>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-amber-500/20">
+                  <button
+                    onClick={() => {
+                      const linkUrl = window.location.href;
+                      navigator.clipboard.writeText(linkUrl);
+                      setCopiedField('payLink');
+                      setTimeout(() => setCopiedField(null), 2000);
+                    }}
+                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
+                  >
+                    <Copy className="w-4 h-4" />
+                    <span>{copiedField === 'payLink' ? t('copied') : t('btnCopy')}</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">

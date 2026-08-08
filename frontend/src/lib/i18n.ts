@@ -117,6 +117,12 @@ export const dictionary = {
     aiStatusCompletedDesc: '{amount} USDC transferidos exitosamente a la billetera del vendedor. ¡Acuerdo completado en Arbitrum Sepolia!',
 
     // Status & Badges
+    roleSeller: 'Vendedor',
+    roleBuyer: 'Comprador',
+    counterpartyLabel: 'Contraparte:',
+    waitingBuyer: 'En espera de comprador',
+    btnCopyLink: 'Copiar Enlace',
+    btnShareTg: 'Re-enviar por Telegram',
     statusPending: 'En Espera',
     statusDeposited: 'Depositado',
     statusCompleted: 'Completado',
@@ -259,6 +265,12 @@ export const dictionary = {
     aiStatusCompletedDesc: '{amount} USDC successfully transferred to seller wallet. Agreement completed on Arbitrum Sepolia!',
 
     // Status & Badges
+    roleSeller: 'Seller',
+    roleBuyer: 'Buyer',
+    counterpartyLabel: 'Counterparty:',
+    waitingBuyer: 'Waiting for buyer',
+    btnCopyLink: 'Copy Link',
+    btnShareTg: 'Resend via Telegram',
     statusPending: 'Pending',
     statusDeposited: 'Deposited',
     statusCompleted: 'Completed',
