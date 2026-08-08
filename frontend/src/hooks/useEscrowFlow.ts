@@ -246,7 +246,7 @@ export function useEscrowFlow() {
         const count = (await publicClient.readContract({
           address: STYLUS_ESCROW_ADDRESS,
           abi: STYLUS_ESCROW_ABI,
-          functionName: 'get_escrow_count',
+          functionName: 'getEscrowCount',
         })) as bigint;
 
         // If targetEscrowId exceeds on-chain count, initialize new slot on-chain
@@ -256,7 +256,7 @@ export function useEscrowFlow() {
           const createTxHash = await walletClient.writeContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
-            functionName: 'create_escrow',
+            functionName: 'createEscrow',
             args: [
               activeWalletAddress as `0x${string}`,
               '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' as `0x${string}`,
@@ -271,7 +271,7 @@ export function useEscrowFlow() {
           const newCount = (await publicClient.readContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
-            functionName: 'get_escrow_count',
+            functionName: 'getEscrowCount',
           })) as bigint;
           targetEscrowId = newCount;
         } else {
@@ -279,7 +279,7 @@ export function useEscrowFlow() {
           const escrowInfo = (await publicClient.readContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
-            functionName: 'get_escrow',
+            functionName: 'getEscrow',
             args: [targetEscrowId],
           })) as [string, string, bigint, number, string];
 
@@ -290,7 +290,7 @@ export function useEscrowFlow() {
             const createTxHash = await walletClient.writeContract({
               address: STYLUS_ESCROW_ADDRESS,
               abi: STYLUS_ESCROW_ABI,
-              functionName: 'create_escrow',
+              functionName: 'createEscrow',
               args: [
                 activeWalletAddress as `0x${string}`,
                 '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' as `0x${string}`,
@@ -305,7 +305,7 @@ export function useEscrowFlow() {
             const newCount = (await publicClient.readContract({
               address: STYLUS_ESCROW_ADDRESS,
               abi: STYLUS_ESCROW_ABI,
-              functionName: 'get_escrow_count',
+              functionName: 'getEscrowCount',
             })) as bigint;
             targetEscrowId = newCount;
           }
@@ -317,7 +317,7 @@ export function useEscrowFlow() {
           const createTxHash = await walletClient.writeContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
-            functionName: 'create_escrow',
+            functionName: 'createEscrow',
             args: [
               activeWalletAddress as `0x${string}`,
               '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' as `0x${string}`,
@@ -332,7 +332,7 @@ export function useEscrowFlow() {
           const newCount = (await publicClient.readContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
-            functionName: 'get_escrow_count',
+            functionName: 'getEscrowCount',
           })) as bigint;
           targetEscrowId = newCount;
         } catch (e2) {}
