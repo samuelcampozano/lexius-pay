@@ -239,6 +239,8 @@ export function useEscrowFlow() {
         escrowId === 'demo' ? '101' : escrowId.replace('#', '')
       );
 
+      let needsCreation = false;
+
       // Check on-chain escrow state to ensure escrow exists before deposit
       try {
         const count = (await publicClient.readContract({
@@ -248,7 +250,7 @@ export function useEscrowFlow() {
         })) as bigint;
 
         // If targetEscrowId exceeds on-chain count, initialize new slot on-chain
-        if (targetEscrowId > count || count === 0n) {
+        if (targetEscrowId > count || count === BigInt(0)) {
           console.log(`[useEscrowFlow] Escrow #${targetEscrowId} exceeds on-chain count (${count}). Creating new escrow slot on-chain...`);
           const dummyDetails = '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`;
           const createTxHash = await walletClient.writeContract({
@@ -334,6 +336,7 @@ export function useEscrowFlow() {
           })) as bigint;
           targetEscrowId = newCount;
         } catch (e2) {}
+      }
       }
 
       console.log(`[useEscrowFlow] Executing deposit for final Escrow ID: #${targetEscrowId}`);

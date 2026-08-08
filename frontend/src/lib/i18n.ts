@@ -38,7 +38,7 @@ export const dictionary = {
     tgBtnSending: 'Enviando...',
     tgBtnSent: '¡Enviado!',
     tgBtnError: 'Error',
-    tgHelperText: 'El bot enviará una tarjeta de pago interactiva al chat. Nota: Para chats privados, el receptor debe haber iniciado una conversación previamente con el bot (@LexiusPayTestBot). Para grupos, el bot debe estar agregado como miembro.',
+    tgHelperText: `El bot enviará una tarjeta de pago interactiva al chat. Nota: Para chats privados, el receptor debe haber iniciado una conversación previamente con el bot (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'LexiusPayBot'}). Para grupos, el bot debe estar agregado como miembro.`,
 
     // AI Simulator
     simBadge: 'Demo Interactivo',
@@ -187,7 +187,7 @@ export const dictionary = {
     tgBtnSending: 'Sending...',
     tgBtnSent: 'Sent!',
     tgBtnError: 'Error',
-    tgHelperText: 'The bot will send an interactive payment card to the specified chat. Note: For private 1-on-1 chats, the recipient must have previously started a conversation with the bot (@LexiusPayTestBot). For groups, the bot must be a member.',
+    tgHelperText: `The bot will send an interactive payment card to the specified chat. Note: For private 1-on-1 chats, the recipient must have previously started a conversation with the bot (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'LexiusPayBot'}). For groups, the bot must be a member.`,
 
     // AI Simulator
     simBadge: 'Interactive Demo',
