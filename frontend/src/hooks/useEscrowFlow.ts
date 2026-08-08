@@ -175,7 +175,8 @@ export function useEscrowFlow() {
    */
   const executeUSCDeposit = async (
     escrowId: string,
-    amountUsdc: number
+    amountUsdc: number,
+    sellerAddress: string
   ): Promise<`0x${string}`> => {
     if (!activeWalletAddress) {
       throw new Error('Please connect your wallet first.');
@@ -280,7 +281,7 @@ export function useEscrowFlow() {
             functionName: 'createEscrow',
             args: [
               activeWalletAddress as `0x${string}`, 
-              '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' as `0x${string}`, 
+              sellerAddress as `0x${string}`, 
               usdcUnits, 
               dummyDetails
             ],
