@@ -208,10 +208,8 @@ export function useEscrowFlow() {
       if (true || currentAllowance < usdcUnits) {
         setIsApproving(true);
         setFlowStep('approving');
-        console.log(
-          `[useEscrowFlow] Approving ${amountUsdc} USDC to Stylus Contract ${STYLUS_ESCROW_ADDRESS}...`
-        );
-
+        
+        console.log(`[useEscrowFlow] Enviando aprobación de USDC para el contrato...`);
         const approveHash = await walletClient.writeContract({
           address: USDC_TOKEN_ADDRESS,
           abi: USDC_MINIMAL_ABI,
@@ -220,12 +218,13 @@ export function useEscrowFlow() {
           gas: BigInt(120000),
         });
 
-        console.log(`[useEscrowFlow] USDC Approve Tx sent: ${approveHash}`);
+        console.log(`[useEscrowFlow] Aprobación enviada: ${approveHash}. Esperando confirmación del bloque...`);
+        
+        // 👑 ESPERA OBLIGATORIA DEL BLOQUE DE APROBACIÓN
         await publicClient.waitForTransactionReceipt({ hash: approveHash });
+        console.log("[useEscrowFlow] USDC aprobado con éxito on-chain. Procediendo con el acuerdo...");
+        
         setIsApproving(false);
-
-        // Small 1s buffer to ensure RPC node updates allowance state trie before deposit call
-        await new Promise((resolve) => setTimeout(resolve, 1200));
       }
 
       // 4. Execute Stylus WASM Escrow Creation / Deposit
