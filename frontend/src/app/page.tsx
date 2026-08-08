@@ -78,7 +78,13 @@ export default function HomePage() {
       return;
     }
 
-    const newEscrowId = Math.floor(100 + Math.random() * 900).toString();
+    let storedEscrows: any[] = [];
+    try {
+      storedEscrows = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+    } catch (e) {}
+
+    const nextIdNum = storedEscrows.length + 1;
+    const newEscrowId = String(nextIdNum);
     const finalSeller =
       sellerAddress.trim() ||
       activeWalletAddress ||
