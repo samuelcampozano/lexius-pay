@@ -52,7 +52,7 @@ export async function sendEscrowCard(params: {
   const msg = await b.telegram.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
-      [Markup.button.webApp(`💳 Pay ${amount} USDC`, payUrl)],
+      [Markup.button.url(`💳 Pay ${amount} USDC`, payUrl)],
     ]),
   });
 
@@ -89,7 +89,7 @@ export async function updateEscrowCard(params: {
         `_Click below to release funds after confirming receipt._`,
       ].join('\n');
       keyboard = Markup.inlineKeyboard([
-        [Markup.button.webApp('🔓 Release Funds', releaseUrl)],
+        [Markup.button.url('🔓 Release Funds', releaseUrl)],
       ]);
       break;
     }
@@ -153,7 +153,7 @@ export async function sendWelcomeMessage(chatId: number | string): Promise<void>
   await b.telegram.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
-      [Markup.button.webApp('🚀 Open Lexius Pay', appUrl)],
+      [Markup.button.url('🚀 Open Lexius Pay', appUrl)],
     ]),
   });
 }
