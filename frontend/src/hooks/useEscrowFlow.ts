@@ -217,11 +217,15 @@ export function useEscrowFlow() {
           abi: USDC_MINIMAL_ABI,
           functionName: 'approve',
           args: [STYLUS_ESCROW_ADDRESS, usdcUnits],
+          gas: BigInt(120000),
         });
 
         console.log(`[useEscrowFlow] USDC Approve Tx sent: ${approveHash}`);
         await publicClient.waitForTransactionReceipt({ hash: approveHash });
         setIsApproving(false);
+
+        // Small 1s buffer to ensure RPC node updates allowance state trie before deposit call
+        await new Promise((resolve) => setTimeout(resolve, 1200));
       }
 
       // 4. Execute Stylus WASM Escrow Deposit
@@ -240,6 +244,7 @@ export function useEscrowFlow() {
         abi: STYLUS_ESCROW_ABI,
         functionName: 'deposit',
         args: [numericEscrowId],
+        gas: BigInt(350000),
       });
 
       console.log(`[useEscrowFlow] Stylus Deposit Tx sent: ${depositHash}`);

@@ -52,6 +52,7 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'create_escrow',
       args: [buyer, seller, amount, detailsHash],
+      gas: BigInt(350000),
     });
     return txHash;
   };
@@ -64,6 +65,7 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'deposit',
       args: [escrowId],
+      gas: BigInt(350000),
     });
     return txHash;
   };
@@ -76,6 +78,7 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'release',
       args: [escrowId],
+      gas: BigInt(350000),
     });
     return txHash;
   };
@@ -88,6 +91,7 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'refund',
       args: [escrowId],
+      gas: BigInt(350000),
     });
     return txHash;
   };
@@ -100,6 +104,7 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'raise_dispute',
       args: [escrowId],
+      gas: BigInt(350000),
     });
     return txHash;
   };
@@ -112,6 +117,7 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'cancel_escrow',
       args: [escrowId],
+      gas: BigInt(350000),
     });
     return txHash;
   };
@@ -134,6 +140,7 @@ export function useStylusContract() {
       abi: STYLUS_ESCROW_ABI,
       functionName: 'resolve_dispute_with_signature',
       args: [escrowId, winner, v, r, s],
+      gas: BigInt(450000),
     });
     return hash;
   };
