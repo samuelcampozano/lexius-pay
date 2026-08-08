@@ -204,8 +204,8 @@ export function useEscrowFlow() {
         ],
       })) as bigint;
 
-      // 3. Approve USDC spend if allowance is insufficient
-      if (currentAllowance < usdcUnits) {
+      // 3. Approve USDC spend if allowance is insufficient (FORCED TO TRUE TEMPORARILY)
+      if (true || currentAllowance < usdcUnits) {
         setIsApproving(true);
         setFlowStep('approving');
         console.log(
