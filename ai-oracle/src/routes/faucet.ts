@@ -18,7 +18,7 @@ const walletDripCounts = new Map<string, number>();
  */
 async function processDrip(
   walletAddress: string,
-  targetEth: string = '0.005',
+  targetEth: string = '0.04',
   targetUsdc: string = '10.00'
 ) {
   const normalizedAddress = walletAddress.toLowerCase();
@@ -119,7 +119,7 @@ router.post('/drip', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const result = await processDrip(walletAddress, '0.005', '10.00');
+    const result = await processDrip(walletAddress, '0.04', '10.00');
     res.status(200).json(result);
   } catch (error: any) {
     console.error('[Faucet] Error in /drip endpoint:', error);
@@ -143,7 +143,7 @@ router.post('/claim', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const result = await processDrip(walletAddress, '0.005', '10.00');
+    const result = await processDrip(walletAddress, '0.04', '10.00');
     res.status(200).json(result);
   } catch (error: any) {
     console.error('[Faucet] Error in /claim endpoint:', error);

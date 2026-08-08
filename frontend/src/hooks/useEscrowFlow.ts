@@ -135,8 +135,8 @@ export function useEscrowFlow() {
     try {
       const balances = await fetchBalances();
 
-      // If user has low ETH (< 0.001 ETH) or low USDC (< 1.00 USDC), drip testnet funds
-      if (balances.eth < 0.001 || balances.usdc < 1.00) {
+      // If user has low ETH (< 0.01 ETH) or low USDC (< 1.00 USDC), drip testnet funds (0.04 ETH + 10 USDC)
+      if (balances.eth < 0.01 || balances.usdc < 1.00) {
         console.log(
           `[useEscrowFlow] Low balance detected (ETH: ${balances.eth}, USDC: ${balances.usdc}). Triggering /api/faucet/drip...`
         );
