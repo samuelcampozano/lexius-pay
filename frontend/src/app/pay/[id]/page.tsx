@@ -182,7 +182,7 @@ export default function PaymentPage() {
 
     try {
       const targetAmount = parseFloat(amount) || 5;
-      const hash = await executeUSCDeposit(escrowId, targetAmount);
+      const hash = await executeUSCDeposit(escrowId, targetAmount, seller);
 
       setTxHash(hash);
       setStatus('Deposited');
