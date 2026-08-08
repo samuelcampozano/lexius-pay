@@ -14,6 +14,11 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// 1. Registramos las rutas normales
+app.use('/api/dispute', disputeRouter);
+app.use('/api/faucet', faucetRouter);
+app.use('/api/telegram', telegramRouter);
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -23,15 +28,19 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api/dispute', disputeRouter);
-app.use('/api/faucet', faucetRouter);
-app.use('/api/telegram', telegramRouter);
-
-app.listen(PORT, () => {
-  console.log(`🚀 Lexius Pay AI Oracle service listening on port ${PORT}`);
-
-  // Initialize Telegram bot (webhook in production, long-polling in development)
-  initBot(app).catch((err) => {
+// 2. Inicializamos el Bot de Telegram (Webhook/Polling) ANTES de levantar el puerto 🚀
+console.log('🤖 Inicializando Telegram Bot...');
+initBot(app)
+  .then(() => {
+    // 3. Solo cuando el bot y sus rutas estén 100% listos, abrimos el puerto al tráfico
+    app.listen(PORT, () => {
+      console.log(`🚀 Lexius Pay AI Oracle service listening on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
     console.error('[Telegram Bot] Failed to initialize:', err.message);
+    // Levantamos el puerto como plan de respaldo aunque el bot falle
+    app.listen(PORT, () => {
+      console.log(`🚀 Lexius Pay AI Oracle listening (Bot initialization failed) on port ${PORT}`);
+    });
   });
-});
