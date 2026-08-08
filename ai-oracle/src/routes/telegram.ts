@@ -18,8 +18,14 @@ router.post('/send-escrow-card', async (req: Request, res: Response) => {
       });
     }
 
+    // Auto-format username string if leading @ is missing
+    const formattedChatId =
+      typeof chatId === 'string' && !chatId.startsWith('@') && isNaN(Number(chatId))
+        ? `@${chatId}`
+        : chatId;
+
     const result = await sendEscrowCard({
-      chatId,
+      chatId: formattedChatId,
       escrowId,
       description: description || 'Escrow Agreement',
       amount: amount || '0',
@@ -34,9 +40,12 @@ router.post('/send-escrow-card', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('[Telegram Route] Error sending escrow card:', error);
-    return res.status(500).json({
+    const isChatNotFound = error?.message?.includes('chat not found') || error?.description?.includes('chat not found');
+    return res.status(400).json({
       success: false,
-      error: 'Failed to send escrow card',
+      error: isChatNotFound
+        ? 'Telegram user or chat not found. Make sure the user has started a conversation with the bot first.'
+        : 'Failed to send escrow card',
       details: error.message || String(error),
     });
   }

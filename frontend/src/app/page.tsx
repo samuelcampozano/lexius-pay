@@ -134,10 +134,21 @@ export default function HomePage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  const [tgShareError, setTgShareError] = useState<string | null>(null);
+
   /** Share escrow card to a Telegram chat via the bot */
   const shareToTelegram = async () => {
     if (!generatedId || !telegramChatId.trim()) return;
     setTgShareStatus('sending');
+    setTgShareError(null);
+
+    // Auto format username if missing leading @
+    let formattedChat = telegramChatId.trim();
+    if (!formattedChat.startsWith('@') && isNaN(Number(formattedChat))) {
+      formattedChat = `@${formattedChat}`;
+      setTelegramChatId(formattedChat);
+    }
+
     try {
       const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
       const finalSeller = sellerAddress.trim() || activeWalletAddress || '0x0000000000000000000000000000000000000000';
@@ -145,7 +156,7 @@ export default function HomePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chatId: telegramChatId.trim(),
+          chatId: formattedChat,
           escrowId: generatedId,
           description,
           amount: String(amount),
@@ -157,17 +168,21 @@ export default function HomePage() {
       if (data.success) {
         // Store the Telegram message context for future status updates
         localStorage.setItem(`lexius_tg_msg_${generatedId}`, JSON.stringify({
-          chatId: telegramChatId.trim(),
+          chatId: formattedChat,
           messageId: data.messageId,
         }));
         setTgShareStatus('sent');
       } else {
         setTgShareStatus('error');
+        setTgShareError(data.error || 'Failed to send card to Telegram');
       }
-    } catch {
+    } catch (err: any) {
       setTgShareStatus('error');
+      setTgShareError(err?.message || 'Error connecting to Telegram Bot API');
     }
-    setTimeout(() => setTgShareStatus('idle'), 3000);
+    setTimeout(() => {
+      setTgShareStatus('idle');
+    }, 5000);
   };
 
   const runAISimulator = () => {
@@ -409,8 +424,13 @@ export default function HomePage() {
                     </span>
                   </button>
                 </div>
+                {tgShareError && (
+                  <p className="text-[11px] font-semibold text-red-400 bg-red-950/40 p-2 rounded-lg border border-red-500/30">
+                    ⚠️ {tgShareError}
+                  </p>
+                )}
                 <p className="text-[10px] text-slate-500">
-                  The bot will send an interactive payment card to the specified Telegram chat.
+                  The bot will send an interactive payment card to the specified Telegram chat (@username or Chat ID). Target user must have started @LexiusPayTestBot.
                 </p>
               </div>
 
