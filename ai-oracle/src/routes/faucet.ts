@@ -102,7 +102,7 @@ async function processDrip(
     ethTxHash,
     usdcTxHash,
     dripCount: currentCount + 1,
-    message: `🎁 Successfully dripped ${targetUsdc} USDC and ${targetEth} ETH for gas on Arbitrum Sepolia!`,
+    message: `🎁 ¡Billetera de prueba fondeada con éxito con ${targetUsdc} USDC y ${targetEth} ETH para gas en Arbitrum Sepolia!`,
   };
 }
 

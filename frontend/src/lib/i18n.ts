@@ -129,6 +129,11 @@ export const dictionary = {
     swapBtn: '⚡ Intercambiar ETH → USDC (Slippage 5%)',
     swapping: 'Intercambiando ETH en Arbitrum Sepolia...',
     swapSuccess: '⚡ Intercambio ejecutado: ~0.0015 ETH → {amount} USDC (Slippage: 5%). ¡Saldo listo para depositar!',
+    faucetLabel: 'Fondeo de Prueba Lexius:',
+    faucetBtnRefund: 'Re-Fondear (0.005 ETH + 10 USDC)',
+    faucetRefunding: 'Fondeando 10 USDC...',
+    faucetSuccessMsg: '¡Billetera de prueba fondeada con éxito! +10 USDC y 0.005 ETH de gas agregados.',
+    circleFaucetLink: 'Obtener USDC en Faucet Oficial de Circle ↗',
 
     // Welcome Gift Modal
     giftTitle: '¡Regalo de Bienvenida Reclamado!',
@@ -266,6 +271,11 @@ export const dictionary = {
     swapBtn: '⚡ Swap ETH → USDC (5% Slippage)',
     swapping: 'Swapping ETH on Arbitrum Sepolia...',
     swapSuccess: '⚡ Swap executed: ~0.0015 ETH → {amount} USDC (5% Slippage). Balance ready for deposit!',
+    faucetLabel: 'Lexius Testnet Funding:',
+    faucetBtnRefund: 'Re-Fund (0.005 ETH + 10 USDC)',
+    faucetRefunding: 'Funding 10 USDC...',
+    faucetSuccessMsg: 'Testnet wallet successfully funded! +10 USDC and 0.005 ETH gas added.',
+    circleFaucetLink: 'Get USDC on Circle Official Faucet ↗',
 
     // Welcome Gift Modal
     giftTitle: 'Welcome Gift Claimed!',
