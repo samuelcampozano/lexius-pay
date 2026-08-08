@@ -93,12 +93,28 @@ export default function PaymentPage() {
   const sellerNameRaw = searchParams?.get('sellerName')?.trim();
   const sellerName = sellerNameRaw && sellerNameRaw.length > 0 ? sellerNameRaw : '';
 
+  const [storedRecord, setStoredRecord] = useState<any>(null);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+      const item = stored.find((rec: any) => rec.id === escrowId);
+      if (item) {
+        setStoredRecord(item);
+        if (item.status) {
+          setStatus(item.status);
+        }
+      }
+    } catch (e) {}
+  }, [escrowId]);
+
   // Determine if the authenticated user is the seller
   const isSeller =
     authenticated &&
     activeWallet &&
-    seller &&
-    activeWallet.toLowerCase() === seller.toLowerCase();
+    ((seller && activeWallet.toLowerCase() === seller.toLowerCase()) ||
+      (storedRecord && storedRecord.role === 'Seller') ||
+      (storedRecord && storedRecord.seller?.toLowerCase() === activeWallet.toLowerCase()));
 
   const sellerHue = addressToHue(seller);
   const buyerHue = addressToHue(buyerWallet);
@@ -178,13 +194,21 @@ export default function PaymentPage() {
         setTimeout(() => closeTma(), 2000);
       }
     } catch (err: any) {
-      console.warn('[PaymentPage] Web3 Deposit fallback/notice:', err);
-      // Fallback for hackathon demo if wallet user cancels prompt
-      const demoHash = `0x9a8b${Date.now().toString(16)}2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d`;
-      setTxHash(demoHash);
-      setStatus('Deposited');
-      updateLocalStorageStatus('Deposited');
-      await notifyTelegramStatus('deposited');
+      console.warn('[PaymentPage] Web3 Deposit error caught:', err);
+      const isCancellation =
+        err === 'USER_CANCELLED' ||
+        err?.message === 'USER_CANCELLED' ||
+        err?.name === 'UserRejectedRequestError' ||
+        err?.code === 4001 ||
+        String(err?.message || '').toLowerCase().includes('rejected') ||
+        String(err?.message || '').toLowerCase().includes('denied');
+
+      if (isCancellation) {
+        setErrorMessage(t('userCancelledTx'));
+        // Do NOT force status transition on user cancellation
+      } else {
+        setErrorMessage(t('payDepositError') + (err?.shortMessage || err?.message || ''));
+      }
     } finally {
       setLoading(false);
     }

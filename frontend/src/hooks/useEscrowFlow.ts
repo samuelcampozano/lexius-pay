@@ -252,12 +252,19 @@ export function useEscrowFlow() {
       return depositHash;
     } catch (err: any) {
       console.error('[useEscrowFlow] Deposit error:', err);
-      const msg =
-        err?.shortMessage ||
-        err?.message ||
-        'Error during Arbitrum Sepolia deposit';
+      const isUserCancellation =
+        err?.name === 'UserRejectedRequestError' ||
+        err?.code === 4001 ||
+        String(err?.message || '').toLowerCase().includes('rejected') ||
+        String(err?.message || '').toLowerCase().includes('denied') ||
+        String(err?.shortMessage || '').toLowerCase().includes('rejected') ||
+        String(err?.shortMessage || '').toLowerCase().includes('denied');
+
+      const msg = isUserCancellation
+        ? 'USER_CANCELLED'
+        : err?.shortMessage || err?.message || 'Error during Arbitrum Sepolia deposit';
       setErrorMessage(msg);
-      setFlowStep('error');
+      setFlowStep('idle');
       throw err;
     } finally {
       setIsFunding(false);
