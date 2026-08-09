@@ -42,7 +42,7 @@ jobs:
             echo "frontend_service=lexius-frontend-staging"                                    >> $GITHUB_OUTPUT
             echo "oracle_url=https://lexius-ai-oracle-staging-265650435557.us-central1.run.app" >> $GITHUB_OUTPUT
             echo "frontend_url=https://lexius-frontend-staging-265650435557.us-central1.run.app" >> $GITHUB_OUTPUT
-            echo "bot_username=LexiusPayTestBot"                                                >> $GITHUB_OUTPUT
+            echo "bot_username=LexiusPayBot"                                                >> $GITHUB_OUTPUT
           fi
 
   # ─────────────────────────────────────────────
