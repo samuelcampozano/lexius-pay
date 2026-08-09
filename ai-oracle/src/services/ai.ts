@@ -7,6 +7,8 @@ export interface DisputeEvidenceInput {
   itemDescription: string;
   claimText: string;
   evidenceImageUrls: string[];
+  sellerClaimText?: string;
+  sellerEvidenceImageUrls?: string[];
 }
 
 export interface AIVerdictResult {
@@ -14,6 +16,8 @@ export interface AIVerdictResult {
   reasoning: string;
   summary: string;
   confidenceScore: number;
+  fraudRiskFlag: boolean;
+  evidenceAuthenticityScore: number;
 }
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -23,41 +27,77 @@ if (!OPENAI_API_KEY) {
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-// Se ha agregado la Regla 1 para manejar la falta de imágenes sin romper el formato JSON
 const SYSTEM_PROMPT = `You are an expert impartial AI Judicial Arbitrator for Web3 P2P Escrow transactions.
-Your task is to analyze dispute claims, chat logs, OCR bank receipts, and event ticket images objectively.
+Your task is to analyze dispute claims, chat logs, courier tracking receipts, and physical item photos objectively using a strict Bilateral Evidence Protocol.
 
-Global & Regional Bank Recognition Capabilities:
-1. You are trained to inspect financial receipts, bank vouchers, and mobile transfer screenshots from LatAm and Global providers:
-   - Peru: Yape, Plin, BCP (Banco de Crédito), Interbank, BBVA Perú, Scotiabank.
-   - Ecuador: Banco Pichincha (Deuna!), Banco Guayaquil, Produbanco, Banco del Pacífico.
-   - Colombia: Nequi, Daviplata, Bancolombia, Banco de Bogotá, Movii.
-   - USA & Global: Zelle, Venmo, Cash App, PayPal, Wise, Revolut, Stripe, Chase, Bank of America.
-2. Analyze image authenticity: check for forged text, font mismatches, edited amounts, fake operation numbers, or barcode serial discrepancies.
-3. If no images are provided, evaluate based on the textual claim facts provided.
-4. Output Language: Write the "reason" field in the SAME language (Spanish or English) as the user's dispute claim text.
+Judicial Rules & Anti-Fraud Protocols:
+1. Bilateral Burden of Proof & Cross-Examination:
+   - Evaluate BOTH Buyer's claim + evidence AND Seller's dispatch proof + tracking receipts.
+   - Compare Buyer's item photos against Seller's dispatch/package photos.
 
-Output Rules:
-- Respond ONLY with a valid single JSON object.
-- The JSON object must contain exactly two fields: "winner" (string wallet address) and "reason" (string concise justification).
+2. Contextual Packaging & Waybill Requirement (Physical Goods):
+   - For physical items or shipped merchandise, an isolated photo of an object (e.g. flowers, electronics, clothes) without courier packaging, shipping label, waybill, or tracking box is UNCONTEXTUAL and CANNOT serve as proof of seller delivery tampering.
+   - If Seller provides valid postal dispatch proof / shipping label with matching buyer address, and Buyer only submits an uncontextual photo of a different item without packaging/label, rule in favor of the Seller due to insufficient contextual proof of tampering.
 
-Example output:
-{"winner":"0x1234...","reason":"GPT-4o OCR verified Yape receipt operation #849201. Amount S/180.00 matches transaction terms. Refund authorized."}`;
+3. Anti-Fraud & Stock Photo Detection:
+   - Inspect images for stock photo characteristics, watermarks, internet catalog framing, studio lighting artifacts, or isolated object snapshots.
+   - If an image exhibits stock photo traits or lacks real-world contextual unboxing/package labels, flag "fraudRiskFlag": true and lower "evidenceAuthenticityScore".
+
+4. Financial Receipts & Tickets Recognition:
+   - LatAm & Global bank vouchers (Yape, Plin, BCP, Interbank, Nequi, Daviplata, Zelle, Venmo, PayPal, Wise, etc.).
+   - Check for forged fonts, edited amounts, fake operation numbers, or barcode serial mismatches.
+
+5. Output Language:
+   - Write the "reason" field in the SAME language (Spanish or English) as the dispute claim text.
+
+Output Format Rules:
+- Respond ONLY with a valid single JSON object containing:
+  - "winner": (string wallet address of the winner: buyerAddress or sellerAddress)
+  - "reason": (string concise judicial reasoning explaining why winner won based on evidence & packaging rule)
+  - "confidenceScore": (number between 0.0 and 1.0)
+  - "fraudRiskFlag": (boolean: true if suspicious stock photo or uncontextual claim detected, false otherwise)
+  - "evidenceAuthenticityScore": (number between 0.0 and 1.0 assessing evidence credibility)
+
+Example JSON Output:
+{"winner":"0x71C7656EC7ab88b098defB751B7401B5f6d8976F","reason":"Seller provided valid Olva Courier dispatch receipt #74819 with matching shipping label. Buyer submitted an uncontextual stock photo without packaging or waybill. Under the Contextual Packaging Rule, the buyer claim is rejected.","confidenceScore":0.96,"fraudRiskFlag":true,"evidenceAuthenticityScore":0.35}`;
 
 export async function evaluateDisputeWithAI(
   params: DisputeEvidenceInput
 ): Promise<AIVerdictResult> {
   
-  // 1. Preparamos el contenido del usuario integrando texto e imágenes en el mismo array
+  const buyerImages = params.evidenceImageUrls || [];
+  const sellerImages = params.sellerEvidenceImageUrls || [];
+
+  const userPromptText = [
+    `Escrow ID: #${params.escrowId}`,
+    `Buyer Address: ${params.buyerAddress}`,
+    `Seller Address: ${params.sellerAddress}`,
+    `Item Description: ${params.itemDescription}`,
+    ``,
+    `--- BUYER CLAIM & EVIDENCE ---`,
+    `Buyer Claim Text: ${params.claimText}`,
+    `Buyer Images Attached: ${buyerImages.length} image(s)`,
+    ``,
+    `--- SELLER DISPATCH PROOF & EVIDENCE ---`,
+    `Seller Dispatch Claim: ${params.sellerClaimText || 'Seller states item was dispatched per agreement.'}`,
+    `Seller Images Attached: ${sellerImages.length} image(s)`,
+    ``,
+    `Evaluate both claims and evidence using the Contextual Packaging Rule and Stock Photo Anti-Fraud Protocol. Return the required JSON verdict.`
+  ].join('\n');
+
   const userContent: any[] = [
     {
       type: 'input_text',
-      text: `Escrow ID: ${params.escrowId}\nBuyer Address: ${params.buyerAddress}\nSeller Address: ${params.sellerAddress}\nItem Description: ${params.itemDescription}\nDispute Claim: ${params.claimText}\n\nEvaluate these facts and the evidence images, then return a strict JSON verdict with winner and reason only.`,
+      text: userPromptText,
     },
   ];
 
-  // Añadimos cada URL de evidencia como parte del contenido del mensaje
-  params.evidenceImageUrls.forEach((url) => {
+  // Add Buyer evidence images
+  buyerImages.forEach((url, i) => {
+    userContent.push({
+      type: 'input_text',
+      text: `[Buyer Evidence Image #${i + 1}]`,
+    });
     userContent.push({
       type: 'input_image',
       image_url: url,
@@ -65,7 +105,19 @@ export async function evaluateDisputeWithAI(
     });
   });
 
-  // 2. Hacemos la llamada usando la API de Responses de OpenAI
+  // Add Seller evidence images
+  sellerImages.forEach((url, i) => {
+    userContent.push({
+      type: 'input_text',
+      text: `[Seller Dispatch Evidence Image #${i + 1}]`,
+    });
+    userContent.push({
+      type: 'input_image',
+      image_url: url,
+      detail: 'auto',
+    });
+  });
+
   const response = await openai.responses.create({
     model: 'gpt-4o',
     input: [
@@ -80,14 +132,12 @@ export async function evaluateDisputeWithAI(
     ],
   });
 
-  // 3. Obtenemos el texto plano de forma directa
   const rawOutput = response.output_text;
 
   if (!rawOutput) {
     throw new Error('OpenAI did not return a parsable text output');
   }
 
-  // Limpiamos el string por si GPT añadió delimitadores de Markdown como ```json
   const trimmedOutput = rawOutput.trim();
   const jsonText = trimmedOutput.startsWith('{')
     ? trimmedOutput
@@ -107,7 +157,9 @@ export async function evaluateDisputeWithAI(
   return {
     winnerAddress: parsed.winner as string,
     reasoning: parsed.reason as string,
-    summary: `Decision rendered for escrow ${params.escrowId}`,
-    confidenceScore: 0.92, // Valor estático por el momento
+    summary: `Decision rendered for escrow #${params.escrowId}`,
+    confidenceScore: typeof parsed.confidenceScore === 'number' ? parsed.confidenceScore : 0.95,
+    fraudRiskFlag: Boolean(parsed.fraudRiskFlag),
+    evidenceAuthenticityScore: typeof parsed.evidenceAuthenticityScore === 'number' ? parsed.evidenceAuthenticityScore : 0.90,
   };
 }

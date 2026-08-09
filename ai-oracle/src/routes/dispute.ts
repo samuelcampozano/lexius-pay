@@ -23,6 +23,8 @@ router.post('/resolve', async (req: Request, res: Response) => {
       itemDescription,
       claimText,
       evidenceImageUrls,
+      sellerClaimText,
+      sellerEvidenceImageUrls,
     } = req.body;
 
     // Validate required parameters
@@ -33,29 +35,36 @@ router.post('/resolve', async (req: Request, res: Response) => {
       });
     }
 
-    // Normalize evidence URLs into an array
-    const resolvedEvidence = Array.isArray(evidenceImageUrls)
+    // Normalize evidence URLs into arrays
+    const resolvedBuyerEvidence = Array.isArray(evidenceImageUrls)
       ? evidenceImageUrls
       : evidenceImageUrls
       ? [evidenceImageUrls]
       : [];
 
-    console.log(`[AI Oracle] Resolving dispute for Escrow #${escrowId}`);
-    console.log(`[AI Oracle] Buyer: ${buyerAddress}`);
-    console.log(`[AI Oracle] Seller: ${sellerAddress}`);
-    console.log(`[AI Oracle] Evidence URLs: ${resolvedEvidence.length} image(s)`);
+    const resolvedSellerEvidence = Array.isArray(sellerEvidenceImageUrls)
+      ? sellerEvidenceImageUrls
+      : sellerEvidenceImageUrls
+      ? [sellerEvidenceImageUrls]
+      : [];
 
-    // Step 1: Call GPT-4o Vision to analyze the dispute
+    console.log(`[AI Oracle] Resolving dispute for Escrow #${escrowId}`);
+    console.log(`[AI Oracle] Buyer: ${buyerAddress} (${resolvedBuyerEvidence.length} buyer images)`);
+    console.log(`[AI Oracle] Seller: ${sellerAddress} (${resolvedSellerEvidence.length} seller images)`);
+
+    // Step 1: Call GPT-4o Vision to analyze the bilateral dispute evidence
     const aiVerdict = await evaluateDisputeWithAI({
       escrowId,
       buyerAddress,
       sellerAddress,
       itemDescription: itemDescription || 'P2P Deal',
       claimText,
-      evidenceImageUrls: resolvedEvidence,
+      evidenceImageUrls: resolvedBuyerEvidence,
+      sellerClaimText,
+      sellerEvidenceImageUrls: resolvedSellerEvidence,
     });
 
-    console.log(`[AI Oracle] AI verdict: Winner = ${aiVerdict.winnerAddress}`);
+    console.log(`[AI Oracle] AI verdict: Winner = ${aiVerdict.winnerAddress} | FraudRisk = ${aiVerdict.fraudRiskFlag}`);
 
     // Step 2: Sign the verdict with Oracle's private key (EIP-191 compatible with Stylus ecrecover)
     const signedPayload = await signVerdict(escrowId, aiVerdict.winnerAddress);
@@ -71,9 +80,11 @@ router.post('/resolve', async (req: Request, res: Response) => {
       r: signedPayload.r,
       s: signedPayload.s,
       signature: signedPayload.signature,
-      // Additional metadata
+      // Additional anti-fraud metadata
       escrowId,
       confidenceScore: aiVerdict.confidenceScore,
+      fraudRiskFlag: aiVerdict.fraudRiskFlag,
+      evidenceAuthenticityScore: aiVerdict.evidenceAuthenticityScore,
       summary: aiVerdict.summary,
       oracleAddress: signedPayload.oracleAddress,
       timestamp: new Date().toISOString(),

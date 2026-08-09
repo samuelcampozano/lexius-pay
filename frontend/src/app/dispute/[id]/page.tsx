@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play } from 'lucide-react';
+import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play, ShieldAlert, Check } from 'lucide-react';
 import { DisputeVerdict } from '@/types';
 import { useStylusContract } from '@/hooks/useStylusContract';
 import { usePrivy } from '@privy-io/react-auth';
@@ -19,6 +19,10 @@ export default function DisputePage() {
   const [claimText, setClaimText] = useState(
     t('disputeDefaultClaim')
   );
+
+  const [sellerClaimText, setSellerClaimText] = useState('');
+  const [sellerProofUrl, setSellerProofUrl] = useState('');
+  const [sellerUploading, setSellerUploading] = useState(false);
 
   useEffect(() => {
     setClaimText(t('disputeDefaultClaim'));
@@ -60,10 +64,12 @@ export default function DisputePage() {
   const handleLoadMockData = () => {
     setVerdict({
       escrowId: '1',
-      winner: '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E',
+      winner: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
       reasoning: t('disputeDemoReasoning'),
-      summary: 'Verdict in favor of Buyer (Refund Executed)',
-      confidenceScore: 0.99,
+      summary: 'Verdict in favor of Seller (Bilateral Protocol Applied)',
+      confidenceScore: 0.96,
+      fraudRiskFlag: true,
+      evidenceAuthenticityScore: 0.35,
       signature: '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb1b',
       v: 27,
       r: '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b',
@@ -91,9 +97,11 @@ export default function DisputePage() {
           escrowId,
           buyerAddress: mockBuyer,
           sellerAddress: mockSeller,
-          itemDescription: 'VIP Concert Ticket — ETH Lima Afterparty 2026',
+          itemDescription: 'Physical Merchandise Delivery — Olva Courier Shipment',
           claimText,
           evidenceImageUrls: proofUrl ? [proofUrl] : [],
+          sellerClaimText: sellerClaimText || undefined,
+          sellerEvidenceImageUrls: sellerProofUrl ? [sellerProofUrl] : [],
         }),
       });
 
@@ -106,8 +114,10 @@ export default function DisputePage() {
         escrowId: String(data.escrowId || escrowId),
         winner: data.winner,
         reasoning: data.reason || data.reasoning,
-        summary: data.summary || 'AI Dispute Decision',
+        summary: data.summary || 'Bilateral AI Dispute Decision',
         confidenceScore: data.confidenceScore || 0.95,
+        fraudRiskFlag: Boolean(data.fraudRiskFlag),
+        evidenceAuthenticityScore: typeof data.evidenceAuthenticityScore === 'number' ? data.evidenceAuthenticityScore : 0.85,
         signature: data.signature,
         v: Number(data.v) < 27 ? Number(data.v) + 27 : Number(data.v),
         r: data.r as `0x${string}`,
@@ -138,12 +148,6 @@ export default function DisputePage() {
         return;
       }
 
-      // Exact parameters expected by Rust Stylus contract resolve_dispute_with_signature:
-      // escrow_id: uint256 (bigint)
-      // winner: address (0x...)
-      // v: uint8 (number, 27 or 28)
-      // r: bytes32 (0x...)
-      // s: bytes32 (0x...)
       const hash = await resolveDisputeWithSignature(
         BigInt(escrowId.replace('#', '')),
         verdict.winner as `0x${string}`,
@@ -176,23 +180,36 @@ export default function DisputePage() {
     }, 600);
   };
 
+  const handleSellerReceiptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setSellerUploading(true);
+    const previewUrl = URL.createObjectURL(file);
+
+    setTimeout(() => {
+      setSellerProofUrl(previewUrl);
+      setSellerUploading(false);
+    }, 600);
+  };
+
   const isOracleMismatch =
     onChainOracle &&
     verdict?.oracleAddress &&
     onChainOracle.toLowerCase() !== verdict.oracleAddress.toLowerCase();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider shadow-inner">
           <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-          <span>GCP Cloud Run + OpenAI GPT-4o Vision</span>
+          <span>{t('disputeBilateralBadge')}</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
           {t('disputeCenterTitle')}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
+        <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto">
           {t('disputeCenterSub')}
         </p>
 
@@ -210,15 +227,26 @@ export default function DisputePage() {
         )}
       </div>
 
+      {/* Contextual Packaging Rule Notice Banner */}
+      <div className="p-4 bg-cyan-950/40 border border-cyan-500/30 rounded-2xl flex items-start gap-3 text-xs text-cyan-200">
+        <ShieldCheck className="w-5 h-5 shrink-0 text-cyan-400 mt-0.5" />
+        <div className="space-y-1">
+          <span className="font-bold text-white block">{t('disputePackagingRuleTitle')}</span>
+          <p className="text-[11px] leading-relaxed text-cyan-300/80">
+            {t('disputePackagingRuleDesc')}
+          </p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Form Column */}
+        {/* Form Column: Bilateral Evidence Inputs */}
         <div className="glass-card rounded-2xl p-6 space-y-5 border-cyan-500/30">
           <div className="flex items-center gap-2 text-white font-bold text-base border-b border-cyan-950 pb-3">
             <FileText className="w-5 h-5 text-cyan-400" />
             <span>{t('disputeFormHeader')}</span>
           </div>
 
-          <form onSubmit={handleEvaluateAI} className="space-y-4">
+          <form onSubmit={handleEvaluateAI} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 {t('disputeEscrowId')}
@@ -231,33 +259,50 @@ export default function DisputePage() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                {t('disputeExplanation')}
-              </label>
-              <textarea
-                rows={4}
-                required
-                value={claimText}
-                onChange={(e) => setClaimText(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
-              />
+            {/* Buyer Section */}
+            <div className="p-3.5 bg-[#030818] rounded-xl border border-cyan-900/40 space-y-3">
+              <span className="text-xs font-bold text-cyan-400 block">{t('disputeBuyerSection')}</span>
+              <div>
+                <textarea
+                  rows={3}
+                  required
+                  value={claimText}
+                  onChange={(e) => setClaimText(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#020612] border border-cyan-950 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-cyan-800/60 bg-[#020612] px-3 py-3 text-xs text-slate-300 transition hover:border-cyan-400 hover:text-white">
+                  <Upload className="h-3.5 w-3.5 text-cyan-400" />
+                  <span>{uploading ? t('disputeUploading') : t('disputeUploadPrompt')}</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleReceiptUpload} />
+                </label>
+                {proofUrl && <p className="mt-1 text-[10px] text-cyan-400 font-bold">{t('disputePreviewReady')}</p>}
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                {t('disputeEvidenceLabel')}
-              </label>
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-cyan-800/60 bg-[#030818] px-3 py-4 text-sm text-slate-300 transition hover:border-cyan-400 hover:text-white">
-                <Upload className="h-4 w-4 text-cyan-400" />
-                <span>{uploading ? t('disputeUploading') : t('disputeUploadPrompt')}</span>
-                <input type="file" accept="image/*" className="hidden" onChange={handleReceiptUpload} />
-              </label>
-              {proofUrl ? (
-                <p className="mt-2 text-[11px] text-cyan-400 font-bold">{t('disputePreviewReady')}</p>
-              ) : (
-                <p className="mt-2 text-[11px] text-slate-500">{t('disputeAcceptedFormats')}</p>
-              )}
+            {/* Seller Section */}
+            <div className="p-3.5 bg-[#030818] rounded-xl border border-cyan-900/40 space-y-3">
+              <span className="text-xs font-bold text-sky-400 block">{t('disputeSellerSection')}</span>
+              <div>
+                <textarea
+                  rows={2}
+                  placeholder={t('disputeSellerClaimPlaceholder')}
+                  value={sellerClaimText}
+                  onChange={(e) => setSellerClaimText(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#020612] border border-cyan-950 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-cyan-800/60 bg-[#020612] px-3 py-3 text-xs text-slate-300 transition hover:border-cyan-400 hover:text-white">
+                  <Upload className="h-3.5 w-3.5 text-sky-400" />
+                  <span>{sellerUploading ? t('disputeUploading') : t('disputeSellerUploadPrompt')}</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleSellerReceiptUpload} />
+                </label>
+                {sellerProofUrl && <p className="mt-1 text-[10px] text-sky-400 font-bold">{t('disputePreviewReady')}</p>}
+              </div>
             </div>
 
             <button
@@ -282,25 +327,50 @@ export default function DisputePage() {
 
         {/* Evidence & Live Status Column */}
         <div className="glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4 border-cyan-500/30">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
               {t('disputeAttachedPreview')}
             </span>
-            {proofUrl && (
-              <div className="relative rounded-xl overflow-hidden border border-cyan-900/40 bg-[#030818] max-h-48">
-                <img
-                  src={proofUrl}
-                  alt={t('disputeEvidenceAlt')}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+
+            <div className="grid grid-cols-1 gap-3">
+              {proofUrl && (
+                <div className="relative rounded-xl overflow-hidden border border-cyan-900/40 bg-[#030818] max-h-36">
+                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-cyan-950/90 border border-cyan-500/40 text-cyan-300 text-[10px] font-bold rounded">
+                    Buyer Photo
+                  </span>
+                  <img
+                    src={proofUrl}
+                    alt={t('disputeEvidenceAlt')}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              {sellerProofUrl && (
+                <div className="relative rounded-xl overflow-hidden border border-sky-900/40 bg-[#030818] max-h-36">
+                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-sky-950/90 border border-sky-500/40 text-sky-300 text-[10px] font-bold rounded">
+                    Seller Dispatch Waybill
+                  </span>
+                  <img
+                    src={sellerProofUrl}
+                    alt="Seller dispatch evidence"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              {!proofUrl && !sellerProofUrl && (
+                <div className="p-8 text-center border border-dashed border-cyan-900/40 rounded-xl text-slate-500 text-xs">
+                  {t('disputeAcceptedFormats')}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-2 text-xs">
             <div className="flex items-center justify-between text-slate-400">
               <span>{t('disputeOracleNode')}</span>
-              <span className="text-cyan-400 font-mono font-semibold">GCP Cloud Run</span>
+              <span className="text-cyan-400 font-mono font-semibold">GCP Cloud Run (GPT-4o Vision)</span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
               <span>{t('disputeOnChainOracle')}</span>
@@ -329,12 +399,32 @@ export default function DisputePage() {
                 <p className="text-xs text-slate-400">{t('disputeSignedKey')}</p>
               </div>
             </div>
-            <span className="text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full">
-              {t('disputeConfidence').replace('{score}', String(Math.round(verdict.confidenceScore * 100)))}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full">
+                {t('disputeConfidence').replace('{score}', String(Math.round(verdict.confidenceScore * 100)))}
+              </span>
+              {typeof verdict.evidenceAuthenticityScore === 'number' && (
+                <span className="text-xs font-mono font-bold bg-sky-950/80 text-sky-300 border border-sky-500/30 px-3 py-1 rounded-full">
+                  {t('disputeAuthenticityScore').replace('{score}', String(Math.round(verdict.evidenceAuthenticityScore * 100)))}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">
+            {/* Anti-Fraud Stock Photo Risk Banner */}
+            {verdict.fraudRiskFlag && (
+              <div className="p-4 bg-red-950/60 border border-red-500/50 rounded-xl flex items-start gap-3 text-red-300 text-xs">
+                <ShieldAlert className="w-5 h-5 shrink-0 text-red-400 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-bold block text-red-200">{t('disputeFraudAlertTitle')}</span>
+                  <p className="text-[11px] leading-relaxed text-red-300/80">
+                    GPT-4o Vision detectó una imagen de evidencia sin empaque, etiqueta o contexto de envío (foto de stock aislada). La afirmación del comprador carece de prueba contextual de manipulación.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-2">
               <span className="text-[10px] text-cyan-400 uppercase tracking-wider font-bold">{t('disputeLegalReasoning')}</span>
               <p className="text-xs text-slate-200 leading-relaxed font-medium">{verdict.reasoning}</p>
