@@ -1,5 +1,35 @@
 export type Language = 'es' | 'en';
 
+export type Translation = {
+  [key: string]: string;
+};
+
+// Define el bot de forma dinámica, dando prioridad absoluta a la variable de entorno
+const getTelegramBotUsername = (): string => {
+  // 1. Si hay una variable de entorno explícita, usarla (ideal para forzar pruebas)
+  if (process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME) {
+    return process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
+  }
+
+  // 2. Fallback automático por entorno (Hostname)
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (
+      hostname.includes('localhost') || 
+      hostname.includes('127.0.0.1') || 
+      hostname.includes('staging') ||
+      hostname.includes('lexiuspay.app')
+    ) {
+      return 'LexiusPayTestBot'; // Bot de pruebas
+    }
+  }
+  
+  // 3. Fallback final a producción
+  return 'LexiusPayBot';
+};
+
+export const TELEGRAM_BOT_USERNAME = getTelegramBotUsername();
+
 export const dictionary = {
   es: {
     // Navbar
@@ -38,7 +68,7 @@ export const dictionary = {
     tgBtnSending: 'Enviando...',
     tgBtnSent: '¡Enviado!',
     tgBtnError: 'Error',
-    tgHelperText: `El bot enviará una tarjeta de pago interactiva al chat. Nota: Para chats privados, el receptor debe haber iniciado una conversación previamente con el bot (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'LexiusPayTestBot'}). Para grupos, el bot debe estar agregado como miembro.`,
+    tgHelperText: `El bot enviará una tarjeta de pago interactiva al chat. Nota: Para chats privados, el receptor debe haber iniciado una conversación previamente con el bot (@${TELEGRAM_BOT_USERNAME}). Para grupos, el bot debe estar agregado como miembro.`,
 
     // AI Simulator
     simBadge: 'Demo Interactivo',
@@ -187,7 +217,7 @@ export const dictionary = {
     tgBtnSending: 'Sending...',
     tgBtnSent: 'Sent!',
     tgBtnError: 'Error',
-    tgHelperText: `The bot will send an interactive payment card to the specified chat. Note: For private 1-on-1 chats, the recipient must have previously started a conversation with the bot (@${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'LexiusPayTestBot'}). For groups, the bot must be a member.`,
+    tgHelperText: `The bot will send an interactive payment card to the specified chat. Note: For private 1-on-1 chats, the recipient must have previously started a conversation with the bot (@${TELEGRAM_BOT_USERNAME}). For groups, the bot must be a member.`,
 
     // AI Simulator
     simBadge: 'Interactive Demo',
