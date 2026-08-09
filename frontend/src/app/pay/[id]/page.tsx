@@ -557,19 +557,14 @@ export default function PaymentPage() {
           </div>
 
           <div className="space-y-1.5 pt-1">
-            <div className={`flex items-center gap-2 ${flowStep === 'funding' ? 'text-cyan-300 font-bold' : 'text-slate-500'}`}>
-              <span>{flowStep === 'funding' ? '⏳' : '✓'}</span>
-              <span>1. {lang === 'es' ? 'Fondeando cuenta de prueba (0.005 ETH + 10 USDC)...' : '1. Funding test wallet (0.005 ETH + 10 USDC)...'}</span>
-            </div>
-
             <div className={`flex items-center gap-2 ${flowStep === 'approving' ? 'text-cyan-300 font-bold' : flowStep === 'depositing' || flowStep === 'success' ? 'text-slate-400' : 'text-slate-600'}`}>
               <span>{flowStep === 'approving' ? '⏳' : flowStep === 'depositing' || flowStep === 'success' ? '✓' : '•'}</span>
-              <span>2. {lang === 'es' ? 'Aprobando USDC en Arbitrum Sepolia...' : '2. Approving USDC on Arbitrum Sepolia...'}</span>
+              <span>1. {lang === 'es' ? 'Aprobando USDC en Arbitrum Sepolia...' : '1. Approving USDC on Arbitrum Sepolia...'}</span>
             </div>
 
             <div className={`flex items-center gap-2 ${flowStep === 'depositing' ? 'text-cyan-300 font-bold' : flowStep === 'success' ? 'text-cyan-200 font-bold' : 'text-slate-600'}`}>
               <span>{flowStep === 'depositing' ? '⏳' : flowStep === 'success' ? '✓' : '•'}</span>
-              <span>3. {lang === 'es' ? 'Protegiendo fondos en Bóveda Escrow WASM...' : '3. Locking funds in Stylus WASM Vault...'}</span>
+              <span>2. {lang === 'es' ? 'Protegiendo fondos en Bóveda Escrow WASM...' : '2. Locking funds in Stylus WASM Vault...'}</span>
             </div>
           </div>
         </div>
@@ -626,9 +621,7 @@ export default function PaymentPage() {
                       <>
                         <RefreshCw className="w-5 h-5 animate-spin" />
                         <span>
-                          {isFunding
-                            ? lang === 'es' ? 'Fondeando 10 USDC...' : 'Funding 10 USDC...'
-                            : isApproving
+                          {isApproving
                             ? lang === 'es' ? 'Aprobando USDC...' : 'Approving USDC...'
                             : isDepositing
                             ? lang === 'es' ? 'Depositando en Stylus...' : 'Depositing in Stylus...'
