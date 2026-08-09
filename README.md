@@ -86,6 +86,60 @@ Permite que cualquier persona compre o venda productos y servicios en redes soci
 
 ---
 
+## 🦀 ¿Por qué Arbitrum Stylus (Rust WASM) vs. Solidity?
+
+La elección de **Arbitrum Stylus (Rust)** sobre Solidity convencional responde a 3 pilares de eficiencia computacional, criptográfica y de seguridad:
+
+1. **Verificación Criptográfica de Firmas (ECDSA)**: La función `resolve_dispute_with_signature` ejecuta la función `ecrecover` de la EVM para validar de forma inmutable la firma `(v, r, s)` emitida por el oráculo. Las operaciones criptográficas y el análisis matemático en curvas elípticas (`secp256k1`) son extremadamente intensivas en cómputo.
+2. **Ventaja de Gas en WASM**: Stylus introduce una máquina virtual equivalente que ejecuta WebAssembly (WASM). Wasmer ejecuta código compilado nativo a velocidad ultra-rápida. Stylus reduce drásticamente los costos de gas para verificación criptográfica y cálculos intensivos en memoria, permitiendo procesar firmas por una fracción de centavo de dólar (algo que en Solidity nativo resultaría sumamente costoso).
+3. **Seguridad Estricta de Memoria en Rust**: Desarrollar en Rust (`#![no_std]`) permite aprovechar su compilador estricto para eliminar vulnerabilidades comunes de desbordamiento, aliasing de almacenamiento o fallas de punteros antes del despliegue on-chain.
+
+---
+
+## 🗺️ Roadmap 2026: Arquitectura Descentralizada & Resiliencia Progresiva
+
+Para neutralizar críticas de centralización y llevar **Lexius Pay** al siguiente nivel de seguridad institucional:
+
+```text
+ ┌─────────────────────────────────────────────────────────────────────────────┐
+ |                         DESCENTRALIZACIÓN PROGRESIVA                        |
+ └──────┬──────────────────────┬──────────────────────┬────────────────────────┘
+        │                      │                      │
+ ┌──────▼──────┐        ┌──────▼──────┐        ┌──────▼──────┐
+ │   FASE 1    │        │   FASE 2    │        │   FASE 3    │
+ │ GCP Cloud   │ ─────► │ Multi-Agent │ ─────► │ Timelock &  │
+ │ Run Oracle  │        │ Consensus   │        │ Human Appeal│
+ └─────────────┘        └─────────────┘        └─────────────┘
+```
+
+### 🔹 Fase 1: MVP Hackathon (Estado Actual)
+* **Arquitectura:** Oráculo de IA aislado en **Google Cloud Run** y **GCP Secret Manager** con firma criptográfica ECDSA `(v, r, s)` única verificada en Arbitrum Sepolia.
+
+### 🔹 Fase 2: Consenso Multi-Agente 2-de-3 (Multi-Agent Consensus)
+* **Arquitectura:** Eliminación de puntos únicos de fallo mediante validación multifirma.
+* **Implementación:** Tres nodos de IA independientes ejecutando modelos distintos:
+  * **Nodo 1:** OpenAI GPT-4o Vision
+  * **Nodo 2:** Anthropic Claude 3.5 Sonnet
+  * **Nodo 3:** Google Gemini 1.5 Pro
+* Cada modelo inspecciona las evidencias de forma aislada en Google Cloud Storage y emite su firma ECDSA. El contrato en **Arbitrum Stylus** solo ejecuta la transferencia si recibe al menos **2 de 3 firmas coincidentes**.
+
+### 🔹 Fase 3: Mecanismo de Apelación Humana con Garantía (Appeal Bond & Timelock)
+* **Arquitectura:** Protección contra alucinaciones o disputas complejas.
+* **Implementación:**
+  1. **Timelock de 24h:** Al emitirse el veredicto de IA, los fondos entran en estado `VerdictPending` por 24 horas.
+  2. **Garantía de Apelación (Appeal Bond):** La parte perdedora puede congelar la liberación automática depositando un colateral en USDC.
+  3. **Escalabilidad a Jurado DAO (Kleros / Comité Lexius):** El caso se eleva a mediación humana descentralizada. Si los humanos revierten el fallo, el apelante recupera su colateral y los fondos; si la apelación fue maliciosa, el colateral se entrega a la contraparte.
+
+---
+
+## 🎨 Guía para la Presentación / Pitch Deck (Isabel Colmenares)
+
+### 🛡️ Diapositiva: Seguridad y Descentralización Progresiva
+* **Fase 1 (MVP Actual):** GCP Cloud Run + Secret Manager con firma ECDSA en Arbitrum Stylus.
+* **Fase 2 (Consenso IA):** Multifirma 2-de-3 con 3 modelos independientes (GPT, Claude, Gemini).
+* **Fase 3 (Garantía de Apelación):** Periodo de gracia de 24h con colateral y escalabilidad a jurado humano DAO.
+
+
 ## 🏗️ Arquitectura Técnica del Sistema
 
 ```text
