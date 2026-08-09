@@ -533,7 +533,17 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+          <div className="bg-[#030818] p-5 rounded-xl border border-cyan-500/40 space-y-2.5">
+            <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
+              <Cpu className="w-4 h-4 text-cyan-400" />
+              <span>{t('stylusPoint0Title')}</span>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t('stylusPoint0Desc')}
+            </p>
+          </div>
+
           <div className="bg-[#030818] p-5 rounded-xl border border-cyan-900/40 space-y-2.5">
             <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
               <Lock className="w-4 h-4 text-cyan-400" />
