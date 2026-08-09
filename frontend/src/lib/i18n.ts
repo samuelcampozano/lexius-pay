@@ -96,6 +96,29 @@ export const dictionary = {
     pillar3Title: 'UX Telegram Mini App',
     pillar3Desc: 'Cero fricción de frases semilla. Conexión mediante Passkeys (FaceID / TouchID) o Google con Privy.',
 
+    // Stylus vs Solidity Section
+    whyStylusBadge: 'Arquitectura & Rendimiento',
+    whyStylusTitle: '¿Por qué Arbitrum Stylus (Rust WASM) vs. Solidity?',
+    whyStylusSub: 'Elegimos Stylus para lograr velocidad de código nativo, máximos estándares de seguridad de memoria y costo de gas ultra-bajo en operaciones criptográficas.',
+    stylusPoint1Title: 'Verificación ECDSA (secp256k1)',
+    stylusPoint1Desc: 'La función resolve_dispute_with_signature valida la firma (v, r, s) del oráculo mediante ecrecover precompilado de forma inmutable.',
+    stylusPoint2Title: 'Ventaja de Gas de WASM',
+    stylusPoint2Desc: 'Wasmer ejecuta código WASM nativo reduciendo el costo de gas en verificaciones criptográficas intensivas a sub-centavos de dólar.',
+    stylusPoint3Title: 'Seguridad Estricta de Memoria',
+    stylusPoint3Desc: 'Rust (#![no_std]) elimina riesgos de desbordamiento, aliasing de memoria y fallas de punteros antes del despliegue on-chain.',
+
+    // Roadmap 2026 Section
+    roadmapBadge: 'Futuro & Seguridad Progresiva',
+    roadmapTitle: 'Roadmap 2026: Descentralización Progresiva',
+    roadmapSub: 'Propuesta de arquitectura resiliente para escalar de la fase Hackathon a una red de seguridad institucional sin puntos de fallo.',
+    phase1Title: 'Fase 1: MVP Hackathon (Actual)',
+    phase1Desc: 'Oráculo IA en GCP Cloud Run + Secret Manager con firma criptográfica ECDSA única verificada en Arbitrum Sepolia.',
+    phase2Title: 'Fase 2: Consenso Multi-Agente 2-de-3',
+    phase2Desc: 'Tres modelos independientes (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro) en nodos distribuidos con validación multifirma 2-de-3 en Stylus.',
+    phase3Title: 'Fase 3: Timelock 24h & Apelación DAO',
+    phase3Desc: 'Periodo de gracia de 24h con depósito de colateral (Appeal Bond) para escalar disputas complejas a un jurado humano descentralizado (Kleros).',
+
+
     // Footer
     footerText: 'Lexius Pay © 2026 — Desarrollado para ETH Lima 2026 en Arbitrum Stylus y Google Cloud Platform',
 
@@ -284,6 +307,29 @@ export const dictionary = {
     pillar2Desc: 'GPT-4o Vision hosted on Google Cloud Run evaluates chat receipts and signs ECDSA verdicts with GCP Secret Manager keys.',
     pillar3Title: 'Telegram Mini App UX',
     pillar3Desc: 'Zero seed-phrase friction. Connect via Passkeys (FaceID / TouchID) or Google social logins with Privy.',
+
+    // Stylus vs Solidity Section
+    whyStylusBadge: 'Architecture & Performance',
+    whyStylusTitle: 'Why Arbitrum Stylus (Rust WASM) vs. Solidity?',
+    whyStylusSub: 'We chose Stylus for native speed, strict memory safety standards, and ultra-low gas costs on cryptographic signature verification.',
+    stylusPoint1Title: 'ECDSA Verification (secp256k1)',
+    stylusPoint1Desc: 'resolve_dispute_with_signature validates the oracle ECDSA (v, r, s) signature using EVM ecrecover precompile inmutably.',
+    stylusPoint2Title: 'WASM Gas Efficiency',
+    stylusPoint2Desc: 'Wasmer executes native WASM bytecode, slashing gas costs for compute-heavy cryptographic verification down to sub-cents.',
+    stylusPoint3Title: 'Strict Rust Memory Safety',
+    stylusPoint3Desc: 'Rust (#![no_std]) eliminates overflow bugs, storage aliasing, and pointer flaws before on-chain deployment.',
+
+    // Roadmap 2026 Section
+    roadmapBadge: 'Future & Progressive Security',
+    roadmapTitle: 'Roadmap 2026: Progressive Decentralization',
+    roadmapSub: 'Resilient architectural proposal to scale from Hackathon MVP to an institutional multi-agent security network.',
+    phase1Title: 'Phase 1: Hackathon MVP (Current)',
+    phase1Desc: 'Single GCP Cloud Run + Secret Manager AI Oracle issuing ECDSA signed verdicts verified on Arbitrum Sepolia.',
+    phase2Title: 'Phase 2: Multi-Agent 2-of-3 Consensus',
+    phase2Desc: 'Three independent models (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro) on distributed nodes with 2-of-3 multisig on Stylus.',
+    phase3Title: 'Phase 3: 24h Timelock & Human DAO Appeal',
+    phase3Desc: '24h grace period with Appeal Bond collateral to escalate complex disputes to a decentralized human jury (Kleros).',
+
 
     // Footer
     footerText: 'Lexius Pay © 2026 — Built for ETH Lima 2026 on Arbitrum Stylus & Google Cloud Platform',

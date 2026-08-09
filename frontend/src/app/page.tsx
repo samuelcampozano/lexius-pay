@@ -14,6 +14,7 @@ import {
   Cpu,
   RefreshCw,
   Scale,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
@@ -516,8 +517,105 @@ export default function HomePage() {
           <p className="text-xs text-slate-400 leading-relaxed">{t('pillar3Desc')}</p>
         </div>
       </section>
+
+      {/* 🦀 Why Arbitrum Stylus (Rust WASM) vs Solidity Section */}
+      <section className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-cyan-500/30">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider">
+            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{t('whyStylusBadge')}</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            {t('whyStylusTitle')}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            {t('whyStylusSub')}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+          <div className="bg-[#030818] p-5 rounded-xl border border-cyan-900/40 space-y-2.5">
+            <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
+              <Lock className="w-4 h-4 text-cyan-400" />
+              <span>{t('stylusPoint1Title')}</span>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t('stylusPoint1Desc')}
+            </p>
+          </div>
+
+          <div className="bg-[#030818] p-5 rounded-xl border border-cyan-900/40 space-y-2.5">
+            <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
+              <Zap className="w-4 h-4 text-cyan-400" />
+              <span>{t('stylusPoint2Title')}</span>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t('stylusPoint2Desc')}
+            </p>
+          </div>
+
+          <div className="bg-[#030818] p-5 rounded-xl border border-cyan-900/40 space-y-2.5">
+            <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
+              <ShieldCheck className="w-4 h-4 text-cyan-400" />
+              <span>{t('stylusPoint3Title')}</span>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t('stylusPoint3Desc')}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 🗺️ Roadmap 2026: Progressive Decentralization Section */}
+      <section className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-cyan-500/30">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider">
+            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{t('roadmapBadge')}</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            {t('roadmapTitle')}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            {t('roadmapSub')}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+          <div className="bg-[#030818] p-5 rounded-xl border border-cyan-500/40 space-y-2.5 relative">
+            <span className="text-[10px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded-full inline-block mb-1">
+              PROD LIVE
+            </span>
+            <h4 className="text-sm font-bold text-white">{t('phase1Title')}</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t('phase1Desc')}
+            </p>
+          </div>
+
+          <div className="bg-[#030818] p-5 rounded-xl border border-cyan-900/40 space-y-2.5">
+            <span className="text-[10px] font-mono font-bold bg-blue-950 text-blue-400 border border-blue-800 px-2 py-0.5 rounded-full inline-block mb-1">
+              FASE 2
+            </span>
+            <h4 className="text-sm font-bold text-white">{t('phase2Title')}</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t('phase2Desc')}
+            </p>
+          </div>
+
+          <div className="bg-[#030818] p-5 rounded-xl border border-cyan-900/40 space-y-2.5">
+            <span className="text-[10px] font-mono font-bold bg-purple-950 text-purple-400 border border-purple-800 px-2 py-0.5 rounded-full inline-block mb-1">
+              FASE 3
+            </span>
+            <h4 className="text-sm font-bold text-white">{t('phase3Title')}</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {t('phase3Desc')}
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
+
 
 
