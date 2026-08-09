@@ -175,7 +175,7 @@ export default function UseCaseSelector() {
           <div className="bg-cyan-950/30 border border-cyan-500/40 rounded-xl p-5 space-y-3 relative overflow-hidden">
             <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4" />
-              <span>{lang === 'es' ? 'La Solución Lexius Pay' : 'The Lexius Shield'}</span>
+              <span>{lang === 'es' ? 'La Solución Lexius' : 'The Lexius Shield'}</span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed font-medium">
               {current.shield}

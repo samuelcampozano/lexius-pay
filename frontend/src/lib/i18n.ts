@@ -120,7 +120,7 @@ export const dictionary = {
 
 
     // Footer
-    footerText: 'Lexius Pay © 2026 — Desarrollado para ETH Lima 2026 en Arbitrum Stylus y Google Cloud Platform',
+    footerText: 'Lexius © 2026 — Desarrollado para ETH Lima 2026 en Arbitrum Stylus y Google Cloud Platform',
 
     // Dashboard
     dashTitle: 'Panel de Control de Pagos',
@@ -237,7 +237,7 @@ export const dictionary = {
 
     // Welcome Gift Modal
     giftTitle: '¡Regalo de Bienvenida Reclamado!',
-    giftSub: '¡Hemos acreditado activos de prueba en tu billetera para que pruebes Lexius Pay inmediatamente!',
+    giftSub: '¡Hemos acreditado activos de prueba en tu billetera para que pruebes Lexius inmediatamente!',
     giftBonusStable: 'Establecoin de Bono',
     giftGasFee: 'Gas de Arbitrum',
     giftExplorerLink: 'Ver Transferencia USDC en Arbiscan',
@@ -332,7 +332,7 @@ export const dictionary = {
 
 
     // Footer
-    footerText: 'Lexius Pay © 2026 — Built for ETH Lima 2026 on Arbitrum Stylus & Google Cloud Platform',
+    footerText: 'Lexius © 2026 — Built for ETH Lima 2026 on Arbitrum Stylus & Google Cloud Platform',
 
     // Dashboard
     dashTitle: 'Payment Dashboard',
@@ -449,7 +449,7 @@ export const dictionary = {
 
     // Welcome Gift Modal
     giftTitle: 'Welcome Gift Claimed!',
-    giftSub: 'We funded your wallet with testnet assets so you can try Lexius Pay immediately!',
+    giftSub: 'We funded your wallet with testnet assets so you can try Lexius immediately!',
     giftBonusStable: 'Bonus Stablecoin',
     giftGasFee: 'Arbitrum Gas Fee',
     giftExplorerLink: 'View USDC Transfer on Arbiscan',

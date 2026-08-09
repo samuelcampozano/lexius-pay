@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <head>
-        <title>Lexius Pay — Autonomous AI P2P Escrow on Arbitrum Stylus</title>
+        <title>Lexius — Autonomous AI P2P Escrow on Arbitrum Stylus</title>
         <meta
           name="description"
           content="Decentralized P2P escrow links with autonomous AI dispute resolution on Arbitrum Stylus."

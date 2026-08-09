@@ -16,7 +16,7 @@ export default function Footer() {
             className="w-5 h-5 object-contain opacity-80"
           />
           <span className="font-heading font-semibold text-slate-400">
-            Lexius Pay
+            Lexius
           </span>
           <span className="text-[10px] font-mono text-cyan-400/80 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded-full">
             Arbitrum Stylus WASM
