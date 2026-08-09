@@ -205,8 +205,8 @@ export function useEscrowFlow() {
         ],
       })) as bigint;
 
-      // 3. Approve USDC spend if allowance is insufficient (FORCED TO TRUE TEMPORARILY)
-      if (true || currentAllowance < usdcUnits) {
+      // 3. Approve USDC spend if allowance is insufficient
+      if (currentAllowance < usdcUnits) {
         setIsApproving(true);
         setFlowStep('approving');
         
@@ -221,7 +221,6 @@ export function useEscrowFlow() {
 
         console.log(`[useEscrowFlow] Aprobación enviada: ${approveHash}. Esperando confirmación del bloque...`);
         
-        // 👑 ESPERA OBLIGATORIA DEL BLOQUE DE APROBACIÓN
         await publicClient.waitForTransactionReceipt({ hash: approveHash });
         console.log("[useEscrowFlow] USDC aprobado con éxito on-chain. Procediendo con el acuerdo...");
         
@@ -241,7 +240,7 @@ export function useEscrowFlow() {
 
       let needsCreation = false;
 
-      // 1. Check if escrow exists on-chain
+      // Check on-chain escrow state to ensure escrow exists and belongs to active wallet
       try {
         const count = (await publicClient.readContract({
           address: STYLUS_ESCROW_ADDRESS,
@@ -249,7 +248,7 @@ export function useEscrowFlow() {
           functionName: 'getEscrowCount',
         })) as bigint;
 
-        if (targetEscrowId > count || count === BigInt(0)) {
+        if (targetEscrowId >= count) {
           needsCreation = true;
         } else {
           const escrowInfo = (await publicClient.readContract({
@@ -260,7 +259,12 @@ export function useEscrowFlow() {
           })) as [string, string, bigint, number, string];
 
           const buyerOnChain = escrowInfo[0];
-          if (!buyerOnChain || buyerOnChain === '0x0000000000000000000000000000000000000000') {
+          const statusOnChain = escrowInfo[3];
+          if (
+            !buyerOnChain ||
+            buyerOnChain === '0x0000000000000000000000000000000000000000' ||
+            (statusOnChain === 0 && buyerOnChain.toLowerCase() !== activeWalletAddress.toLowerCase())
+          ) {
             needsCreation = true;
           }
         }
@@ -269,10 +273,10 @@ export function useEscrowFlow() {
         needsCreation = true;
       }
 
-      // 2. Initialize Escrow on-chain if missing
+      // 2. Initialize Escrow on-chain if missing or assigned to another wallet
       if (needsCreation) {
         try {
-          console.log("[useEscrowFlow] Detectado Escrow inexistente on-chain. Creando slot...");
+          console.log("[useEscrowFlow] Detectado Escrow inexistente o asignado a otra billetera. Creando slot...");
           const dummyDetails = '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`;
           
           const createTxHash = await walletClient.writeContract({
@@ -296,13 +300,13 @@ export function useEscrowFlow() {
           
           console.log("[useEscrowFlow] ¡Bloque confirmado en Arbitrum Sepolia! El acuerdo ya existe on-chain.", receipt);
 
-          // Update target ID to the newly created escrow
+          // Update target ID to the newly created escrow ID
           const newCount = (await publicClient.readContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
             functionName: 'getEscrowCount',
           })) as bigint;
-          targetEscrowId = newCount - BigInt(1);
+          targetEscrowId = newCount;
 
         } catch (createError) {
           console.error("[useEscrowFlow] Error durante la inicialización de emergencia:", createError);
