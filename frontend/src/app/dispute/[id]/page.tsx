@@ -6,17 +6,24 @@ import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, 
 import { DisputeVerdict } from '@/types';
 import { useStylusContract } from '@/hooks/useStylusContract';
 import { usePrivy } from '@privy-io/react-auth';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function DisputePage() {
   const params = useParams();
   const escrowId = (params.id as string) || '1';
+  const { t, lang } = useLanguage();
 
   const { resolveDisputeWithSignature, get_oracle } = useStylusContract();
   const { authenticated, login } = usePrivy();
 
   const [claimText, setClaimText] = useState(
-    'The seller sent a forged PDF ticket for the concert. The barcode fails validation at the venue gate.'
+    t('disputeDefaultClaim')
   );
+
+  useEffect(() => {
+    setClaimText(t('disputeDefaultClaim'));
+  }, [lang]);
+
   const [proofUrl, setProofUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
@@ -54,7 +61,7 @@ export default function DisputePage() {
     setVerdict({
       escrowId: '1',
       winner: '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E',
-      reasoning: 'GPT-4o Vision OCR verified receipt. Barcode mismatch detected against event organizers database. Refund granted to Buyer.',
+      reasoning: t('disputeDemoReasoning'),
       summary: 'Verdict in favor of Buyer (Refund Executed)',
       confidenceScore: 0.99,
       signature: '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb1b',
@@ -183,10 +190,10 @@ export default function DisputePage() {
           <span>GCP Cloud Run + OpenAI GPT-4o Vision</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
-          Autonomous AI Dispute Resolution Center
+          {t('disputeCenterTitle')}
         </h1>
         <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
-          Submit claim details and evidence screenshots. Our AI Mediator runs multi-modal vision analysis and signs a cryptographic ECDSA verdict.
+          {t('disputeCenterSub')}
         </p>
 
         {/* Quick Mock Load Button for Testing (Demo Mode Only) */}
@@ -197,7 +204,7 @@ export default function DisputePage() {
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#070e24] hover:bg-[#0b173c] text-cyan-300 rounded-xl text-xs font-semibold border border-cyan-900/40 transition"
             >
               <Play className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Cargar veredicto de prueba (Demo)</span>
+              <span>{t('disputeDemoBtn')}</span>
             </button>
           </div>
         )}
@@ -208,13 +215,13 @@ export default function DisputePage() {
         <div className="glass-card rounded-2xl p-6 space-y-5 border-cyan-500/30">
           <div className="flex items-center gap-2 text-white font-bold text-base border-b border-cyan-950 pb-3">
             <FileText className="w-5 h-5 text-cyan-400" />
-            <span>Submit Dispute Evidence</span>
+            <span>{t('disputeFormHeader')}</span>
           </div>
 
           <form onSubmit={handleEvaluateAI} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Escrow ID
+                {t('disputeEscrowId')}
               </label>
               <input
                 type="text"
@@ -226,7 +233,7 @@ export default function DisputePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Dispute Explanation
+                {t('disputeExplanation')}
               </label>
               <textarea
                 rows={4}
@@ -239,17 +246,17 @@ export default function DisputePage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Receipt / Chat Evidence
+                {t('disputeEvidenceLabel')}
               </label>
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-cyan-800/60 bg-[#030818] px-3 py-4 text-sm text-slate-300 transition hover:border-cyan-400 hover:text-white">
                 <Upload className="h-4 w-4 text-cyan-400" />
-                <span>{uploading ? 'Uploading...' : 'Upload receipt image'}</span>
+                <span>{uploading ? t('disputeUploading') : t('disputeUploadPrompt')}</span>
                 <input type="file" accept="image/*" className="hidden" onChange={handleReceiptUpload} />
               </label>
               {proofUrl ? (
-                <p className="mt-2 text-[11px] text-cyan-400 font-bold">Receipt preview ready</p>
+                <p className="mt-2 text-[11px] text-cyan-400 font-bold">{t('disputePreviewReady')}</p>
               ) : (
-                <p className="mt-2 text-[11px] text-slate-500">PNG, JPG or WEBP accepted</p>
+                <p className="mt-2 text-[11px] text-slate-500">{t('disputeAcceptedFormats')}</p>
               )}
             </div>
 
@@ -261,12 +268,12 @@ export default function DisputePage() {
               {evaluating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Evaluating Vision AI...</span>
+                  <span>{t('disputeEvaluatingBtn')}</span>
                 </>
               ) : (
                 <>
                   <Cpu className="w-4 h-4" />
-                  <span>Trigger AI Resolution</span>
+                  <span>{t('disputeTriggerBtn')}</span>
                 </>
               )}
             </button>
@@ -277,13 +284,13 @@ export default function DisputePage() {
         <div className="glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4 border-cyan-500/30">
           <div className="space-y-3">
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
-              Attached Evidence Preview
+              {t('disputeAttachedPreview')}
             </span>
             {proofUrl && (
               <div className="relative rounded-xl overflow-hidden border border-cyan-900/40 bg-[#030818] max-h-48">
                 <img
                   src={proofUrl}
-                  alt="Dispute evidence"
+                  alt={t('disputeEvidenceAlt')}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -292,17 +299,17 @@ export default function DisputePage() {
 
           <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-2 text-xs">
             <div className="flex items-center justify-between text-slate-400">
-              <span>Oracle Node:</span>
+              <span>{t('disputeOracleNode')}</span>
               <span className="text-cyan-400 font-mono font-semibold">GCP Cloud Run</span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
-              <span>On-Chain Contract Oracle:</span>
+              <span>{t('disputeOnChainOracle')}</span>
               <span className="text-cyan-300 font-mono text-[11px] truncate max-w-[150px]">
-                {onChainOracle ? `${onChainOracle.slice(0, 6)}...${onChainOracle.slice(-4)}` : 'Loading...'}
+                {onChainOracle ? `${onChainOracle.slice(0, 6)}...${onChainOracle.slice(-4)}` : (lang === 'es' ? 'Cargando...' : 'Loading...')}
               </span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
-              <span>Contract Verifier:</span>
+              <span>{t('disputeContractVerifier')}</span>
               <span className="text-cyan-400 font-mono font-semibold">Stylus ecrecover</span>
             </div>
           </div>
@@ -318,28 +325,28 @@ export default function DisputePage() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">AI Verdict & Cryptographic Signature</h3>
-                <p className="text-xs text-slate-400">Signed with Oracle ECDSA Key</p>
+                <h3 className="text-xl font-bold text-white">{t('disputeVerdictHeader')}</h3>
+                <p className="text-xs text-slate-400">{t('disputeSignedKey')}</p>
               </div>
             </div>
             <span className="text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full">
-              Confidence: {Math.round(verdict.confidenceScore * 100)}%
+              {t('disputeConfidence').replace('{score}', String(Math.round(verdict.confidenceScore * 100)))}
             </span>
           </div>
 
           <div className="space-y-4">
             <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-2">
-              <span className="text-[10px] text-cyan-400 uppercase tracking-wider font-bold">Legal Reasoning</span>
+              <span className="text-[10px] text-cyan-400 uppercase tracking-wider font-bold">{t('disputeLegalReasoning')}</span>
               <p className="text-xs text-slate-200 leading-relaxed font-medium">{verdict.reasoning}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="bg-[#060e28] p-3 rounded-xl border border-cyan-900/40">
-                <span className="text-slate-400 block mb-1">Declared Winner</span>
+                <span className="text-slate-400 block mb-1">{t('disputeDeclaredWinner')}</span>
                 <span className="font-mono text-cyan-300 font-bold truncate block">{verdict.winner}</span>
               </div>
               <div className="bg-[#060e28] p-3 rounded-xl border border-cyan-900/40">
-                <span className="text-slate-400 block mb-1">Signer Oracle Address</span>
+                <span className="text-slate-400 block mb-1">{t('disputeSignerOracle')}</span>
                 <span className="font-mono text-cyan-400 truncate block">{verdict.oracleAddress}</span>
               </div>
             </div>
@@ -383,20 +390,20 @@ export default function DisputePage() {
               {executingTx ? (
                 <>
                   <RefreshCw className="w-5 h-5 animate-spin" />
-                  <span>Ejecutando Pago en Stylus...</span>
+                  <span>{t('disputeExecutingPayout')}</span>
                 </>
               ) : (
                 <>
                   <Lock className="w-5 h-5" />
-                  <span>Execute On-Chain Payout via Stylus Contract</span>
+                  <span>{t('disputeExecutePayoutBtn')}</span>
                 </>
               )}
             </button>
           ) : (
             <div className="p-4 bg-cyan-950/40 border border-cyan-500/40 rounded-xl text-center space-y-2">
               <CheckCircle2 className="w-8 h-8 text-cyan-400 mx-auto" />
-              <h4 className="font-bold text-white">Dispute Resolved On-Chain!</h4>
-              <p className="text-xs text-slate-300">Funds transferred to winner on Arbitrum Sepolia.</p>
+              <h4 className="font-bold text-white">{t('disputeResolvedTitle')}</h4>
+              <p className="text-xs text-slate-300">{t('disputeResolvedSub')}</p>
               {txHash && (
                 <a
                   href={`https://sepolia.arbiscan.io/tx/${txHash}`}
@@ -404,7 +411,7 @@ export default function DisputePage() {
                   rel="noopener noreferrer"
                   className="inline-block text-xs font-mono text-cyan-400 hover:underline pt-1 font-bold"
                 >
-                  Ver transacción en Arbiscan ↗
+                  {t('disputeViewArbiscan')}
                 </a>
               )}
             </div>
@@ -414,4 +421,3 @@ export default function DisputePage() {
     </div>
   );
 }
-

@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Providers from './providers';
 import WelcomeGiftModal from '@/components/WelcomeGiftModal';
 import TmaActionProvider from '@/components/TmaActionProvider';
+import Footer from '@/components/Footer';
 import { initTelegramWebApp } from '@/lib/telegram';
 
 export default function RootLayout({
@@ -18,7 +19,7 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en" className="dark">
+    <html lang="es" className="dark">
       <head>
         <title>Lexius Pay — Autonomous AI P2P Escrow on Arbitrum Stylus</title>
         <meta
@@ -45,29 +46,9 @@ export default function RootLayout({
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
             {children}
           </main>
-          <footer className="border-t border-cyan-950/60 bg-[#030611]/80 backdrop-blur-md py-8 text-center text-xs text-slate-500 relative">
-            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <img
-                  src="/lexius-logo.png"
-                  alt="Lexius Logo"
-                  className="w-5 h-5 object-contain opacity-80"
-                />
-                <span className="font-heading font-semibold text-slate-400">
-                  Lexius Pay
-                </span>
-                <span className="text-[10px] font-mono text-cyan-400/80 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded-full">
-                  Arbitrum Stylus WASM
-                </span>
-              </div>
-              <p className="text-slate-500">
-                Lexius Pay &copy; 2026 — Built for ETH Lima 2026 on Arbitrum Stylus & Google Cloud Platform
-              </p>
-            </div>
-          </footer>
+          <Footer />
         </Providers>
       </body>
     </html>
   );
 }
-

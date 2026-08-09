@@ -97,7 +97,7 @@ export const dictionary = {
     pillar3Desc: 'Cero fricción de frases semilla. Conexión mediante Passkeys (FaceID / TouchID) o Google con Privy.',
 
     // Footer
-    footerText: 'Lexius Pay © 2026 — Desarrollado en Arbitrum Stylus y Google Cloud Platform',
+    footerText: 'Lexius Pay © 2026 — Desarrollado para ETH Lima 2026 en Arbitrum Stylus y Google Cloud Platform',
 
     // Dashboard
     dashTitle: 'Panel de Control de Pagos',
@@ -107,6 +107,37 @@ export const dictionary = {
     // Dispute page
     disputeTitle: 'Resolución de Disputa con IA',
     disputeSub: 'Carga pruebas de chat o fotos de recibos para mediación automática con GPT-4o Vision',
+    disputeCenterTitle: 'Centro Autónomo de Resolución de Disputas con IA',
+    disputeCenterSub: 'Envía los detalles del reclamo y capturas de pantalla de evidencia. Nuestro Mediador IA ejecuta un análisis de visión multimodal y firma un veredicto criptográfico ECDSA.',
+    disputeFormHeader: 'Enviar Evidencia de la Disputa',
+    disputeEscrowId: 'ID del Escrow',
+    disputeExplanation: 'Explicación de la Disputa',
+    disputeEvidenceLabel: 'Evidencia de Comprobante / Chat',
+    disputeUploading: 'Subiendo...',
+    disputeUploadPrompt: 'Subir imagen de comprobante',
+    disputePreviewReady: 'Vista previa del comprobante lista',
+    disputeAcceptedFormats: 'Acepta PNG, JPG o WEBP',
+    disputeTriggerBtn: 'Iniciar Resolución con IA',
+    disputeEvaluatingBtn: 'Evaluando con IA de Visión...',
+    disputeDemoBtn: 'Cargar veredicto de prueba (Demo)',
+    disputeAttachedPreview: 'Vista Previa de Evidencia Adjunta',
+    disputeEvidenceAlt: 'Evidencia de la disputa',
+    disputeOracleNode: 'Nodo Oráculo:',
+    disputeOnChainOracle: 'Oráculo del Contrato en Cadena:',
+    disputeContractVerifier: 'Verificador en Contrato:',
+    disputeVerdictHeader: 'Veredicto de IA y Firma Criptográfica',
+    disputeSignedKey: 'Firmado con Clave ECDSA del Oráculo',
+    disputeConfidence: 'Confianza: {score}%',
+    disputeLegalReasoning: 'Razonamiento Legal',
+    disputeDeclaredWinner: 'Ganador Declarado',
+    disputeSignerOracle: 'Dirección del Oráculo Firmante',
+    disputeExecutePayoutBtn: 'Ejecutar Pago en Cadena mediante Contrato Stylus',
+    disputeExecutingPayout: 'Ejecutando Pago en Stylus...',
+    disputeResolvedTitle: '¡Disputa Resuelta en la Cadena!',
+    disputeResolvedSub: 'Fondos transferidos al ganador en Arbitrum Sepolia.',
+    disputeViewArbiscan: 'Ver transacción en Arbiscan ↗',
+    disputeDefaultClaim: 'El vendedor envió un boleto PDF falsificado para el concierto. El código de barras falla la validación en la puerta del evento.',
+    disputeDemoReasoning: 'El OCR de GPT-4o Vision verificó el comprobante. Se detectó una inconsistencia de código de barras con la base de datos del evento. Reembolso concedido al Comprador.',
 
     // Pay page
     payTitle: 'Acuerdo de Escrow Lexius',
@@ -246,7 +277,7 @@ export const dictionary = {
     pillar3Desc: 'Zero seed-phrase friction. Connect via Passkeys (FaceID / TouchID) or Google social logins with Privy.',
 
     // Footer
-    footerText: 'Lexius Pay © 2026 — Built on Arbitrum Stylus & Google Cloud Platform',
+    footerText: 'Lexius Pay © 2026 — Built for ETH Lima 2026 on Arbitrum Stylus & Google Cloud Platform',
 
     // Dashboard
     dashTitle: 'Payment Dashboard',
@@ -256,6 +287,37 @@ export const dictionary = {
     // Dispute page
     disputeTitle: 'AI Dispute Resolution',
     disputeSub: 'Upload chat receipts or evidence photos for automated GPT-4o Vision mediation',
+    disputeCenterTitle: 'Autonomous AI Dispute Resolution Center',
+    disputeCenterSub: 'Submit claim details and evidence screenshots. Our AI Mediator runs multi-modal vision analysis and signs a cryptographic ECDSA verdict.',
+    disputeFormHeader: 'Submit Dispute Evidence',
+    disputeEscrowId: 'Escrow ID',
+    disputeExplanation: 'Dispute Explanation',
+    disputeEvidenceLabel: 'Receipt / Chat Evidence',
+    disputeUploading: 'Uploading...',
+    disputeUploadPrompt: 'Upload receipt image',
+    disputePreviewReady: 'Receipt preview ready',
+    disputeAcceptedFormats: 'PNG, JPG or WEBP accepted',
+    disputeTriggerBtn: 'Trigger AI Resolution',
+    disputeEvaluatingBtn: 'Evaluating Vision AI...',
+    disputeDemoBtn: 'Load test verdict (Demo)',
+    disputeAttachedPreview: 'Attached Evidence Preview',
+    disputeEvidenceAlt: 'Dispute evidence',
+    disputeOracleNode: 'Oracle Node:',
+    disputeOnChainOracle: 'On-Chain Contract Oracle:',
+    disputeContractVerifier: 'Contract Verifier:',
+    disputeVerdictHeader: 'AI Verdict & Cryptographic Signature',
+    disputeSignedKey: 'Signed with Oracle ECDSA Key',
+    disputeConfidence: 'Confidence: {score}%',
+    disputeLegalReasoning: 'Legal Reasoning',
+    disputeDeclaredWinner: 'Declared Winner',
+    disputeSignerOracle: 'Signer Oracle Address',
+    disputeExecutePayoutBtn: 'Execute On-Chain Payout via Stylus Contract',
+    disputeExecutingPayout: 'Executing Payout on Stylus...',
+    disputeResolvedTitle: 'Dispute Resolved On-Chain!',
+    disputeResolvedSub: 'Funds transferred to winner on Arbitrum Sepolia.',
+    disputeViewArbiscan: 'View transaction on Arbiscan ↗',
+    disputeDefaultClaim: 'The seller sent a forged PDF ticket for the concert. The barcode fails validation at the venue gate.',
+    disputeDemoReasoning: 'GPT-4o Vision OCR verified receipt. Barcode mismatch detected against event organizers database. Refund granted to Buyer.',
 
     // Pay page
     payTitle: 'Lexius Escrow Agreement',
