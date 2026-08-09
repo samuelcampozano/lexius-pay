@@ -11,8 +11,8 @@ export default function WalletLogin() {
   // Loading state — Privy initializing
   if (!ready) {
     return (
-      <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/60 border border-slate-700/50">
-        <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#070e24] border border-cyan-950">
+        <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
         <span className="text-xs text-slate-400">Connecting…</span>
       </div>
     );
@@ -37,7 +37,7 @@ export default function WalletLogin() {
       shortAddr;
 
     return (
-      <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700/60 rounded-xl p-1.5 pl-3 backdrop-blur-sm">
+      <div className="flex items-center gap-2.5 bg-[#070e24] border border-cyan-500/30 rounded-xl p-1.5 pl-3 backdrop-blur-md shadow-lg shadow-cyan-500/10">
         {/* Avatar / status dot */}
         <div className="relative flex-shrink-0">
           {googleMeta?.picture ? (
@@ -45,22 +45,22 @@ export default function WalletLogin() {
             <img
               src={googleMeta.picture}
               alt="Avatar"
-              className="w-6 h-6 rounded-full ring-1 ring-blue-500/40"
+              className="w-6.5 h-6.5 rounded-full ring-1 ring-cyan-400/60"
             />
           ) : (
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white">
+            <div className="w-6.5 h-6.5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-[10px] font-bold text-white shadow-inner">
               {displayName.slice(0, 1).toUpperCase()}
             </div>
           )}
-          <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-1 ring-slate-900" />
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-[#040814]" />
         </div>
 
         {/* Name + address */}
         <div className="flex flex-col leading-tight">
-          <span className="text-xs font-medium text-slate-200 max-w-[100px] truncate">
+          <span className="text-xs font-semibold text-slate-100 max-w-[110px] truncate">
             {displayName}
           </span>
-          <span className="text-[10px] font-mono text-slate-500">{shortAddr}</span>
+          <span className="text-[10px] font-mono text-cyan-300/80">{shortAddr}</span>
         </div>
 
         {/* Disconnect */}
@@ -90,18 +90,19 @@ export default function WalletLogin() {
       aria-label="Connect wallet or sign in"
       className={[
         'group flex items-center gap-2 px-4 py-2.5',
-        'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600',
-        'hover:from-blue-500 hover:to-purple-500',
-        'active:from-blue-700 active:to-purple-700',
-        'text-white text-sm font-semibold rounded-xl',
-        'shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35',
+        'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600',
+        'hover:from-cyan-400 hover:to-blue-500',
+        'active:from-cyan-600 active:to-blue-700',
+        'text-white text-xs font-bold rounded-xl',
+        'shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40',
         'transition-all duration-200 hover:-translate-y-px active:translate-y-0',
         'disabled:opacity-60 disabled:cursor-not-allowed',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cyan-500',
       ].join(' ')}
     >
-      <ShieldCheck className="w-4 h-4 opacity-90" />
+      <ShieldCheck className="w-4 h-4 opacity-90 text-white" />
       <span>Connect</span>
     </button>
   );
 }
+

@@ -178,14 +178,14 @@ export default function DisputePage() {
     <div className="max-w-3xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider shadow-inner">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
           <span>GCP Cloud Run + OpenAI GPT-4o Vision</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
           Autonomous AI Dispute Resolution Center
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+        <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
           Submit claim details and evidence screenshots. Our AI Mediator runs multi-modal vision analysis and signs a cryptographic ECDSA verdict.
         </p>
 
@@ -194,9 +194,9 @@ export default function DisputePage() {
           <div className="pt-2">
             <button
               onClick={handleLoadMockData}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#070e24] hover:bg-[#0b173c] text-cyan-300 rounded-xl text-xs font-semibold border border-cyan-900/40 transition"
             >
-              <Play className="w-3.5 h-3.5 text-purple-400" />
+              <Play className="w-3.5 h-3.5 text-cyan-400" />
               <span>Cargar veredicto de prueba (Demo)</span>
             </button>
           </div>
@@ -205,9 +205,9 @@ export default function DisputePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Form Column */}
-        <div className="glass-card rounded-2xl p-6 space-y-5">
-          <div className="flex items-center gap-2 text-white font-bold text-base border-b border-slate-800 pb-3">
-            <FileText className="w-5 h-5 text-purple-400" />
+        <div className="glass-card rounded-2xl p-6 space-y-5 border-cyan-500/30">
+          <div className="flex items-center gap-2 text-white font-bold text-base border-b border-cyan-950 pb-3">
+            <FileText className="w-5 h-5 text-cyan-400" />
             <span>Submit Dispute Evidence</span>
           </div>
 
@@ -220,7 +220,7 @@ export default function DisputePage() {
                 type="text"
                 disabled
                 value={`Escrow #${escrowId}`}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-400 font-mono text-xs"
+                className="w-full px-3.5 py-2.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-cyan-300 font-mono text-xs font-semibold"
               />
             </div>
 
@@ -233,7 +233,7 @@ export default function DisputePage() {
                 required
                 value={claimText}
                 onChange={(e) => setClaimText(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 text-xs"
+                className="w-full px-3.5 py-2.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
               />
             </div>
 
@@ -241,13 +241,13 @@ export default function DisputePage() {
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Receipt / Chat Evidence
               </label>
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-950 px-3 py-4 text-sm text-slate-300 transition hover:border-purple-500 hover:text-white">
-                <Upload className="h-4 w-4" />
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-cyan-800/60 bg-[#030818] px-3 py-4 text-sm text-slate-300 transition hover:border-cyan-400 hover:text-white">
+                <Upload className="h-4 w-4 text-cyan-400" />
                 <span>{uploading ? 'Uploading...' : 'Upload receipt image'}</span>
                 <input type="file" accept="image/*" className="hidden" onChange={handleReceiptUpload} />
               </label>
               {proofUrl ? (
-                <p className="mt-2 text-[11px] text-emerald-400">Receipt preview ready</p>
+                <p className="mt-2 text-[11px] text-cyan-400 font-bold">Receipt preview ready</p>
               ) : (
                 <p className="mt-2 text-[11px] text-slate-500">PNG, JPG or WEBP accepted</p>
               )}
@@ -256,7 +256,7 @@ export default function DisputePage() {
             <button
               type="submit"
               disabled={evaluating}
-              className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/25 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+              className="w-full py-3.5 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
             >
               {evaluating ? (
                 <>
@@ -274,13 +274,13 @@ export default function DisputePage() {
         </div>
 
         {/* Evidence & Live Status Column */}
-        <div className="glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
+        <div className="glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4 border-cyan-500/30">
           <div className="space-y-3">
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
               Attached Evidence Preview
             </span>
             {proofUrl && (
-              <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 max-h-48">
+              <div className="relative rounded-xl overflow-hidden border border-cyan-900/40 bg-[#030818] max-h-48">
                 <img
                   src={proofUrl}
                   alt="Dispute evidence"
@@ -290,20 +290,20 @@ export default function DisputePage() {
             )}
           </div>
 
-          <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+          <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-2 text-xs">
             <div className="flex items-center justify-between text-slate-400">
               <span>Oracle Node:</span>
-              <span className="text-purple-400 font-mono">GCP Cloud Run</span>
+              <span className="text-cyan-400 font-mono font-semibold">GCP Cloud Run</span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
               <span>On-Chain Contract Oracle:</span>
-              <span className="text-emerald-400 font-mono text-[11px] truncate max-w-[150px]">
+              <span className="text-cyan-300 font-mono text-[11px] truncate max-w-[150px]">
                 {onChainOracle ? `${onChainOracle.slice(0, 6)}...${onChainOracle.slice(-4)}` : 'Loading...'}
               </span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
               <span>Contract Verifier:</span>
-              <span className="text-blue-400 font-mono">Stylus ecrecover</span>
+              <span className="text-cyan-400 font-mono font-semibold">Stylus ecrecover</span>
             </div>
           </div>
         </div>
@@ -311,10 +311,10 @@ export default function DisputePage() {
 
       {/* AI Verdict & Execution Modal */}
       {verdict && (
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-purple-500/40 glow-purple animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-cyan-500/40 glow-cyan animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="flex items-center justify-between border-b border-cyan-950 pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500/10 text-purple-400 rounded-xl">
+              <div className="p-2 bg-cyan-950/80 text-cyan-400 rounded-xl border border-cyan-500/30">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
@@ -322,31 +322,31 @@ export default function DisputePage() {
                 <p className="text-xs text-slate-400">Signed with Oracle ECDSA Key</p>
               </div>
             </div>
-            <span className="text-xs font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 px-3 py-1 rounded-full">
+            <span className="text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full">
               Confidence: {Math.round(verdict.confidenceScore * 100)}%
             </span>
           </div>
 
           <div className="space-y-4">
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-              <span className="text-[10px] text-purple-400 uppercase tracking-wider font-semibold">Legal Reasoning</span>
+            <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-2">
+              <span className="text-[10px] text-cyan-400 uppercase tracking-wider font-bold">Legal Reasoning</span>
               <p className="text-xs text-slate-200 leading-relaxed font-medium">{verdict.reasoning}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                <span className="text-slate-500 block mb-1">Declared Winner</span>
-                <span className="font-mono text-emerald-400 font-bold truncate block">{verdict.winner}</span>
+              <div className="bg-[#060e28] p-3 rounded-xl border border-cyan-900/40">
+                <span className="text-slate-400 block mb-1">Declared Winner</span>
+                <span className="font-mono text-cyan-300 font-bold truncate block">{verdict.winner}</span>
               </div>
-              <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                <span className="text-slate-500 block mb-1">Signer Oracle Address</span>
-                <span className="font-mono text-blue-400 truncate block">{verdict.oracleAddress}</span>
+              <div className="bg-[#060e28] p-3 rounded-xl border border-cyan-900/40">
+                <span className="text-slate-400 block mb-1">Signer Oracle Address</span>
+                <span className="font-mono text-cyan-400 truncate block">{verdict.oracleAddress}</span>
               </div>
             </div>
 
             {/* Security Warning: Oracle Mismatch Check */}
             {isOracleMismatch && (
-              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-3 text-amber-300 text-xs">
+              <div className="p-4 bg-amber-950/40 border border-amber-500/40 rounded-xl flex items-start gap-3 text-amber-300 text-xs">
                 <AlertTriangle className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
                 <div className="space-y-1">
                   <span className="font-bold block">⚠️ Advertencia de Seguridad: Desajuste de Oráculo</span>
@@ -358,9 +358,9 @@ export default function DisputePage() {
             )}
 
             {/* Cryptographic Signature Breakdown */}
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-900 font-mono text-[10px] space-y-1 text-slate-400">
+            <div className="bg-[#020612] p-3 rounded-xl border border-cyan-950 font-mono text-[10px] space-y-1 text-cyan-300">
               <div className="truncate">sig: {verdict.signature}</div>
-              <div className="flex gap-4 text-slate-500">
+              <div className="flex gap-4 text-slate-400">
                 <span>v: {verdict.v}</span>
                 <span className="truncate">r: {verdict.r.slice(0, 16)}...</span>
                 <span className="truncate">s: {verdict.s.slice(0, 16)}...</span>
@@ -368,7 +368,7 @@ export default function DisputePage() {
             </div>
 
             {txError && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-mono">
+              <div className="p-3 bg-red-950/40 border border-red-500/40 rounded-xl text-red-400 text-xs font-mono">
                 Error de Transacción: {txError}
               </div>
             )}
@@ -378,7 +378,7 @@ export default function DisputePage() {
             <button
               onClick={handleExecuteOnChain}
               disabled={executingTx}
-              className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50"
+              className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50"
             >
               {executingTx ? (
                 <>
@@ -393,16 +393,16 @@ export default function DisputePage() {
               )}
             </button>
           ) : (
-            <div className="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-center space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
+            <div className="p-4 bg-cyan-950/40 border border-cyan-500/40 rounded-xl text-center space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-cyan-400 mx-auto" />
               <h4 className="font-bold text-white">Dispute Resolved On-Chain!</h4>
-              <p className="text-xs text-slate-400">Funds transferred to winner on Arbitrum Sepolia.</p>
+              <p className="text-xs text-slate-300">Funds transferred to winner on Arbitrum Sepolia.</p>
               {txHash && (
                 <a
                   href={`https://sepolia.arbiscan.io/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block text-xs font-mono text-emerald-400 hover:underline pt-1"
+                  className="inline-block text-xs font-mono text-cyan-400 hover:underline pt-1 font-bold"
                 >
                   Ver transacción en Arbiscan ↗
                 </a>
@@ -414,3 +414,4 @@ export default function DisputePage() {
     </div>
   );
 }
+

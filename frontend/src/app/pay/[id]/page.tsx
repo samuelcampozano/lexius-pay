@@ -143,14 +143,15 @@ export default function PaymentPage() {
     try {
       const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
       const tgContext = JSON.parse(localStorage.getItem(`lexius_tg_msg_${escrowId}`) || '{}');
-      if (!tgContext.chatId || !tgContext.messageId) return;
+      const paramChatId = searchParams.get('chatId') || searchParams.get('chat_id') || tgContext.chatId;
+      const paramMessageId = searchParams.get('messageId') || searchParams.get('message_id') || tgContext.messageId;
 
       await fetch(`${oracleUrl}/api/telegram/update-escrow-status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chatId: tgContext.chatId,
-          messageId: tgContext.messageId,
+          chatId: paramChatId || undefined,
+          messageId: paramMessageId ? Number(paramMessageId) : undefined,
           escrowId,
           newStatus,
           amount,
