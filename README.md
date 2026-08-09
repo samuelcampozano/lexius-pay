@@ -50,7 +50,7 @@ Permite que cualquier persona compre o venda productos y servicios en redes soci
 1. **Links de Pago Sociales en 10s:** El vendedor crea un acuerdo de custodia mediante un link compartido directo en Telegram o la Web.
 2. **Contratos en Stylus (Rust / WASM):** Los fondos se congelan en un smart contract en Rust compilado a WASM en Arbitrum Sepolia, logrando velocidad ultra rápida y comisiones de gas de centavos.
 3. **Login Web2 (Account Abstraction):** Autenticación en 1-clic con Passkeys (FaceID / TouchID) o Google mediante Privy, generando wallets embebidas invisibles.
-4. **Mediación por IA (GCP Cloud Run):** GPT-4o Vision procesa las capturas de chat y comprobantes de pago subidos a **Google Cloud Storage (GCS)** y firma un veredicto ECDSA con su clave resguardada en **GCP Secret Manager**.
+4. **Árbitro IA Bilateral y Anti-Fraude (GCP Cloud Run):** GPT-4o Vision ejecuta un careo entre las pruebas del comprador (reclamo + foto del ítem) y del vendedor (guía de courier + foto de embalaje). Aplica la **Regla de Empaque Contextual** (rechaza fotos de stock sin empaque) y firma un veredicto ECDSA resguardado en **GCP Secret Manager**.
 
 ---
 
@@ -72,13 +72,13 @@ Permite que cualquier persona compre o venda productos y servicios en redes soci
 * **Stack:** Rust, `stylus-sdk`, `alloy-primitives`, Arbitrum Sepolia.
 * **Descripción:** Ninguna de las partes puede manipular los fondos. La custodia y la lógica de liberación (`release`, `refund`) o resolución de disputas (`resolve_dispute_with_signature`) son 100% inmutables y verificables on-chain.
 
-### ⚖️ Pilar 2: Mediación Autónoma por IA (The AI Mediator Agent)
+### ⚖️ Pilar 2: Mediación Autónoma por IA Bilateral & Anti-Fraude (AI Mediator Agent)
 * **Stack:** Express, Node.js, OpenAI GPT-4o Vision, Ethers.js (ECDSA Signer).
-* **Descripción:** Reemplazo completo de árbitros humanos. El Oráculo analiza evidencias en imágenes y texto con OCR, evalúa el acuerdo y emite un veredicto estructurado en JSON firmado digitalmente (`v, r, s`).
+* **Descripción:** Reemplazo inteligente de árbitros humanos con **Protocolo de Evidencia Bilateral**. Analiza en paralelo reclamos del comprador y comprobantes de despacho/guías de envío del vendedor. Incorpora la **Regla de Empaque Contextual** (identifica fotos de stock descontextualizadas sin empaque) y devuelve veredictos en JSON firmado digitalmente (`v, r, s`), con alertas `fraudRiskFlag` y puntaje de autenticidad `evidenceAuthenticityScore`.
 
 ### 📱 Pilar 3: Experiencia Social Sin Fricción (Social UX)
 * **Stack:** Telegram Mini App SDK (`@twa-dev/sdk`), Next.js 14, Privy, Viem.
-* **Descripción:** Experiencia móvil integrada en Telegram.Onboarding instantáneo sin requerir extensiones de navegador ni claves privadas manuales.
+* **Descripción:** Experiencia móvil integrada en Telegram. Onboarding instantáneo sin requerir extensiones de navegador ni claves privadas manuales.
 
 ### ☁️ Pilar 4: Infraestructura Cloud Empresarial (GCP Stack)
 * **Stack:** Google Cloud Run, GCP Secret Manager, Google Cloud Storage (GCS), Docker.
