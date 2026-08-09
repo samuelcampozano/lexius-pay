@@ -91,14 +91,14 @@ export default function UseCaseSelector() {
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Section Header */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
-          <Zap className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider shadow-inner">
+          <Zap className="w-3.5 h-3.5 text-cyan-400" />
           <span>{lang === 'es' ? 'Casos de Uso de la Vida Real' : 'Real-World Use Cases'}</span>
         </div>
         <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
           {lang === 'es' ? '¿Qué Problemas Resuelve Lexius Pay?' : 'What Problems Does Lexius Pay Solve?'}
         </h2>
-        <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+        <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
           {lang === 'es'
             ? 'Eliminamos la desconfianza en transacciones peer-to-peer en redes sociales mediante custodia criptográfica WASM y mediación por IA.'
             : 'We eliminate P2P friction on social networks using WASM smart contracts and autonomous AI dispute resolution.'}
@@ -118,21 +118,21 @@ export default function UseCaseSelector() {
               onClick={() => setActiveTab(key)}
               className={`p-4 rounded-2xl border text-left transition-all duration-200 flex items-center gap-3.5 ${
                 isActive
-                  ? 'bg-slate-900 border-blue-500/60 shadow-lg shadow-blue-500/10 scale-[1.02]'
-                  : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700 text-slate-400'
+                  ? 'bg-[#070e24] border-cyan-500/60 shadow-lg shadow-cyan-500/20 scale-[1.02]'
+                  : 'bg-[#030818] border-cyan-950/60 hover:border-cyan-800/60 text-slate-400'
               }`}
             >
               <div
                 className={`p-3 rounded-xl ${
                   isActive
-                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                    : 'bg-slate-800/60 text-slate-400'
+                    ? 'bg-cyan-950/80 text-cyan-400 border border-cyan-500/40 shadow-inner'
+                    : 'bg-slate-900/60 text-slate-400'
                 }`}
               >
                 <Icon className="w-5 h-5" />
               </div>
               <div className="space-y-0.5">
-                <span className="text-xs font-bold text-white block">{uc.title}</span>
+                <span className={`text-xs font-bold block ${isActive ? 'text-cyan-300' : 'text-white'}`}>{uc.title}</span>
                 <span className="text-[11px] text-slate-400 block truncate">{uc.subtitle}</span>
               </div>
             </button>
@@ -141,11 +141,11 @@ export default function UseCaseSelector() {
       </div>
 
       {/* Active Tab Detailed View */}
-      <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-blue-500/30 glow-blue animate-in fade-in duration-300">
+      <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-cyan-500/30 glow-cyan animate-in fade-in duration-300">
         {/* Top Title & Target Badge */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-cyan-950/80 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <div className="p-3 rounded-xl bg-cyan-950/80 text-cyan-400 border border-cyan-500/30">
               <current.icon className="w-6 h-6" />
             </div>
             <div>
@@ -153,7 +153,7 @@ export default function UseCaseSelector() {
               <p className="text-xs text-slate-400">{current.subtitle}</p>
             </div>
           </div>
-          <span className="text-xs font-mono font-semibold bg-blue-500/10 text-blue-300 border border-blue-500/20 px-3 py-1 rounded-full">
+          <span className="text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full">
             👤 {current.badge}
           </span>
         </div>
@@ -161,7 +161,7 @@ export default function UseCaseSelector() {
         {/* Two-Column Comparison: Pain Point vs Lexius Shield */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Pain Point Column */}
-          <div className="bg-red-950/20 border border-red-500/30 rounded-xl p-5 space-y-3 relative overflow-hidden">
+          <div className="bg-red-950/30 border border-red-500/30 rounded-xl p-5 space-y-3 relative overflow-hidden">
             <div className="flex items-center gap-2 text-red-400 font-bold text-xs uppercase tracking-wider">
               <AlertTriangle className="w-4 h-4" />
               <span>{lang === 'es' ? 'El Problema Actual' : 'The Pain Point'}</span>
@@ -172,8 +172,8 @@ export default function UseCaseSelector() {
           </div>
 
           {/* Lexius Shield Column */}
-          <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-xl p-5 space-y-3 relative overflow-hidden">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <div className="bg-cyan-950/30 border border-cyan-500/40 rounded-xl p-5 space-y-3 relative overflow-hidden">
+            <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4" />
               <span>{lang === 'es' ? 'La Solución Lexius Pay' : 'The Lexius Shield'}</span>
             </div>
@@ -190,12 +190,12 @@ export default function UseCaseSelector() {
             return (
               <div
                 key={idx}
-                className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-center space-y-1"
+                className="bg-[#030818] border border-cyan-900/40 rounded-xl p-3.5 text-center space-y-1"
               >
-                <div className="flex justify-center text-blue-400 mb-1">
+                <div className="flex justify-center text-cyan-400 mb-1">
                   <MIcon className="w-4 h-4" />
                 </div>
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block">
                   {m.label}
                 </span>
                 <span className="text-sm sm:text-base font-extrabold text-white font-mono block">
@@ -209,3 +209,4 @@ export default function UseCaseSelector() {
     </div>
   );
 }
+

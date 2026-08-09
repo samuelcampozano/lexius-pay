@@ -18,7 +18,7 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <title>Lexius Pay — Autonomous AI P2P Escrow on Arbitrum Stylus</title>
         <meta
@@ -29,23 +29,45 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1"
         />
+        <link rel="icon" href="/lexius-logo.png" type="image/png" />
+        <link rel="shortcut icon" href="/lexius-logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/lexius-logo.png" />
         <script src="https://telegram.org/js/telegram-web-app.js" async></script>
       </head>
-      <body className="min-h-screen bg-[#050811] text-slate-100 antialiased flex flex-col">
+      <body className="min-h-screen bg-[#040814] text-slate-100 antialiased flex flex-col relative selection:bg-cyan-500/30 selection:text-cyan-200">
+        {/* Ambient Top Light Beam */}
+        <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-cyan-500/15 via-blue-600/5 to-transparent blur-3xl opacity-70 -z-10" />
+
         <Providers>
           <TmaActionProvider />
           <WelcomeGiftModal />
           <Navbar />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
             {children}
           </main>
-          <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
-            <p>
-              Lexius Pay &copy; 2026 — Built on Arbitrum Stylus & Google Cloud Platform
-            </p>
+          <footer className="border-t border-cyan-950/60 bg-[#030611]/80 backdrop-blur-md py-8 text-center text-xs text-slate-500 relative">
+            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <img
+                  src="/lexius-logo.png"
+                  alt="Lexius Logo"
+                  className="w-5 h-5 object-contain opacity-80"
+                />
+                <span className="font-heading font-semibold text-slate-400">
+                  Lexius Pay
+                </span>
+                <span className="text-[10px] font-mono text-cyan-400/80 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded-full">
+                  Arbitrum Stylus WASM
+                </span>
+              </div>
+              <p className="text-slate-500">
+                Lexius Pay &copy; 2026 — Built for ETH Lima 2026 on Arbitrum Stylus & Google Cloud Platform
+              </p>
+            </div>
           </footer>
         </Providers>
       </body>
     </html>
   );
 }
+

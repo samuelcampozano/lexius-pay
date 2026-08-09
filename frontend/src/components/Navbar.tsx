@@ -3,39 +3,59 @@
 import React from 'react';
 import Link from 'next/link';
 import WalletLogin from './WalletLogin';
-import { Shield, Sparkles, LayoutDashboard, Globe } from 'lucide-react';
+import { LayoutDashboard, Shield } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
   const { lang, setLang, t } = useLanguage();
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 w-full border-b border-cyan-950/60 bg-[#040814]/85 backdrop-blur-xl transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-600 p-0.5 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-              <Shield className="w-5 h-5 text-blue-400" />
+        {/* Brand Logo with glowing aura */}
+        <Link href="/" className="flex items-center gap-3.5 group">
+          <div className="relative flex items-center justify-center">
+            {/* Glowing cyan background aura ring */}
+            <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 opacity-60 blur-sm group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative w-10 h-10 rounded-xl bg-[#060c21] border border-cyan-500/30 p-1 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shadow-lg shadow-cyan-500/20">
+              <img
+                src="/lexius-logo.png"
+                alt="Lexius Pay Logo"
+                className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(0,229,255,0.7)]"
+              />
             </div>
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="font-heading font-bold text-lg text-white tracking-tight">Lexius</span>
-              <span className="font-heading font-bold text-lg text-blue-400">Pay</span>
-              <span className="text-[10px] font-mono uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded-full">Stylus</span>
+              <span className="font-heading font-extrabold text-xl tracking-tight text-gradient-silver">
+                LEXIUS
+              </span>
+              <span className="font-heading font-extrabold text-xl tracking-tight text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.4)]">
+                PAY
+              </span>
+              <span className="text-[10px] font-mono font-bold uppercase bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full shadow-inner">
+                WASM
+              </span>
             </div>
-            <span className="text-[10px] text-slate-400 font-medium">Escrow P2P Autónomo</span>
+            <span className="text-[10px] text-slate-400 font-medium tracking-wide">
+              Arbitrum Stylus P2P Escrow
+            </span>
           </div>
         </Link>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
-          <Link href="/" className="hover:text-blue-400 transition-colors">
+        <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-300">
+          <Link
+            href="/"
+            className="hover:text-cyan-400 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-cyan-400 hover:after:w-full after:transition-all"
+          >
             {t('navCreate')}
           </Link>
-          <Link href="/dashboard" className="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
-            <LayoutDashboard className="w-4 h-4 text-slate-400" />
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-cyan-400 hover:after:w-full after:transition-all"
+          >
+            <LayoutDashboard className="w-4 h-4 text-cyan-400/70" />
             <span>{t('navDashboard')}</span>
           </Link>
         </div>
@@ -43,12 +63,12 @@ export default function Navbar() {
         {/* Controls: Language Switcher + Wallet Login */}
         <div className="flex items-center gap-3">
           {/* Language Switcher Pill */}
-          <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 text-xs font-semibold shadow-inner">
+          <div className="flex items-center bg-[#070e24] border border-cyan-900/40 rounded-xl p-1 text-xs font-semibold shadow-inner">
             <button
               onClick={() => setLang('es')}
               className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
                 lang === 'es'
-                  ? 'bg-blue-600 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-md shadow-cyan-500/25'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -58,7 +78,7 @@ export default function Navbar() {
               onClick={() => setLang('en')}
               className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
                 lang === 'en'
-                  ? 'bg-blue-600 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-md shadow-cyan-500/25'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -72,3 +92,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
