@@ -302,7 +302,7 @@ export function useEscrowFlow() {
             abi: STYLUS_ESCROW_ABI,
             functionName: 'getEscrowCount',
           })) as bigint;
-          targetEscrowId = newCount;
+          targetEscrowId = newCount - BigInt(1);
 
         } catch (createError) {
           console.error("[useEscrowFlow] Error durante la inicialización de emergencia:", createError);
