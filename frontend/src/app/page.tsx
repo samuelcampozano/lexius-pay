@@ -214,42 +214,56 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-20 pb-16">
+    <div className="space-y-24 pb-16 relative">
       {/* HERO SECTION */}
-      <section className="relative text-center max-w-4xl mx-auto pt-6 space-y-6">
+      <section className="relative text-center max-w-4xl mx-auto pt-6 space-y-8">
         {/* Glow backdrop */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-blue-600/15 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-r from-cyan-500/20 via-blue-600/15 to-indigo-600/10 blur-[130px] rounded-full pointer-events-none -z-10" />
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider shadow-inner">
-          <Zap className="w-3.5 h-3.5" />
+        {/* Hero Logo Emblem Presentation */}
+        <div className="flex justify-center mb-2">
+          <div className="relative group cursor-pointer">
+            <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-600 opacity-50 blur-md group-hover:opacity-100 transition-opacity duration-500 animate-pulse-cyan" />
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-[#060d24] border border-cyan-500/40 p-3.5 flex items-center justify-center shadow-2xl shadow-cyan-500/30 animate-float-logo">
+              <img
+                src="/lexius-logo.png"
+                alt="Lexius Shield Logo"
+                className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(0,229,255,0.8)]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider shadow-lg shadow-cyan-500/10">
+          <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
           <span>{t('heroBadge')}</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.15]">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.12]">
           {t('heroTitle1')}
-          <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+          <span className="text-gradient-cyan drop-shadow-[0_0_20px_rgba(0,229,255,0.3)]">
             {t('heroTitleGradient')}
           </span>
         </h1>
 
-        <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed max-w-2xl mx-auto">
+        <p className="text-slate-300 text-lg sm:text-xl font-normal leading-relaxed max-w-2xl mx-auto">
           {t('heroSub')}
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <a
             href="#generator"
-            className="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center gap-2 text-base"
+            className="px-7 py-4 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all flex items-center gap-2 text-base active:scale-98"
           >
-            <LinkIcon className="w-5 h-5" />
+            <LinkIcon className="w-5 h-5 text-white" />
             <span>{t('btnGenerate')}</span>
           </a>
           <a
             href="#ai-simulator"
-            className="px-6 py-3.5 bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 border border-purple-500/30 font-semibold rounded-xl transition-all flex items-center gap-2 text-base"
+            className="px-7 py-4 bg-[#08122c] hover:bg-[#0c1b42] text-cyan-200 border border-cyan-500/30 font-semibold rounded-xl transition-all flex items-center gap-2 text-base shadow-lg"
           >
-            <Sparkles className="w-5 h-5 text-purple-400" />
+            <Sparkles className="w-5 h-5 text-cyan-400" />
             <span>{t('btnDemo')}</span>
           </a>
         </div>
@@ -257,18 +271,18 @@ export default function HomePage() {
 
       {/* INTERACTIVE LINK GENERATOR MODAL */}
       <section id="generator" className="max-w-xl mx-auto scroll-mt-24">
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 glow-blue">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="glass-card rounded-3xl p-6 sm:p-9 space-y-6 border-cyan-500/30 shadow-2xl shadow-cyan-500/10">
+          <div className="flex items-center justify-between border-b border-cyan-950/80 pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
-                <LinkIcon className="w-6 h-6" />
+              <div className="w-11 h-11 bg-cyan-950/80 text-cyan-400 rounded-2xl border border-cyan-500/30 flex items-center justify-center shadow-inner">
+                <LinkIcon className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">{t('genTitle')}</h2>
                 <p className="text-xs text-slate-400">{t('genSub')}</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-full uppercase">
+            <span className="text-[10px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-2.5 py-1 rounded-full uppercase shadow-inner">
               {t('genWasmBadge')}
             </span>
           </div>
@@ -285,7 +299,7 @@ export default function HomePage() {
                   placeholder={t('placeholderDesc')}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-4 py-3.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-sm transition-all"
                 />
               </div>
 
@@ -311,15 +325,15 @@ export default function HomePage() {
                         }
                       }
                     }}
-                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm font-mono"
+                    className="w-full px-4 py-3.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-sm font-mono transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                     {t('labelNetwork')}
                   </label>
-                  <div className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-blue-400 font-medium text-sm flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                  <div className="w-full px-4 py-3.5 bg-[#060e28] border border-cyan-900/40 rounded-xl text-cyan-300 font-semibold text-sm flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
                     Arbitrum Sepolia
                   </div>
                 </div>
@@ -334,7 +348,7 @@ export default function HomePage() {
                   placeholder={t('placeholderSellerName')}
                   value={sellerName}
                   onChange={(e) => setSellerName(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-4 py-3.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-sm transition-all"
                 />
               </div>
 
@@ -347,44 +361,44 @@ export default function HomePage() {
                   placeholder={t('placeholderSeller')}
                   value={sellerAddress}
                   onChange={(e) => setSellerAddress(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 text-sm font-mono"
+                  className="w-full px-4 py-3.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-sm font-mono transition-all"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-base active:scale-95"
+                className="w-full py-4 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all flex items-center justify-center gap-2 text-base active:scale-98"
               >
-                <Sparkles className="w-5 h-5" />
+                <Sparkles className="w-5 h-5 text-white" />
                 <span>{t('btnCreate')}</span>
               </button>
             </form>
           ) : (
             <div className="space-y-6 text-center animate-in fade-in zoom-in duration-300">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/20">
-                <CheckCircle2 className="w-6 h-6" />
+              <div className="w-14 h-14 rounded-2xl bg-cyan-950/80 text-cyan-400 flex items-center justify-center mx-auto border border-cyan-500/30 shadow-lg shadow-cyan-500/20">
+                <CheckCircle2 className="w-7 h-7" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-white">{t('createdTitle')}</h3>
                 <p className="text-xs text-slate-400">{t('createdSub')}</p>
               </div>
 
-              <div className="space-y-3 rounded-xl border border-slate-800 bg-slate-950 p-4 text-left">
-                <div className="text-xs text-slate-400">
-                  <p className="font-semibold text-white">{description}</p>
-                  <p className="mt-1">Amount: {amount} USDC</p>
-                  {sellerName ? <p className="mt-1">{t('paySeller')}: {sellerName}</p> : null}
-                  {sellerAddress ? <p className="mt-1 font-mono text-[11px]">{sellerAddress}</p> : null}
+              <div className="space-y-3 rounded-2xl border border-cyan-900/40 bg-[#030818] p-4 text-left">
+                <div className="text-xs text-slate-300 space-y-1">
+                  <p className="font-semibold text-white text-sm">{description}</p>
+                  <p className="text-cyan-400 font-mono">Monto: {amount} USDC</p>
+                  {sellerName ? <p className="text-slate-400">{t('paySeller')}: {sellerName}</p> : null}
+                  {sellerAddress ? <p className="font-mono text-[11px] text-slate-400">{sellerAddress}</p> : null}
                 </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-mono text-blue-400 truncate">
+                <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-900">
+                  <span className="text-xs font-mono text-cyan-300 truncate">
                     {typeof window !== 'undefined'
                       ? `${window.location.origin}${generatedLink ?? `/pay/${generatedId}`}`
                       : `${generatedLink ?? `/pay/${generatedId}`}`}
                   </span>
                   <button
                     onClick={copyToClipboard}
-                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                    className="px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shrink-0 shadow-md shadow-cyan-600/20"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>{isCopied ? t('copied') : t('btnCopy')}</span>
@@ -393,7 +407,7 @@ export default function HomePage() {
               </div>
 
               {/* Share via Telegram Bot */}
-              <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-4 space-y-3">
+              <div className="rounded-2xl border border-cyan-500/30 bg-cyan-950/30 p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Send className="w-4 h-4 text-cyan-400" />
                   <span className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">
@@ -406,12 +420,12 @@ export default function HomePage() {
                     placeholder={t('tgPlaceholder')}
                     value={telegramChatId}
                     onChange={(e) => setTelegramChatId(e.target.value)}
-                    className="flex-1 px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs font-mono"
+                    className="flex-1 px-3 py-2.5 bg-[#030818] border border-cyan-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs font-mono"
                   />
                   <button
                     onClick={shareToTelegram}
                     disabled={!telegramChatId.trim() || tgShareStatus === 'sending'}
-                    className="px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                    className="px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shrink-0 shadow-md shadow-cyan-600/20"
                   >
                     {tgShareStatus === 'sending' ? (
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -444,7 +458,7 @@ export default function HomePage() {
               <div className="flex gap-3">
                 <Link
                   href={generatedLink ?? `/pay/${generatedId}`}
-                  className="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20"
                 >
                   <span>{t('btnPayPage')}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -456,7 +470,7 @@ export default function HomePage() {
                     setTgShareStatus('idle');
                     setTelegramChatId('');
                   }}
-                  className="px-4 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-400 text-sm font-medium rounded-xl border border-slate-800"
+                  className="px-4 py-3.5 bg-[#070e24] hover:bg-[#0b173c] text-slate-300 text-sm font-medium rounded-xl border border-cyan-900/40"
                 >
                   +
                 </button>
@@ -478,25 +492,25 @@ export default function HomePage() {
 
       {/* FEATURE PILLARS */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        <div className="glass-card glass-card-hover rounded-2xl p-6 space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
-            <Lock className="w-5 h-5" />
+        <div className="glass-card glass-card-hover rounded-2xl p-6 space-y-3.5 border-cyan-500/20">
+          <div className="w-11 h-11 rounded-xl bg-cyan-950/80 text-cyan-400 flex items-center justify-center border border-cyan-500/30 shadow-inner">
+            <Lock className="w-5.5 h-5.5" />
           </div>
           <h3 className="text-lg font-bold text-white">{t('pillar1Title')}</h3>
           <p className="text-xs text-slate-400 leading-relaxed">{t('pillar1Desc')}</p>
         </div>
 
-        <div className="glass-card glass-card-hover rounded-2xl p-6 space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-            <Sparkles className="w-5 h-5" />
+        <div className="glass-card glass-card-hover rounded-2xl p-6 space-y-3.5 border-cyan-500/20">
+          <div className="w-11 h-11 rounded-xl bg-cyan-950/80 text-cyan-400 flex items-center justify-center border border-cyan-500/30 shadow-inner">
+            <Sparkles className="w-5.5 h-5.5" />
           </div>
           <h3 className="text-lg font-bold text-white">{t('pillar2Title')}</h3>
           <p className="text-xs text-slate-400 leading-relaxed">{t('pillar2Desc')}</p>
         </div>
 
-        <div className="glass-card glass-card-hover rounded-2xl p-6 space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-            <Send className="w-5 h-5" />
+        <div className="glass-card glass-card-hover rounded-2xl p-6 space-y-3.5 border-cyan-500/20">
+          <div className="w-11 h-11 rounded-xl bg-cyan-950/80 text-cyan-400 flex items-center justify-center border border-cyan-500/30 shadow-inner">
+            <Send className="w-5.5 h-5.5" />
           </div>
           <h3 className="text-lg font-bold text-white">{t('pillar3Title')}</h3>
           <p className="text-xs text-slate-400 leading-relaxed">{t('pillar3Desc')}</p>
@@ -505,4 +519,5 @@ export default function HomePage() {
     </div>
   );
 }
+
 

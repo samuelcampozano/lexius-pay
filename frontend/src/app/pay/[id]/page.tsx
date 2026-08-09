@@ -182,7 +182,7 @@ export default function PaymentPage() {
 
     try {
       const targetAmount = parseFloat(amount) || 5;
-      const hash = await executeUSCDeposit(escrowId, targetAmount);
+      const hash = await executeUSCDeposit(escrowId, targetAmount, seller);
 
       setTxHash(hash);
       setStatus('Deposited');
@@ -266,30 +266,30 @@ export default function PaymentPage() {
     <div className="max-w-xl mx-auto space-y-6 pb-16">
       {/* HEADER ESCROW BADGE & STATUS */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-cyan-950/80 text-cyan-400 rounded-xl border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/20">
             <Shield className="w-5 h-5" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-white">
               {t('escrowBadge').replace('{id}', escrowId)}
             </h1>
-            <p className="text-[11px] text-slate-400 font-mono">
-              Contrato WASM en Arbitrum Sepolia
+            <p className="text-[11px] text-cyan-300/80 font-mono">
+              Arbitrum Stylus WASM Contract
             </p>
           </div>
         </div>
 
         {/* Dynamic Status Badge */}
         <span
-          className={`px-3 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider border ${
+          className={`px-3 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider border shadow-sm ${
             status === 'Pending'
-              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+              ? 'bg-amber-950/80 text-amber-300 border-amber-500/40'
               : status === 'Deposited'
-              ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+              ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40'
               : status === 'Completed'
-              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-              : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+              ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+              : 'bg-purple-950/80 text-purple-300 border border-purple-500/40'
           }`}
         >
           {status === 'Pending' && t('statusPending')}
@@ -300,30 +300,30 @@ export default function PaymentPage() {
       </div>
 
       {/* ITEM & AMOUNT SUMMARY CARD */}
-      <div className="glass-card rounded-2xl p-6 space-y-4 glow-blue">
+      <div className="glass-card rounded-2xl p-6 space-y-4 border-cyan-500/30 glow-cyan">
         <div className="space-y-1">
-          <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
             {t('payItemDesc')}
           </span>
           <h2 className="text-xl font-bold text-white leading-snug">{description}</h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-cyan-950">
           <div>
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
               {t('payTotalAmount')}
             </span>
-            <span className="text-2xl font-extrabold text-blue-400 font-mono block">
+            <span className="text-2xl font-extrabold text-cyan-400 font-mono block drop-shadow-[0_0_10px_rgba(0,229,255,0.4)]">
               {amount} <span className="text-sm font-bold text-slate-300">USDC</span>
             </span>
           </div>
 
           <div className="text-right">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
               Red
             </span>
-            <span className="text-xs font-semibold text-slate-300 flex items-center justify-end gap-1.5 mt-1 font-mono">
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            <span className="text-xs font-bold text-cyan-300 flex items-center justify-end gap-1.5 mt-1 font-mono">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
               Arbitrum Sepolia
             </span>
           </div>
@@ -332,38 +332,38 @@ export default function PaymentPage() {
 
       {/* WEB2.5 LIVE BALANCES & ONBOARDING PANEL */}
       {authenticated && activeWallet && (
-        <div className="bg-slate-950/90 rounded-2xl p-4 border border-blue-500/30 space-y-3 shadow-lg">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div className="bg-[#030818] rounded-2xl p-4 border border-cyan-500/30 space-y-3 shadow-xl">
+          <div className="flex items-center justify-between border-b border-cyan-950 pb-2.5">
             <div className="flex items-center gap-2">
-              <Wallet className="w-4 h-4 text-blue-400" />
+              <Wallet className="w-4 h-4 text-cyan-400" />
               <span className="text-xs font-bold text-white uppercase tracking-wider">
                 {lang === 'es' ? 'Billetera Privy Web2.5' : 'Privy Web2.5 Embedded Wallet'}
               </span>
             </div>
-            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2.5 py-0.5 rounded-full">
               {truncateAddress(activeWallet)}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-            <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div className="bg-[#060e28] p-2.5 rounded-xl border border-cyan-900/40 flex items-center justify-between">
               <span className="text-slate-400">Sepolia ETH:</span>
               <span className="text-white font-bold">{ethBalance} ETH</span>
             </div>
 
-            <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div className="bg-[#060e28] p-2.5 rounded-xl border border-cyan-900/40 flex items-center justify-between">
               <span className="text-slate-400">USDC:</span>
-              <span className="text-blue-400 font-bold">{usdcBalance} USDC</span>
+              <span className="text-cyan-400 font-bold">{usdcBalance} USDC</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-800 font-mono">
-            <span className="text-slate-500">Circle Testnet Faucet:</span>
+          <div className="flex items-center justify-between text-[11px] pt-2 border-t border-cyan-950 font-mono">
+            <span className="text-slate-400">Circle Testnet Faucet:</span>
             <a
               href="https://faucet.circle.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 hover:underline"
+              className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 hover:underline"
             >
               <span>{t('circleFaucetLink')}</span>
               <ArrowUpRight className="w-3 h-3" />
@@ -373,15 +373,15 @@ export default function PaymentPage() {
       )}
 
       {/* AI ASSISTANT STATUS BANNER */}
-      <div className="glass-card rounded-2xl p-4 space-y-2 border-purple-500/30 bg-purple-950/10">
+      <div className="glass-card rounded-2xl p-4 space-y-2 border-cyan-500/30 bg-cyan-950/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
-            <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
               {t('aiStatusTitle')}
             </span>
           </div>
-          <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full">
             {t('aiOracleActive')}
           </span>
         </div>
@@ -416,7 +416,7 @@ export default function PaymentPage() {
         </span>
 
         {/* Seller Card */}
-        <div className="bg-slate-950/80 rounded-xl border border-slate-800 p-4 space-y-3">
+        <div className="bg-[#030818] rounded-2xl border border-cyan-900/40 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
@@ -433,23 +433,23 @@ export default function PaymentPage() {
                     {t('paySeller')}
                   </span>
                   {isSeller && (
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2 py-0.5 rounded-full">
                       {t('payYou')}
                     </span>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-white mt-0.5">
+                <p className="text-sm font-bold text-white mt-0.5">
                   {sellerName || t('payUnknown')}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between bg-slate-900/60 rounded-lg px-3 py-2">
+          <div className="flex items-center justify-between bg-[#060e28] rounded-xl px-3 py-2 border border-cyan-950">
             <span className="font-mono text-xs text-slate-300 truncate mr-3">{seller}</span>
             <button
               onClick={() => handleCopyAddress(seller, 'seller')}
-              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-slate-400 hover:text-blue-400 bg-slate-800 hover:bg-slate-700 rounded-md transition-colors shrink-0"
+              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-cyan-300 hover:text-white bg-cyan-950 hover:bg-cyan-900 rounded-lg transition-colors shrink-0 border border-cyan-500/30"
             >
               <Copy className="w-3 h-3" />
               {copiedField === 'seller' ? t('payAddressCopied') : t('payCopyAddress')}
@@ -458,7 +458,7 @@ export default function PaymentPage() {
         </div>
 
         {/* Buyer Card */}
-        <div className="bg-slate-950/80 rounded-xl border border-slate-800 p-4 space-y-3">
+        <div className="bg-[#030818] rounded-2xl border border-cyan-900/40 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
@@ -475,12 +475,12 @@ export default function PaymentPage() {
                     {t('payBuyer')}
                   </span>
                   {!isSeller && authenticated && (
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2 py-0.5 rounded-full">
                       {t('payYou')}
                     </span>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-white mt-0.5">
+                <p className="text-sm font-bold text-white mt-0.5">
                   {status === 'Pending'
                     ? isSeller
                       ? t('payWaitingBuyer')
@@ -495,13 +495,13 @@ export default function PaymentPage() {
 
           {((status !== 'Pending' && buyerWallet) ||
             (!isSeller && authenticated && activeWallet)) && (
-            <div className="flex items-center justify-between bg-slate-900/60 rounded-lg px-3 py-2">
+            <div className="flex items-center justify-between bg-[#060e28] rounded-xl px-3 py-2 border border-cyan-950">
               <span className="font-mono text-xs text-slate-300 truncate mr-3">
                 {buyerWallet}
               </span>
               <button
                 onClick={() => handleCopyAddress(buyerWallet, 'buyer')}
-                className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-slate-400 hover:text-blue-400 bg-slate-800 hover:bg-slate-700 rounded-md transition-colors shrink-0"
+                className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-cyan-300 hover:text-white bg-cyan-950 hover:bg-cyan-900 rounded-lg transition-colors shrink-0 border border-cyan-500/30"
               >
                 <Copy className="w-3 h-3" />
                 {copiedField === 'buyer'
@@ -511,7 +511,7 @@ export default function PaymentPage() {
             </div>
           )}
           {status === 'Pending' && isSeller && (
-            <div className="flex items-center justify-between bg-slate-900/40 rounded-lg px-3 py-2 text-xs text-slate-500 font-mono">
+            <div className="flex items-center justify-between bg-[#060e28] rounded-xl px-3 py-2 text-xs text-slate-500 font-mono border border-cyan-950">
               <span>0x... ({t('payWaitingBuyer')})</span>
             </div>
           )}
@@ -520,7 +520,7 @@ export default function PaymentPage() {
 
       {/* ERROR ALERT BOX */}
       {(errorMessage || flowError) && (
-        <div className="p-3 bg-red-950/40 border border-red-500/30 rounded-xl text-xs text-red-300 flex items-start gap-2">
+        <div className="p-3 bg-red-950/40 border border-red-500/40 rounded-xl text-xs text-red-300 flex items-start gap-2">
           <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
           <p>{errorMessage || flowError}</p>
         </div>
@@ -528,15 +528,15 @@ export default function PaymentPage() {
 
       {/* TX HASH TOAST */}
       {activeTxHash && (
-        <div className="p-3 bg-blue-950/40 border border-blue-500/30 rounded-xl text-xs text-blue-300 flex items-center justify-between">
-          <span className="font-mono truncate">Tx: {activeTxHash}</span>
+        <div className="p-3 bg-[#060e28] border border-cyan-500/40 rounded-xl text-xs text-cyan-300 flex items-center justify-between font-mono">
+          <span className="truncate">Tx: {activeTxHash}</span>
           <a
             href={`https://sepolia.arbiscan.io/tx/${activeTxHash}`}
             target="_blank"
             rel="noreferrer"
-            className="text-blue-400 hover:text-blue-300 flex items-center gap-1 font-semibold"
+            className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold"
           >
-            <span>Scan</span>
+            <span>Arbiscan</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
           </a>
         </div>
@@ -544,29 +544,29 @@ export default function PaymentPage() {
 
       {/* STEP-BY-STEP PROGRESS INDICATOR PANEL */}
       {flowStep !== 'idle' && flowStep !== 'error' && (
-        <div className="bg-slate-950 border border-blue-500/40 p-4 rounded-xl space-y-2 font-mono text-xs text-blue-300 glow-blue animate-in fade-in">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div className="bg-[#030818] border border-cyan-500/40 p-4 rounded-2xl space-y-2 font-mono text-xs text-cyan-300 glow-cyan animate-in fade-in">
+          <div className="flex items-center justify-between border-b border-cyan-950 pb-2">
             <span className="font-bold text-white uppercase flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-blue-400" />
+              <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
               {lang === 'es' ? 'Progreso de Transacción Web3' : 'Web3 Transaction Progress'}
             </span>
-            <span className="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-bold">
               Arbitrum Sepolia
             </span>
           </div>
 
           <div className="space-y-1.5 pt-1">
-            <div className={`flex items-center gap-2 ${flowStep === 'funding' ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>
+            <div className={`flex items-center gap-2 ${flowStep === 'funding' ? 'text-cyan-300 font-bold' : 'text-slate-500'}`}>
               <span>{flowStep === 'funding' ? '⏳' : '✓'}</span>
               <span>1. {lang === 'es' ? 'Fondeando cuenta de prueba (0.005 ETH + 10 USDC)...' : '1. Funding test wallet (0.005 ETH + 10 USDC)...'}</span>
             </div>
 
-            <div className={`flex items-center gap-2 ${flowStep === 'approving' ? 'text-amber-400 font-bold' : flowStep === 'depositing' || flowStep === 'success' ? 'text-slate-400' : 'text-slate-600'}`}>
+            <div className={`flex items-center gap-2 ${flowStep === 'approving' ? 'text-cyan-300 font-bold' : flowStep === 'depositing' || flowStep === 'success' ? 'text-slate-400' : 'text-slate-600'}`}>
               <span>{flowStep === 'approving' ? '⏳' : flowStep === 'depositing' || flowStep === 'success' ? '✓' : '•'}</span>
               <span>2. {lang === 'es' ? 'Aprobando USDC en Arbitrum Sepolia...' : '2. Approving USDC on Arbitrum Sepolia...'}</span>
             </div>
 
-            <div className={`flex items-center gap-2 ${flowStep === 'depositing' ? 'text-amber-400 font-bold' : flowStep === 'success' ? 'text-emerald-400 font-bold' : 'text-slate-600'}`}>
+            <div className={`flex items-center gap-2 ${flowStep === 'depositing' ? 'text-cyan-300 font-bold' : flowStep === 'success' ? 'text-cyan-200 font-bold' : 'text-slate-600'}`}>
               <span>{flowStep === 'depositing' ? '⏳' : flowStep === 'success' ? '✓' : '•'}</span>
               <span>3. {lang === 'es' ? 'Protegiendo fondos en Bóveda Escrow WASM...' : '3. Locking funds in Stylus WASM Vault...'}</span>
             </div>
@@ -579,18 +579,18 @@ export default function PaymentPage() {
         {status === 'Pending' && (
           <>
             {isSeller ? (
-              <div className="p-5 bg-amber-950/30 border border-amber-500/30 rounded-2xl text-center space-y-4 shadow-lg">
-                <div className="flex items-center justify-center gap-2 text-amber-400">
-                  <RefreshCw className="w-5 h-5 animate-spin-slow" />
+              <div className="p-5 bg-[#060e28] border border-cyan-500/30 rounded-2xl text-center space-y-4 shadow-lg">
+                <div className="flex items-center justify-center gap-2 text-cyan-400">
+                  <RefreshCw className="w-5 h-5 animate-spin" />
                   <span className="text-xs font-bold uppercase tracking-wider">
                     {lang === 'es' ? 'Esperando Depósito del Comprador' : 'Waiting for Buyer Deposit'}
                   </span>
                 </div>
-                <p className="text-xs font-semibold text-amber-200 leading-relaxed">
+                <p className="text-xs font-semibold text-slate-300 leading-relaxed">
                   {t('paySellerSelfWarning').replace('{amount}', amount)}
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-amber-500/20">
+                <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-cyan-950">
                   <button
                     onClick={() => {
                       const linkUrl = window.location.href;
@@ -598,7 +598,7 @@ export default function PaymentPage() {
                       setCopiedField('payLink');
                       setTimeout(() => setCopiedField(null), 2000);
                     }}
-                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
+                    className="flex-1 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-cyan-500/20"
                   >
                     <Copy className="w-4 h-4" />
                     <span>{copiedField === 'payLink' ? t('copied') : t('btnCopy')}</span>
@@ -610,7 +610,7 @@ export default function PaymentPage() {
                 {!authenticated ? (
                   <button
                     onClick={login}
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-base"
+                    className="w-full py-4 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 text-base"
                   >
                     <User className="w-5 h-5" />
                     <span>{lang === 'es' ? 'Iniciar Sesión con Google (Billetera Instantánea)' : 'Log in with Google (Instant Wallet)'}</span>
@@ -619,7 +619,7 @@ export default function PaymentPage() {
                   <button
                     onClick={handleSecureDeposit}
                     disabled={loading || isFunding || isApproving || isDepositing}
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50"
+                    className="w-full py-4 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 text-base disabled:opacity-50"
                   >
                     {loading || isFunding || isApproving || isDepositing ? (
                       <>
@@ -657,7 +657,7 @@ export default function PaymentPage() {
               <button
                 onClick={handleRelease}
                 disabled={loading}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-600/25 transition-all flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />
@@ -669,24 +669,24 @@ export default function PaymentPage() {
                 )}
               </button>
             ) : (
-              <div className="p-3 bg-blue-950/30 border border-blue-500/20 rounded-xl text-center text-xs text-blue-300">
+              <div className="p-3 bg-[#060e28] border border-cyan-500/30 rounded-xl text-center text-xs text-cyan-300 font-semibold">
                 🔒 Fondos en la bóveda Stylus. Esperando confirmación de recepción del comprador.
               </div>
             )}
 
             <Link
               href={`/dispute/${escrowId}`}
-              className="w-full py-3.5 bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 border border-purple-500/30 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
+              className="w-full py-3.5 bg-[#070e24] hover:bg-[#0b173c] text-cyan-300 border border-cyan-500/30 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-xs shadow-md"
             >
-              <Sparkles className="w-4 h-4 text-purple-400" />
+              <Sparkles className="w-4 h-4 text-cyan-400" />
               <span>{t('payOpenDispute')}</span>
             </Link>
           </div>
         )}
 
         {status === 'Completed' && (
-          <div className="p-4 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-center space-y-2">
-            <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
+          <div className="p-4 bg-cyan-950/30 border border-cyan-500/40 rounded-2xl text-center space-y-2">
+            <CheckCircle2 className="w-8 h-8 text-cyan-400 mx-auto" />
             <h3 className="font-bold text-white text-base">
               {lang === 'es' ? '¡Transacción Completada!' : 'Transaction Completed!'}
             </h3>
@@ -701,3 +701,4 @@ export default function PaymentPage() {
     </div>
   );
 }
+
