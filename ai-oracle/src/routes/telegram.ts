@@ -3,6 +3,9 @@ import { sendEscrowCard, updateEscrowCard } from '../services/telegram';
 
 const router = Router();
 
+// In-memory store mapping escrowId -> { chatId, messageId }
+const escrowCardStore = new Map<string, { chatId: string | number; messageId: number }>();
+
 /**
  * POST /api/telegram/send-escrow-card
  * Sends an interactive escrow message to a Telegram chat.
@@ -26,11 +29,17 @@ router.post('/send-escrow-card', async (req: Request, res: Response) => {
 
     const result = await sendEscrowCard({
       chatId: formattedChatId,
-      escrowId,
+      escrowId: String(escrowId),
       description: description || 'Escrow Agreement',
       amount: amount || '0',
       sellerName: sellerName || '',
       seller: seller || '0x0000000000000000000000000000000000000000',
+    });
+
+    // Save in store for automatic status updates
+    escrowCardStore.set(String(escrowId), {
+      chatId: formattedChatId,
+      messageId: result.messageId,
     });
 
     return res.status(200).json({
@@ -57,12 +66,30 @@ router.post('/send-escrow-card', async (req: Request, res: Response) => {
  */
 router.post('/update-escrow-status', async (req: Request, res: Response) => {
   try {
-    const { chatId, messageId, escrowId, newStatus, amount, description } = req.body;
+    let { chatId, messageId, escrowId, newStatus, amount, description } = req.body;
 
-    if (!chatId || !messageId || !escrowId || !newStatus) {
+    if (!escrowId || !newStatus) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: chatId, messageId, escrowId, newStatus',
+        error: 'Missing required fields: escrowId, newStatus',
+      });
+    }
+
+    // Auto-resolve chatId and messageId from store if missing from request
+    if (!chatId || !messageId) {
+      const stored = escrowCardStore.get(String(escrowId));
+      if (stored) {
+        chatId = chatId || stored.chatId;
+        messageId = messageId || stored.messageId;
+      }
+    }
+
+    if (!chatId || !messageId) {
+      console.warn(`[Telegram Route] Skipping status update for Escrow #${escrowId}: No Telegram message card linked.`);
+      return res.status(200).json({
+        success: false,
+        warning: 'No Telegram card linked for this escrowId',
+        escrowId,
       });
     }
 
@@ -77,7 +104,7 @@ router.post('/update-escrow-status', async (req: Request, res: Response) => {
     await updateEscrowCard({
       chatId,
       messageId,
-      escrowId,
+      escrowId: String(escrowId),
       newStatus,
       amount: amount || '0',
       description: description || 'Escrow Agreement',
