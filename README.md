@@ -86,13 +86,14 @@ Permite que cualquier persona compre o venda productos y servicios en redes soci
 
 ---
 
-## 🦀 ¿Por qué Arbitrum Stylus (Rust WASM) vs. Solidity?
+## 🦀 ¿Por qué Scaffold-Stylus (Rust WASM) vs. Solidity?
 
-La elección de **Arbitrum Stylus (Rust)** sobre Solidity convencional responde a 3 pilares de eficiencia computacional, criptográfica y de seguridad:
+La elección de **Scaffold-Stylus** y **Arbitrum Stylus (Rust WASM)** sobre Solidity convencional responde a 4 pilares de eficiencia computacional, interoperabilidad, criptografía y seguridad de memoria:
 
-1. **Verificación Criptográfica de Firmas (ECDSA)**: La función `resolve_dispute_with_signature` ejecuta la función `ecrecover` de la EVM para validar de forma inmutable la firma `(v, r, s)` emitida por el oráculo. Las operaciones criptográficas y el análisis matemático en curvas elípticas (`secp256k1`) son extremadamente intensivas en cómputo.
-2. **Ventaja de Gas en WASM**: Stylus introduce una máquina virtual equivalente que ejecuta WebAssembly (WASM). Wasmer ejecuta código compilado nativo a velocidad ultra-rápida. Stylus reduce drásticamente los costos de gas para verificación criptográfica y cálculos intensivos en memoria, permitiendo procesar firmas por una fracción de centavo de dólar (algo que en Solidity nativo resultaría sumamente costoso).
-3. **Seguridad Estricta de Memoria en Rust**: Desarrollar en Rust (`#![no_std]`) permite aprovechar su compilador estricto para eliminar vulnerabilidades comunes de desbordamiento, aliasing de almacenamiento o fallas de punteros antes del despliegue on-chain.
+1. **Framework Scaffold-Stylus**: Aprovechamos el ecosistema y SDK oficial de **Scaffold-Stylus** para lograr una comunicación type-safe instantánea entre los smart contracts en Rust WASM y el frontend Next.js mediante hooks de Viem/Wagmi y exportación automática de ABI.
+2. **Verificación Criptográfica de Firmas (ECDSA)**: La función `resolve_dispute_with_signature` ejecuta la función `ecrecover` de la EVM para validar de forma inmutable la firma `(v, r, s)` emitida por el oráculo de IA. Las operaciones criptográficas y el análisis matemático en curvas elípticas (`secp256k1`) son extremadamente intensivas en cómputo.
+3. **Ventaja de Gas en WASM**: Stylus introduce una máquina virtual equivalente que ejecuta WebAssembly (WASM). Wasmer ejecuta código compilado nativo a velocidad ultra-rápida. Stylus reduce drásticamente los costos de gas para verificación criptográfica y cálculos intensivos en memoria, permitiendo procesar firmas por una fracción de centavo de dólar (algo que en Solidity nativo resultaría sumamente costoso).
+4. **Seguridad Estricta de Memoria en Rust**: Desarrollar en Rust (`#![no_std]`) permite aprovechar su compilador estricto para eliminar vulnerabilidades comunes de desbordamiento, aliasing de almacenamiento o fallas de punteros antes del despliegue on-chain.
 
 ---
 

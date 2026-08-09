@@ -98,8 +98,10 @@ export const dictionary = {
 
     // Stylus vs Solidity Section
     whyStylusBadge: 'Arquitectura & Rendimiento',
-    whyStylusTitle: '¿Por qué Arbitrum Stylus (Rust WASM) vs. Solidity?',
-    whyStylusSub: 'Elegimos Stylus para lograr velocidad de código nativo, máximos estándares de seguridad de memoria y costo de gas ultra-bajo en operaciones criptográficas.',
+    whyStylusTitle: '¿Por qué Scaffold-Stylus (Rust WASM) vs. Solidity?',
+    whyStylusSub: 'Elegimos Scaffold-Stylus para lograr velocidad de código nativo, interoperabilidad frontend-contract type-safe, máximos estándares de seguridad y gas de sub-centavo en criptografía.',
+    stylusPoint0Title: 'Ecosistema Scaffold-Stylus',
+    stylusPoint0Desc: 'Aprovechamos el SDK oficial de Scaffold-Stylus para interoperabilidad directa type-safe entre contratos inteligentes Rust WASM y componentes Next.js.',
     stylusPoint1Title: 'Verificación ECDSA (secp256k1)',
     stylusPoint1Desc: 'La función resolve_dispute_with_signature valida la firma (v, r, s) del oráculo mediante ecrecover precompilado de forma inmutable.',
     stylusPoint2Title: 'Ventaja de Gas de WASM',
@@ -310,8 +312,10 @@ export const dictionary = {
 
     // Stylus vs Solidity Section
     whyStylusBadge: 'Architecture & Performance',
-    whyStylusTitle: 'Why Arbitrum Stylus (Rust WASM) vs. Solidity?',
-    whyStylusSub: 'We chose Stylus for native speed, strict memory safety standards, and ultra-low gas costs on cryptographic signature verification.',
+    whyStylusTitle: 'Why Scaffold-Stylus (Rust WASM) vs. Solidity?',
+    whyStylusSub: 'We chose Scaffold-Stylus for native code speed, type-safe contract-to-dapp interoperability, strict memory safety, and sub-cent gas fees on cryptography.',
+    stylusPoint0Title: 'Scaffold-Stylus Ecosystem',
+    stylusPoint0Desc: 'We leverage the official Scaffold-Stylus SDK for seamless, type-safe integration between Rust WASM smart contracts and Next.js components.',
     stylusPoint1Title: 'ECDSA Verification (secp256k1)',
     stylusPoint1Desc: 'resolve_dispute_with_signature validates the oracle ECDSA (v, r, s) signature using EVM ecrecover precompile inmutably.',
     stylusPoint2Title: 'WASM Gas Efficiency',
