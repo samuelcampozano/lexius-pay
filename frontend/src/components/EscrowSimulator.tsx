@@ -74,14 +74,24 @@ export default function EscrowSimulator() {
       setResolvingAi(true);
       setTerminalLogs([]);
 
-      const logs = [
-        '[GCS] Uploading chat evidence to gs://lexius-dispute-evidence/1042_proof.png...',
-        '[GCP Cloud Run] Spinning up container (us-central1)...',
-        '[AI Mediator] Analyzing screenshots using OpenAI GPT-4o Vision OCR...',
-        '[Signer] Compiling JSON verdict and generating ECDSA signature (v=27, r, s)...',
-        '[Arbitrum Stylus] Verifying signature against oracle_address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266...',
-        '[Arbitrum Stylus] Signature verified successfully. Payout dispatched to Winner!',
-      ];
+      const logs =
+        lang === 'es'
+          ? [
+              '[GCS] Subiendo evidencia de chat a gs://lexius-dispute-evidence/1042_proof.png...',
+              '[GCP Cloud Run] Desplegando contenedor (us-central1)...',
+              '[Mediador IA] Analizando capturas de pantalla con OpenAI GPT-4o Vision OCR...',
+              '[Firmante] Compilando veredicto JSON y generando firma ECDSA (v=27, r, s)...',
+              '[Arbitrum Stylus] Verificando firma con oracle_address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266...',
+              '[Arbitrum Stylus] Firma verificada con éxito. ¡Pago enviado al Ganador!',
+            ]
+          : [
+              '[GCS] Uploading chat evidence to gs://lexius-dispute-evidence/1042_proof.png...',
+              '[GCP Cloud Run] Spinning up container (us-central1)...',
+              '[AI Mediator] Analyzing screenshots using OpenAI GPT-4o Vision OCR...',
+              '[Signer] Compiling JSON verdict and generating ECDSA signature (v=27, r, s)...',
+              '[Arbitrum Stylus] Verifying signature against oracle_address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266...',
+              '[Arbitrum Stylus] Signature verified successfully. Payout dispatched to Winner!',
+            ];
 
       logs.forEach((logLine, index) => {
         setTimeout(() => {
@@ -468,11 +478,11 @@ export default function EscrowSimulator() {
                 {resolvingAi ? (
                   <span className="text-[10px] font-mono bg-cyan-950/80 text-cyan-300 px-2.5 py-1 rounded-full border border-cyan-500/30 flex items-center gap-1.5">
                     <RefreshCw className="w-3 h-3 animate-spin" />
-                    <span>Processing...</span>
+                    <span>{lang === 'es' ? 'Procesando...' : 'Processing...'}</span>
                   </span>
                 ) : (
                   <span className="text-[10px] font-mono bg-cyan-950/80 text-cyan-400 px-2.5 py-1 rounded-full border border-cyan-500/30 font-bold">
-                    Verdict Executed
+                    {lang === 'es' ? 'Veredicto Ejecutado' : 'Verdict Executed'}
                   </span>
                 )}
               </div>
@@ -498,7 +508,7 @@ export default function EscrowSimulator() {
                   <pre className="bg-[#020612] p-4 rounded-xl border border-cyan-500/30 text-cyan-300 font-mono text-xs overflow-x-auto leading-relaxed">
 {JSON.stringify(
   {
-    winner: '0x33f...c7ac (Comprador)',
+    winner: lang === 'es' ? '0x33f...c7ac (Comprador)' : '0x33f...c7ac (Buyer)',
     reason:
       lang === 'es'
         ? 'La evidencia de chat demuestra que el vendedor no envió el código de seguimiento después de 72 horas y dejó de responder los mensajes. Reembolso concedido al Comprador.'
