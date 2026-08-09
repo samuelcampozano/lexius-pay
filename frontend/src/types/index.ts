@@ -17,6 +17,8 @@ export interface DisputeVerdict {
   reasoning: string;
   summary: string;
   confidenceScore: number;
+  fraudRiskFlag?: boolean;
+  evidenceAuthenticityScore?: number;
   signature: string;
   v: number;
   r: string;
