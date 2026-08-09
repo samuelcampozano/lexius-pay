@@ -20,7 +20,7 @@ export default function Navbar() {
             <div className="relative w-10 h-10 rounded-xl bg-[#060c21] border border-cyan-500/30 p-1 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shadow-lg shadow-cyan-500/20">
               <img
                 src="/lexius-logo.png"
-                alt="Lexius Pay Logo"
+                alt="Lexius Logo"
                 className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(0,229,255,0.7)]"
               />
             </div>
@@ -29,9 +29,6 @@ export default function Navbar() {
             <div className="flex items-center gap-1.5">
               <span className="font-heading font-extrabold text-xl tracking-tight text-gradient-silver">
                 LEXIUS
-              </span>
-              <span className="font-heading font-extrabold text-xl tracking-tight text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.4)]">
-                PAY
               </span>
               <span className="text-[10px] font-mono font-bold uppercase bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full shadow-inner">
                 WASM
