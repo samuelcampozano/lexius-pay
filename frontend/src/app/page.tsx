@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Scale,
   ShieldCheck,
+  BookOpen,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
@@ -267,6 +268,13 @@ export default function HomePage() {
             <Sparkles className="w-5 h-5 text-cyan-400" />
             <span>{t('btnDemo')}</span>
           </a>
+          <Link
+            href="/learn"
+            className="px-6 py-4 bg-[#060c21] hover:bg-[#091436] text-cyan-300 border border-cyan-800/40 font-semibold rounded-xl transition-all flex items-center gap-2 text-base shadow-lg hover:border-cyan-400/50"
+          >
+            <BookOpen className="w-5 h-5 text-cyan-400" />
+            <span>{lang === 'es' ? '💡 ¿Nuevo en Web3? Aprende los Términos' : '💡 New to Web3? Learn Terms'}</span>
+          </Link>
         </div>
       </section>
 
