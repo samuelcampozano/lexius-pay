@@ -167,56 +167,16 @@ export function useEscrowFlow() {
       // 1. Ensure user has sufficient funds (auto-drip if needed)
       await checkAndFundWallet();
 
-      const usdcUnits = parseUnits(String(amountUsdc), 6);
-
-      // 2. Check current USDC allowance for Stylus Escrow Contract
-      const currentAllowance = (await publicClient.readContract({
-        address: USDC_TOKEN_ADDRESS,
-        abi: USDC_MINIMAL_ABI,
-        functionName: 'allowance',
-        args: [
-          activeWalletAddress as `0x${string}`,
-          STYLUS_ESCROW_ADDRESS,
-        ],
-      })) as bigint;
-
-      // 3. Approve USDC spend if allowance is insufficient
-      if (currentAllowance < usdcUnits) {
-        setIsApproving(true);
-        setFlowStep('approving');
-        
-        const maxAllowanceUnits = parseUnits('1000000', 6);
-        console.log(`[useEscrowFlow] Enviando aprobación de USDC para el contrato...`);
-        const approveHash = await walletClient.writeContract({
-          address: USDC_TOKEN_ADDRESS,
-          abi: USDC_MINIMAL_ABI,
-          functionName: 'approve',
-          args: [STYLUS_ESCROW_ADDRESS, maxAllowanceUnits],
-          gas: BigInt(120000),
-        });
-
-        console.log(`[useEscrowFlow] Aprobación enviada: ${approveHash}. Esperando confirmación del bloque...`);
-        
-        await publicClient.waitForTransactionReceipt({ hash: approveHash });
-        console.log("[useEscrowFlow] USDC aprobado con éxito on-chain. Procediendo con el acuerdo...");
-        
-        setIsApproving(false);
-      }
-
-      // 4. Execute Stylus WASM Escrow Creation / Deposit
-      setIsDepositing(true);
-      setFlowStep('depositing');
-      console.log(
-        `[useEscrowFlow] Depositing into Escrow #${escrowId} on Stylus WASM...`
-      );
+      let usdcUnits = parseUnits(String(amountUsdc), 6);
 
       let targetEscrowId = BigInt(
         escrowId === 'demo' ? '101' : escrowId.replace('#', '')
       );
 
       let needsCreation = false;
+      let requiredUsdcUnits = usdcUnits;
 
-      // Check on-chain escrow state to ensure escrow exists and belongs to active wallet
+      // 2. Check on-chain escrow state to ensure escrow exists and get required amount
       try {
         const count = (await publicClient.readContract({
           address: STYLUS_ESCROW_ADDRESS,
@@ -235,7 +195,13 @@ export function useEscrowFlow() {
           })) as [string, string, bigint, number, string];
 
           const buyerOnChain = escrowInfo[0];
+          const amountOnChain = escrowInfo[2];
           const statusOnChain = escrowInfo[3];
+
+          if (amountOnChain > 0n) {
+            requiredUsdcUnits = amountOnChain;
+          }
+
           if (
             !buyerOnChain ||
             buyerOnChain === '0x0000000000000000000000000000000000000000' ||
@@ -248,6 +214,46 @@ export function useEscrowFlow() {
         console.warn('[useEscrowFlow] Error checking on-chain state, assuming needs creation:', checkErr);
         needsCreation = true;
       }
+
+      // 3. Check current USDC allowance for Stylus Escrow Contract against actual required units
+      const currentAllowance = (await publicClient.readContract({
+        address: USDC_TOKEN_ADDRESS,
+        abi: USDC_MINIMAL_ABI,
+        functionName: 'allowance',
+        args: [
+          activeWalletAddress as `0x${string}`,
+          STYLUS_ESCROW_ADDRESS,
+        ],
+      })) as bigint;
+
+      // Approve USDC spend if allowance is less than required units
+      if (currentAllowance < requiredUsdcUnits) {
+        setIsApproving(true);
+        setFlowStep('approving');
+        
+        const maxAllowanceUnits = parseUnits('1000000', 6);
+        console.log(`[useEscrowFlow] Enviando aprobación de USDC para el contrato (${formatUnits(requiredUsdcUnits, 6)} USDC requeridos, ${formatUnits(currentAllowance, 6)} USDC actuales)...`);
+        const approveHash = await walletClient.writeContract({
+          address: USDC_TOKEN_ADDRESS,
+          abi: USDC_MINIMAL_ABI,
+          functionName: 'approve',
+          args: [STYLUS_ESCROW_ADDRESS, maxAllowanceUnits],
+          gas: BigInt(120000),
+        });
+
+        console.log(`[useEscrowFlow] Aprobación enviada: ${approveHash}. Esperando confirmación del bloque...`);
+        await publicClient.waitForTransactionReceipt({ hash: approveHash });
+        console.log("[useEscrowFlow] USDC aprobado con éxito on-chain. Procediendo con el acuerdo...");
+        
+        setIsApproving(false);
+      }
+
+      // 4. Execute Stylus WASM Escrow Creation / Deposit
+      setIsDepositing(true);
+      setFlowStep('depositing');
+      console.log(
+        `[useEscrowFlow] Depositing into Escrow #${targetEscrowId} on Stylus WASM...`
+      );
 
       // 2. Initialize Escrow on-chain if missing or assigned to another wallet
       if (needsCreation) {
