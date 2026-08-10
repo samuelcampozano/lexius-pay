@@ -210,12 +210,13 @@ export function useEscrowFlow() {
         setIsApproving(true);
         setFlowStep('approving');
         
+        const maxAllowanceUnits = parseUnits('1000000', 6);
         console.log(`[useEscrowFlow] Enviando aprobación de USDC para el contrato...`);
         const approveHash = await walletClient.writeContract({
           address: USDC_TOKEN_ADDRESS,
           abi: USDC_MINIMAL_ABI,
           functionName: 'approve',
-          args: [STYLUS_ESCROW_ADDRESS, usdcUnits],
+          args: [STYLUS_ESCROW_ADDRESS, maxAllowanceUnits],
           gas: BigInt(120000),
         });
 
