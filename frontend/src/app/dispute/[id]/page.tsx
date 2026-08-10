@@ -6,7 +6,10 @@ import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, 
 import { DisputeVerdict } from '@/types';
 import { useStylusContract } from '@/hooks/useStylusContract';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { createPublicClient, http } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
 import { useLanguage } from '@/context/LanguageContext';
+import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
 
 export default function DisputePage() {
   const params = useParams();
@@ -39,7 +42,7 @@ export default function DisputePage() {
 
   // Oracle address check
   const [onChainOracle, setOnChainOracle] = useState<string | null>(null);
-  const [currentUserRole, setCurrentUserRole] = useState<'Buyer' | 'Seller' | 'Both'>('Both');
+  const [currentUserRole, setCurrentUserRole] = useState<'Buyer' | 'Seller'>('Buyer');
 
   const { user } = usePrivy();
   const { wallets } = useWallets();
@@ -49,7 +52,7 @@ export default function DisputePage() {
     ''
   ).toLowerCase();
 
-  // Mark escrow as Disputed in localStorage, determine role, and notify Telegram
+  // Mark escrow as Disputed in localStorage, determine role on-chain, and notify Telegram
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
@@ -67,7 +70,7 @@ export default function DisputePage() {
         window.dispatchEvent(new Event('lexius_escrow_updated'));
       }
 
-      // Determine current user's role for this escrow
+      // 1. First check local storage role
       const currentItem = stored.find((item: any) => item.id === escrowId);
       if (currentItem) {
         if (activeWallet) {
@@ -82,6 +85,39 @@ export default function DisputePage() {
         }
       }
     } catch (e) {}
+
+    // 2. Fetch on-chain escrow data from Arbitrum Sepolia to query exact buyer/seller addresses
+    async function syncRoleFromBlockchain() {
+      if (!escrowId || escrowId === 'demo') return;
+      try {
+        const publicClient = createPublicClient({
+          chain: arbitrumSepolia,
+          transport: http(process.env.NEXT_PUBLIC_STYLUS_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc'),
+        });
+        const numericId = BigInt(escrowId.replace('#', ''));
+        const escrowInfo = (await publicClient.readContract({
+          address: STYLUS_ESCROW_ADDRESS,
+          abi: STYLUS_ESCROW_ABI,
+          functionName: 'getEscrow',
+          args: [numericId],
+        })) as [string, string, bigint, number, string];
+
+        const buyerOnChain = escrowInfo[0]?.toLowerCase();
+        const sellerOnChain = escrowInfo[1]?.toLowerCase();
+
+        if (activeWallet) {
+          if (activeWallet === sellerOnChain && activeWallet !== buyerOnChain) {
+            setCurrentUserRole('Seller');
+          } else if (activeWallet === buyerOnChain && activeWallet !== sellerOnChain) {
+            setCurrentUserRole('Buyer');
+          }
+        }
+      } catch (err) {
+        console.warn('[DisputePage] Could not query on-chain role:', err);
+      }
+    }
+
+    syncRoleFromBlockchain();
 
     // Load any existing dispute data for this escrow
     try {
