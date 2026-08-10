@@ -371,17 +371,27 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] pt-2 border-t border-cyan-950 font-mono">
-            <span className="text-slate-400">Circle Testnet Faucet:</span>
-            <a
-              href="https://faucet.circle.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 hover:underline"
-            >
-              <span>{t('circleFaucetLink')}</span>
-              <ArrowUpRight className="w-3 h-3" />
-            </a>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] pt-2 border-t border-cyan-950 font-mono">
+            <span className="text-slate-400 font-semibold">{lang === 'es' ? 'Faucets de Prueba Oficiales:' : 'Official Testnet Faucets:'}</span>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://faucet.circle.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 hover:underline"
+              >
+                <span>{lang === 'es' ? 'Obtener USDC (Circle) ↗' : 'Get USDC (Circle) ↗'}</span>
+              </a>
+              <span className="text-slate-600">•</span>
+              <a
+                href="https://faucet.quicknode.com/arbitrum/sepolia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 hover:underline"
+              >
+                <span>{lang === 'es' ? 'Obtener ETH Gas ↗' : 'Get ETH Gas ↗'}</span>
+              </a>
+            </div>
           </div>
         </div>
       )}
