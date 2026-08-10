@@ -1,14 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Shield,
   Sparkles,
   ExternalLink,
-  Clock,
   CheckCircle2,
-  AlertCircle,
   Plus,
   Wallet,
   ShoppingBag,
@@ -17,8 +14,11 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { createPublicClient, http } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
 import WalletLogin from '@/components/WalletLogin';
 import { useLanguage } from '@/context/LanguageContext';
+import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
 
 export interface EscrowRecord {
   id: string;
@@ -50,24 +50,82 @@ export default function DashboardPage() {
   const [tgStatus, setTgStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [tgError, setTgError] = useState<string | null>(null);
 
+  const syncOnChainStatuses = useCallback(async (currentItems: EscrowRecord[]) => {
+    if (!currentItems.length) return;
+
+    try {
+      const publicClient = createPublicClient({
+        chain: arbitrumSepolia,
+        transport: http(process.env.NEXT_PUBLIC_STYLUS_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc'),
+      });
+
+      let updated = false;
+      const nextItems = [...currentItems];
+
+      for (let i = 0; i < nextItems.length; i++) {
+        const item = nextItems[i];
+        if (!item.id || item.id === 'demo') continue;
+
+        try {
+          const numericId = BigInt(item.id.replace('#', ''));
+          const escrowInfo = (await publicClient.readContract({
+            address: STYLUS_ESCROW_ADDRESS,
+            abi: STYLUS_ESCROW_ABI,
+            functionName: 'getEscrow',
+            args: [numericId],
+          })) as [string, string, bigint, number, string];
+
+          const statusOnChainNum = escrowInfo[3];
+          const statusMap: Record<number, 'Pending' | 'Deposited' | 'Disputed' | 'Completed'> = {
+            0: 'Pending',
+            1: 'Deposited',
+            2: 'Disputed',
+            3: 'Completed',
+            4: 'Completed', // Refunded treated as completed lifecycle
+            5: 'Pending',   // Cancelled
+          };
+
+          const newStatus = statusMap[statusOnChainNum];
+          if (newStatus && newStatus !== item.status) {
+            nextItems[i] = { ...item, status: newStatus };
+            updated = true;
+          }
+        } catch (e) {
+          // Non-blocking on-chain read error for single item
+        }
+      }
+
+      if (updated) {
+        setEscrows(nextItems);
+        const stored: EscrowRecord[] = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+        const mergedStored = stored.map((s) => {
+          const match = nextItems.find((n) => n.id === s.id);
+          return match ? { ...s, status: match.status } : s;
+        });
+        localStorage.setItem('lexius_user_escrows', JSON.stringify(mergedStored));
+      }
+    } catch (e) {
+      // Non-blocking background sync error
+    }
+  }, []);
+
   useEffect(() => {
     const loadUserEscrows = () => {
       try {
         const stored: EscrowRecord[] = JSON.parse(
           localStorage.getItem('lexius_user_escrows') || '[]'
         );
+        let userItems = stored;
         if (activeWallet) {
-          // Filter escrows associated with the logged-in user
-          const userItems = stored.filter(
+          userItems = stored.filter(
             (item) =>
               !item.seller ||
               item.seller.toLowerCase() === activeWallet ||
               item.buyer?.toLowerCase() === activeWallet
           );
-          setEscrows(userItems);
-        } else {
-          setEscrows(stored);
         }
+        setEscrows(userItems);
+        syncOnChainStatuses(userItems);
       } catch (e) {
         setEscrows([]);
       }
@@ -76,14 +134,14 @@ export default function DashboardPage() {
     loadUserEscrows();
     window.addEventListener('storage', loadUserEscrows);
     window.addEventListener('lexius_escrow_updated', loadUserEscrows);
-    const interval = setInterval(loadUserEscrows, 2000);
+    const interval = setInterval(loadUserEscrows, 3000);
 
     return () => {
       window.removeEventListener('storage', loadUserEscrows);
       window.removeEventListener('lexius_escrow_updated', loadUserEscrows);
       clearInterval(interval);
     };
-  }, [activeWallet, authenticated]);
+  }, [activeWallet, authenticated, syncOnChainStatuses]);
 
   const handleCopyLink = (item: EscrowRecord) => {
     const fullUrl = item.link
@@ -272,7 +330,7 @@ export default function DashboardPage() {
                     )}
 
                     <Link
-                      href={item.link || `/pay/${item.id}`}
+                      href={`/pay/${item.id}`}
                       className="p-2.5 bg-[#070e24] hover:bg-cyan-950 text-cyan-300 rounded-xl border border-cyan-900/40 transition-colors shadow-sm"
                       title="Abrir Enlace"
                     >
