@@ -39,11 +39,17 @@ export default function DisputePage() {
 
   // Oracle address check
   const [onChainOracle, setOnChainOracle] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<'Buyer' | 'Seller' | 'Both'>('Both');
 
-  const mockBuyer = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
-  const mockSeller = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+  const { user } = usePrivy();
+  const { wallets } = useWallets();
+  const activeWallet = (
+    wallets?.[0]?.address ||
+    user?.wallet?.address ||
+    ''
+  ).toLowerCase();
 
-  // Mark escrow as Disputed in localStorage and notify Telegram
+  // Mark escrow as Disputed in localStorage, determine role, and notify Telegram
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
@@ -59,6 +65,21 @@ export default function DisputePage() {
         localStorage.setItem('lexius_user_escrows', JSON.stringify(newStored));
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new Event('lexius_escrow_updated'));
+      }
+
+      // Determine current user's role for this escrow
+      const currentItem = stored.find((item: any) => item.id === escrowId);
+      if (currentItem) {
+        if (activeWallet) {
+          const isSellerWallet = currentItem.seller?.toLowerCase() === activeWallet;
+          const isBuyerWallet = currentItem.buyer?.toLowerCase() === activeWallet;
+          if (isSellerWallet && !isBuyerWallet) setCurrentUserRole('Seller');
+          else if (isBuyerWallet && !isSellerWallet) setCurrentUserRole('Buyer');
+          else if (currentItem.role === 'Seller') setCurrentUserRole('Seller');
+          else if (currentItem.role === 'Buyer') setCurrentUserRole('Buyer');
+        } else if (currentItem.role === 'Seller' || currentItem.role === 'Buyer') {
+          setCurrentUserRole(currentItem.role);
+        }
       }
     } catch (e) {}
 
@@ -87,7 +108,7 @@ export default function DisputePage() {
         }),
       }).catch(() => {});
     } catch (e) {}
-  }, [escrowId]);
+  }, [escrowId, activeWallet]);
 
   // Persist bilateral evidence to localStorage whenever modified
   useEffect(() => {
@@ -151,14 +172,23 @@ export default function DisputePage() {
     setTxError(null);
 
     try {
+      let buyerAddr = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
+      let sellerAddr = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+      try {
+        const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+        const match = stored.find((item: any) => item.id === escrowId);
+        if (match?.buyer) buyerAddr = match.buyer;
+        if (match?.seller) sellerAddr = match.seller;
+      } catch (e) {}
+
       const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
       const response = await fetch(`${oracleUrl}/api/dispute/resolve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           escrowId,
-          buyerAddress: mockBuyer,
-          sellerAddress: mockSeller,
+          buyerAddress: buyerAddr,
+          sellerAddress: sellerAddr,
           itemDescription: 'Physical Merchandise Delivery — Olva Courier Shipment',
           claimText,
           evidenceImageUrls: proofUrl ? [proofUrl] : [],
@@ -352,47 +382,101 @@ export default function DisputePage() {
             </div>
 
             {/* Buyer Section */}
-            <div className="p-3.5 bg-[#030818] rounded-xl border border-cyan-900/40 space-y-3">
-              <span className="text-xs font-bold text-cyan-400 block">{t('disputeBuyerSection')}</span>
+            <div className={`p-3.5 rounded-xl border space-y-3 transition-all ${
+              currentUserRole === 'Buyer'
+                ? 'bg-[#030818] border-cyan-500/50 shadow-md shadow-cyan-500/10'
+                : 'bg-[#020614] border-cyan-950/60 opacity-90'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-cyan-400">
+                  {t('disputeBuyerSection')}
+                  {currentUserRole === 'Buyer' ? t('disputeYourSideBadge') : currentUserRole === 'Seller' ? t('disputeCounterpartySideBadge') : ''}
+                </span>
+                {currentUserRole === 'Seller' && (
+                  <span className="text-[10px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                    {t('disputeBuyerOnlyLocked')}
+                  </span>
+                )}
+              </div>
+
               <div>
                 <textarea
                   rows={3}
                   required
+                  disabled={currentUserRole === 'Seller'}
                   value={claimText}
                   onChange={(e) => setClaimText(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#020612] border border-cyan-950 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
+                  className={`w-full px-3 py-2 border rounded-lg text-xs font-sans transition-all ${
+                    currentUserRole === 'Seller'
+                      ? 'bg-[#01030a] border-slate-900 text-slate-300 cursor-not-allowed'
+                      : 'bg-[#020612] border-cyan-950 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-cyan-800/60 bg-[#020612] px-3 py-3 text-xs text-slate-300 transition hover:border-cyan-400 hover:text-white">
-                  <Upload className="h-3.5 w-3.5 text-cyan-400" />
-                  <span>{uploading ? t('disputeUploading') : t('disputeUploadPrompt')}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleReceiptUpload} />
-                </label>
+                {currentUserRole === 'Seller' ? (
+                  <div className="flex items-center justify-center gap-2 rounded-lg border border-slate-900 bg-[#01030a] px-3 py-3 text-xs text-slate-500 cursor-not-allowed">
+                    <Lock className="h-3.5 w-3.5 text-slate-500" />
+                    <span>{t('disputeBuyerOnlyLocked')}</span>
+                  </div>
+                ) : (
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-cyan-800/60 bg-[#020612] px-3 py-3 text-xs text-slate-300 transition hover:border-cyan-400 hover:text-white">
+                    <Upload className="h-3.5 w-3.5 text-cyan-400" />
+                    <span>{uploading ? t('disputeUploading') : t('disputeUploadPrompt')}</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleReceiptUpload} />
+                  </label>
+                )}
                 {proofUrl && <p className="mt-1 text-[10px] text-cyan-400 font-bold">{t('disputePreviewReady')}</p>}
               </div>
             </div>
 
             {/* Seller Section */}
-            <div className="p-3.5 bg-[#030818] rounded-xl border border-cyan-900/40 space-y-3">
-              <span className="text-xs font-bold text-sky-400 block">{t('disputeSellerSection')}</span>
+            <div className={`p-3.5 rounded-xl border space-y-3 transition-all ${
+              currentUserRole === 'Seller'
+                ? 'bg-[#030818] border-sky-500/50 shadow-md shadow-sky-500/10'
+                : 'bg-[#020614] border-sky-950/60 opacity-90'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-sky-400">
+                  {t('disputeSellerSection')}
+                  {currentUserRole === 'Seller' ? t('disputeYourSideBadge') : currentUserRole === 'Buyer' ? t('disputeCounterpartySideBadge') : ''}
+                </span>
+                {currentUserRole === 'Buyer' && (
+                  <span className="text-[10px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                    {t('disputeSellerOnlyLocked')}
+                  </span>
+                )}
+              </div>
+
               <div>
                 <textarea
                   rows={2}
+                  disabled={currentUserRole === 'Buyer'}
                   placeholder={t('disputeSellerClaimPlaceholder')}
                   value={sellerClaimText}
                   onChange={(e) => setSellerClaimText(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#020612] border border-cyan-950 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
+                  className={`w-full px-3 py-2 border rounded-lg text-xs font-sans transition-all ${
+                    currentUserRole === 'Buyer'
+                      ? 'bg-[#01030a] border-slate-900 text-slate-300 cursor-not-allowed'
+                      : 'bg-[#020612] border-cyan-950 text-white placeholder-slate-500 focus:outline-none focus:border-sky-400'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-cyan-800/60 bg-[#020612] px-3 py-3 text-xs text-slate-300 transition hover:border-cyan-400 hover:text-white">
-                  <Upload className="h-3.5 w-3.5 text-sky-400" />
-                  <span>{sellerUploading ? t('disputeUploading') : t('disputeSellerUploadPrompt')}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleSellerReceiptUpload} />
-                </label>
+                {currentUserRole === 'Buyer' ? (
+                  <div className="flex items-center justify-center gap-2 rounded-lg border border-slate-900 bg-[#01030a] px-3 py-3 text-xs text-slate-500 cursor-not-allowed">
+                    <Lock className="h-3.5 w-3.5 text-slate-500" />
+                    <span>{t('disputeSellerOnlyLocked')}</span>
+                  </div>
+                ) : (
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-cyan-800/60 bg-[#020612] px-3 py-3 text-xs text-slate-300 transition hover:border-sky-400 hover:text-white">
+                    <Upload className="h-3.5 w-3.5 text-sky-400" />
+                    <span>{sellerUploading ? t('disputeUploading') : t('disputeSellerUploadPrompt')}</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleSellerReceiptUpload} />
+                  </label>
+                )}
                 {sellerProofUrl && <p className="mt-1 text-[10px] text-sky-400 font-bold">{t('disputePreviewReady')}</p>}
               </div>
             </div>
