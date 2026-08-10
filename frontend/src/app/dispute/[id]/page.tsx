@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play, ShieldAlert, Check } from 'lucide-react';
 import { DisputeVerdict } from '@/types';
 import { useStylusContract } from '@/hooks/useStylusContract';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function DisputePage() {
