@@ -133,35 +133,10 @@ export function useEscrowFlow() {
     setErrorMessage(null);
 
     try {
-      const balances = await fetchBalances();
-
-      // If user has low ETH (< 0.01 ETH) or low USDC (< 1.00 USDC), drip testnet funds (0.04 ETH + 10 USDC)
-      if (balances.eth < 0.01 || balances.usdc < 1.00) {
-        console.log(
-          `[useEscrowFlow] Low balance detected (ETH: ${balances.eth}, USDC: ${balances.usdc}). Triggering /api/faucet/drip...`
-        );
-        const oracleUrl =
-          process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
-
-        const response = await fetch(`${oracleUrl}/api/faucet/drip`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ walletAddress: activeWalletAddress }),
-        });
-
-        const data = await response.json();
-        if (data.error) {
-          console.warn('[useEscrowFlow] Faucet drip warning:', data.error);
-        }
-
-        // Re-fetch balances after drip
-        await fetchBalances();
-      }
-
+      await fetchBalances();
       setFlowStep('idle');
     } catch (err: any) {
-      console.warn('[useEscrowFlow] Faucet check error:', err);
-      // Non-blocking error for demo continuity
+      console.warn('[useEscrowFlow] Balance check error:', err);
       setFlowStep('idle');
     } finally {
       setIsFunding(false);
