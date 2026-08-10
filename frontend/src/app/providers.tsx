@@ -3,6 +3,7 @@
 import React from 'react';
 import { PrivyProvider } from '@privy-io/react-auth';
 import { arbitrumSepolia } from 'viem/chains';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   // Uses valid 25-character CUID format fallback so Privy's internal format validator passes during SSR / docker builds
@@ -10,23 +11,25 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cmsdomun500060dk3xvzqpgoy';
 
   return (
-    <PrivyProvider
-      appId={privyAppId}
-      config={{
-        loginMethods: ['google', 'telegram', 'wallet'],
-        appearance: {
-          theme: 'dark',
-          accentColor: '#3b82f6',
-          showWalletLoginFirst: false,
-        },
-        embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
-        },
-        defaultChain: arbitrumSepolia,
-        supportedChains: [arbitrumSepolia],
-      }}
-    >
-      {children}
-    </PrivyProvider>
+    <LanguageProvider>
+      <PrivyProvider
+        appId={privyAppId}
+        config={{
+          loginMethods: ['google', 'telegram', 'wallet'],
+          appearance: {
+            theme: 'dark',
+            accentColor: '#3b82f6',
+            showWalletLoginFirst: false,
+          },
+          embeddedWallets: {
+            createOnLogin: 'users-without-wallets',
+          },
+          defaultChain: arbitrumSepolia,
+          supportedChains: [arbitrumSepolia],
+        }}
+      >
+        {children}
+      </PrivyProvider>
+    </LanguageProvider>
   );
 }

@@ -51,25 +51,38 @@ export default function DashboardPage() {
   const [tgError, setTgError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const stored: EscrowRecord[] = JSON.parse(
-        localStorage.getItem('lexius_user_escrows') || '[]'
-      );
-      if (activeWallet) {
-        // Filter escrows associated with the logged-in user
-        const userItems = stored.filter(
-          (item) =>
-            !item.seller ||
-            item.seller.toLowerCase() === activeWallet ||
-            item.buyer?.toLowerCase() === activeWallet
+    const loadUserEscrows = () => {
+      try {
+        const stored: EscrowRecord[] = JSON.parse(
+          localStorage.getItem('lexius_user_escrows') || '[]'
         );
-        setEscrows(userItems);
-      } else {
-        setEscrows(stored);
+        if (activeWallet) {
+          // Filter escrows associated with the logged-in user
+          const userItems = stored.filter(
+            (item) =>
+              !item.seller ||
+              item.seller.toLowerCase() === activeWallet ||
+              item.buyer?.toLowerCase() === activeWallet
+          );
+          setEscrows(userItems);
+        } else {
+          setEscrows(stored);
+        }
+      } catch (e) {
+        setEscrows([]);
       }
-    } catch (e) {
-      setEscrows([]);
-    }
+    };
+
+    loadUserEscrows();
+    window.addEventListener('storage', loadUserEscrows);
+    window.addEventListener('lexius_escrow_updated', loadUserEscrows);
+    const interval = setInterval(loadUserEscrows, 2000);
+
+    return () => {
+      window.removeEventListener('storage', loadUserEscrows);
+      window.removeEventListener('lexius_escrow_updated', loadUserEscrows);
+      clearInterval(interval);
+    };
   }, [activeWallet, authenticated]);
 
   const handleCopyLink = (item: EscrowRecord) => {
@@ -269,10 +282,11 @@ export default function DashboardPage() {
                     {item.status === 'Disputed' && (
                       <Link
                         href={`/dispute/${item.id}`}
-                        className="p-2.5 bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 rounded-xl transition-colors shadow-sm"
-                        title="Centro de Disputas IA"
+                        className="px-3.5 py-2.5 bg-gradient-to-r from-purple-900/80 to-indigo-900/80 hover:from-purple-800 hover:to-indigo-800 text-purple-200 border border-purple-500/50 rounded-xl transition-all shadow-md flex items-center gap-1.5 text-xs font-bold shrink-0 animate-pulse"
+                        title="Centro de Disputas IA — Subir Evidencia y Defenderse"
                       >
-                        <Sparkles className="w-4 h-4 text-cyan-400" />
+                        <Sparkles className="w-4 h-4 text-purple-300" />
+                        <span>{lang === 'es' ? '⚖️ Defenderse en IA ↗' : '⚖️ Defend in AI ↗'}</span>
                       </Link>
                     )}
                   </div>

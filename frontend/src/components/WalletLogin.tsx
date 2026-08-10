@@ -3,17 +3,19 @@
 import React from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { LogOut, ShieldCheck, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function WalletLogin() {
   const { login, logout, authenticated, ready, user } = usePrivy();
   const { wallets } = useWallets();
+  const { t } = useLanguage();
 
   // Loading state — Privy initializing
   if (!ready) {
     return (
       <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#070e24] border border-cyan-950">
         <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
-        <span className="text-xs text-slate-400">Connecting…</span>
+        <span className="text-xs text-slate-400">{t('btnConnecting')}</span>
       </div>
     );
   }
@@ -66,8 +68,8 @@ export default function WalletLogin() {
         {/* Disconnect */}
         <button
           onClick={logout}
-          title="Disconnect"
-          aria-label="Disconnect wallet"
+          title={t('btnDisconnect')}
+          aria-label={t('btnDisconnect')}
           className="ml-1 p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 rounded-lg transition-colors duration-150"
         >
           <LogOut className="w-3.5 h-3.5" />
@@ -87,7 +89,7 @@ export default function WalletLogin() {
     <button
       onClick={handleConnect}
       disabled={!ready}
-      aria-label="Connect wallet or sign in"
+      aria-label={t('btnConnect')}
       className={[
         'group flex items-center gap-2 px-4 py-2.5',
         'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600',
@@ -101,7 +103,7 @@ export default function WalletLogin() {
       ].join(' ')}
     >
       <ShieldCheck className="w-4 h-4 opacity-90 text-white" />
-      <span>Connect</span>
+      <span>{t('btnConnect')}</span>
     </button>
   );
 }

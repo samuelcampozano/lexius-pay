@@ -37,6 +37,9 @@ export const dictionary = {
     navDashboard: 'Panel',
     navAiSimulator: 'Simulador Árbitro IA',
     navConnect: 'Conectar / Passkey',
+    btnConnect: 'Conectar',
+    btnConnecting: 'Conectando...',
+    btnDisconnect: 'Desconectar',
     
     // Hero
     heroBadge: 'ETH Lima 2026 • Arbitrum Stylus WASM + GCP IA Oráculo',
@@ -251,6 +254,9 @@ export const dictionary = {
     navDashboard: 'Dashboard',
     navAiSimulator: 'AI Mediator Simulator',
     navConnect: 'Connect / Passkey',
+    btnConnect: 'Connect',
+    btnConnecting: 'Connecting...',
+    btnDisconnect: 'Disconnect',
 
     // Hero
     heroBadge: 'ETH Lima 2026 • Arbitrum Stylus WASM + GCP AI Oracle',

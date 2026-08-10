@@ -96,16 +96,29 @@ export default function PaymentPage() {
   const [storedRecord, setStoredRecord] = useState<any>(null);
 
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
-      const item = stored.find((rec: any) => rec.id === escrowId);
-      if (item) {
-        setStoredRecord(item);
-        if (item.status) {
-          setStatus(item.status);
+    const syncEscrowStatus = () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+        const item = stored.find((rec: any) => rec.id === escrowId);
+        if (item) {
+          setStoredRecord(item);
+          if (item.status) {
+            setStatus(item.status);
+          }
         }
-      }
-    } catch (e) {}
+      } catch (e) {}
+    };
+
+    syncEscrowStatus();
+    window.addEventListener('storage', syncEscrowStatus);
+    window.addEventListener('lexius_escrow_updated', syncEscrowStatus);
+    const interval = setInterval(syncEscrowStatus, 2000);
+
+    return () => {
+      window.removeEventListener('storage', syncEscrowStatus);
+      window.removeEventListener('lexius_escrow_updated', syncEscrowStatus);
+      clearInterval(interval);
+    };
   }, [escrowId]);
 
   // Determine if the authenticated user is the seller
@@ -674,6 +687,39 @@ export default function PaymentPage() {
             >
               <Sparkles className="w-4 h-4 text-cyan-400" />
               <span>{t('payOpenDispute')}</span>
+            </Link>
+          </div>
+        )}
+
+        {status === 'Disputed' && (
+          <div className="p-5 bg-[#120726] border border-purple-500/50 rounded-2xl text-center space-y-3.5 glow-purple">
+            <div className="flex items-center justify-center gap-2 text-purple-300 font-extrabold text-sm sm:text-base">
+              <AlertTriangle className="w-5 h-5 text-purple-400 animate-pulse" />
+              <span>
+                {lang === 'es'
+                  ? '⚠️ ESTE ESCROW SE ENCUENTRA EN DISPUTA ACTIVA'
+                  : '⚠️ THIS ESCROW IS IN ACTIVE DISPUTE'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed max-w-md mx-auto">
+              {isSeller
+                ? (lang === 'es'
+                    ? 'Se ha registrado un reclamo sobre este pago. Como vendedor del producto o servicio, entra de inmediato al Centro de Resolución para subir tus pruebas de empaque/despacho (guía de envío o etiquetas) y defenderte ante el Oráculo de IA.'
+                    : 'A claim was submitted. As the seller, enter the Resolution Center to upload your shipping receipt/waybill and defend your case before the AI Oracle.')
+                : (lang === 'es'
+                    ? 'El Centro de Resolución de Disputas de IA Multimodal está activo. Revisa las evidencias de ambas partes y ejecuta el pago o reembolso al ganador.'
+                    : 'The Multimodal AI Dispute Resolution Center is active. Review evidence and execute on-chain payout to the winner.')}
+            </p>
+            <Link
+              href={`/dispute/${escrowId}`}
+              className="w-full py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl shadow-lg shadow-purple-600/30 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider"
+            >
+              <Sparkles className="w-4.5 h-4.5 text-purple-200" />
+              <span>
+                {isSeller
+                  ? (lang === 'es' ? '⚖️ Defenderse / Subir Pruebas de Despacho ↗' : '⚖️ Defend / Upload Dispatch Proof ↗')
+                  : (lang === 'es' ? '⚖️ Ir al Centro de Resolución con IA ↗' : '⚖️ Open AI Resolution Center ↗')}
+              </span>
             </Link>
           </div>
         )}
