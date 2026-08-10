@@ -198,7 +198,7 @@ export function useEscrowFlow() {
           const amountOnChain = escrowInfo[2];
           const statusOnChain = escrowInfo[3];
 
-          if (amountOnChain > 0n) {
+          if (amountOnChain > BigInt(0)) {
             requiredUsdcUnits = amountOnChain;
           }
 
