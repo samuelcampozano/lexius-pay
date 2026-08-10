@@ -43,6 +43,68 @@ export default function DisputePage() {
   const mockBuyer = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
   const mockSeller = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
 
+  // Mark escrow as Disputed in localStorage and notify Telegram
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+      let updated = false;
+      const newStored = stored.map((item: any) => {
+        if (item.id === escrowId && item.status !== 'Disputed' && item.status !== 'Completed') {
+          updated = true;
+          return { ...item, status: 'Disputed' };
+        }
+        return item;
+      });
+      if (updated) {
+        localStorage.setItem('lexius_user_escrows', JSON.stringify(newStored));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('lexius_escrow_updated'));
+      }
+    } catch (e) {}
+
+    // Load any existing dispute data for this escrow
+    try {
+      const saved = JSON.parse(localStorage.getItem(`lexius_dispute_data_${escrowId}`) || '{}');
+      if (saved.claimText) setClaimText(saved.claimText);
+      if (saved.proofUrl) setProofUrl(saved.proofUrl);
+      if (saved.sellerClaimText) setSellerClaimText(saved.sellerClaimText);
+      if (saved.sellerProofUrl) setSellerProofUrl(saved.sellerProofUrl);
+      if (saved.verdict) setVerdict(saved.verdict);
+    } catch (e) {}
+
+    // Notify Telegram bot that escrow is in dispute
+    try {
+      const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+      const tgContext = JSON.parse(localStorage.getItem(`lexius_tg_msg_${escrowId}`) || '{}');
+      fetch(`${oracleUrl}/api/telegram/update-escrow-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: tgContext.chatId || undefined,
+          messageId: tgContext.messageId ? Number(tgContext.messageId) : undefined,
+          escrowId,
+          newStatus: 'disputed',
+        }),
+      }).catch(() => {});
+    } catch (e) {}
+  }, [escrowId]);
+
+  // Persist bilateral evidence to localStorage whenever modified
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        `lexius_dispute_data_${escrowId}`,
+        JSON.stringify({
+          claimText,
+          proofUrl,
+          sellerClaimText,
+          sellerProofUrl,
+          verdict,
+        })
+      );
+    } catch (e) {}
+  }, [escrowId, claimText, proofUrl, sellerClaimText, sellerProofUrl, verdict]);
+
   // Fetch the authorized oracle address from the Stylus contract on Sepolia
   useEffect(() => {
     async function fetchOnChainOracle() {
@@ -159,6 +221,36 @@ export default function DisputePage() {
       console.log('Dispute resolution transaction sent! Hash:', hash);
       setTxHash(hash);
       setTxSuccess(true);
+
+      // Update escrow status to Completed in localStorage
+      try {
+        const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+        const updated = stored.map((item: any) => {
+          if (item.id === escrowId) {
+            return { ...item, status: 'Completed' };
+          }
+          return item;
+        });
+        localStorage.setItem('lexius_user_escrows', JSON.stringify(updated));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('lexius_escrow_updated'));
+      } catch (e) {}
+
+      // Notify Telegram bot of completed status
+      try {
+        const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+        const tgContext = JSON.parse(localStorage.getItem(`lexius_tg_msg_${escrowId}`) || '{}');
+        fetch(`${oracleUrl}/api/telegram/update-escrow-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chatId: tgContext.chatId || undefined,
+            messageId: tgContext.messageId ? Number(tgContext.messageId) : undefined,
+            escrowId,
+            newStatus: 'completed',
+          }),
+        }).catch(() => {});
+      } catch (e) {}
     } catch (err: any) {
       console.error('On-chain execution failed:', err);
       setTxError(err.message || 'Transaction reverted or failed');
