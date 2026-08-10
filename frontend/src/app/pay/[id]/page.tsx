@@ -19,11 +19,14 @@ import {
   Coins,
 } from 'lucide-react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { createPublicClient, http, formatUnits } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { useStylusContract } from '@/hooks/useStylusContract';
 import { useEscrowFlow } from '@/hooks/useEscrowFlow';
 import { closeTma } from '@/lib/telegram';
+import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
 
 const fallbackBuyer = '0x3C44CdD459193653841586395bcfA5A7b42d506e';
 
@@ -65,14 +68,19 @@ export default function PaymentPage() {
     stylusContractAddress,
   } = useEscrowFlow();
 
+  const [storedRecord, setStoredRecord] = useState<any>(null);
+  const [onChainBuyer, setOnChainBuyer] = useState<string | null>(null);
+  const [onChainSeller, setOnChainSeller] = useState<string | null>(null);
+  const [onChainAmount, setOnChainAmount] = useState<string | null>(null);
+
   const activeWallet = activeWalletAddress || wallets?.[0]?.address || user?.wallet?.address || '';
-  const buyerWallet = activeWallet || fallbackBuyer;
+  const buyerWallet = activeWallet || onChainBuyer || storedRecord?.buyer || fallbackBuyer;
 
   // Get buyer display name from Privy user object
   const buyerDisplayName =
     user?.google?.name ||
     user?.email?.address ||
-    (authenticated && activeWallet ? truncateAddress(activeWallet) : null);
+    (buyerWallet && buyerWallet !== fallbackBuyer ? truncateAddress(buyerWallet) : null);
 
   const [status, setStatus] = useState<'Pending' | 'Deposited' | 'Completed' | 'Disputed'>('Pending');
   const [loading, setLoading] = useState(false);
@@ -85,36 +93,121 @@ export default function PaymentPage() {
   const isTmaCompact = !!tmaAction;
   const tmaAutoExecuted = useRef(false);
 
-  // Parse link params
-  const description = searchParams?.get('description') || 'VIP Concert Ticket — ETH Lima Afterparty 2026';
-  const amount = searchParams?.get('amount') || '50';
-  const sellerRaw = searchParams?.get('seller')?.trim();
-  const seller = sellerRaw && sellerRaw.length > 0 ? sellerRaw : '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
-  const sellerNameRaw = searchParams?.get('sellerName')?.trim();
-  const sellerName = sellerNameRaw && sellerNameRaw.length > 0 ? sellerNameRaw : '';
+  // Parse link params with smart fallbacks from stored record and on-chain state
+  const paramDescription = searchParams?.get('description');
+  const description =
+    paramDescription ||
+    storedRecord?.description ||
+    `Acuerdo P2P Protegido #${escrowId}`;
 
-  const [storedRecord, setStoredRecord] = useState<any>(null);
+  const paramAmount = searchParams?.get('amount');
+  const rawAmountStr = paramAmount || storedRecord?.amount || onChainAmount || '5';
+  const amount = rawAmountStr.replace(/[^0-9.]/g, '') || '5';
+
+  const sellerRaw = searchParams?.get('seller')?.trim();
+  const seller =
+    sellerRaw && sellerRaw.length > 0
+      ? sellerRaw
+      : storedRecord?.seller || onChainSeller || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+
+  const sellerNameRaw = searchParams?.get('sellerName')?.trim();
+  const sellerName =
+    sellerNameRaw && sellerNameRaw.length > 0
+      ? sellerNameRaw
+      : storedRecord?.sellerName || (seller ? truncateAddress(seller) : 'Vendedor');
 
   useEffect(() => {
-    const syncEscrowStatus = () => {
+    let isSubscribed = true;
+
+    const syncEscrowStatus = async () => {
+      // 1. Local Storage Sync
       try {
         const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
         const item = stored.find((rec: any) => rec.id === escrowId);
-        if (item) {
+        if (item && isSubscribed) {
           setStoredRecord(item);
           if (item.status) {
             setStatus(item.status);
           }
         }
       } catch (e) {}
+
+      // 2. Real-Time On-Chain Blockchain Sync from Arbitrum Sepolia
+      try {
+        if (!escrowId || escrowId === 'demo') return;
+        const publicClient = createPublicClient({
+          chain: arbitrumSepolia,
+          transport: http(process.env.NEXT_PUBLIC_STYLUS_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc'),
+        });
+        const numericId = BigInt(escrowId.replace('#', ''));
+        const count = (await publicClient.readContract({
+          address: STYLUS_ESCROW_ADDRESS,
+          abi: STYLUS_ESCROW_ABI,
+          functionName: 'getEscrowCount',
+        })) as bigint;
+
+        if (numericId < count) {
+          const escrowInfo = (await publicClient.readContract({
+            address: STYLUS_ESCROW_ADDRESS,
+            abi: STYLUS_ESCROW_ABI,
+            functionName: 'getEscrow',
+            args: [numericId],
+          })) as [string, string, bigint, number, string];
+
+          const buyerAddr = escrowInfo[0];
+          const sellerAddr = escrowInfo[1];
+          const usdcRaw = escrowInfo[2];
+          const statusCode = escrowInfo[3];
+
+          if (isSubscribed) {
+            if (buyerAddr && buyerAddr !== '0x0000000000000000000000000000000000000000') {
+              setOnChainBuyer(buyerAddr);
+            }
+            if (sellerAddr && sellerAddr !== '0x0000000000000000000000000000000000000000') {
+              setOnChainSeller(sellerAddr);
+            }
+            if (usdcRaw > BigInt(0)) {
+              setOnChainAmount(formatUnits(usdcRaw, 6));
+            }
+
+            // Map on-chain status code: 0=Pending, 1=Deposited, 2=Disputed, 3=Completed
+            let newOnChainStatus: 'Pending' | 'Deposited' | 'Disputed' | 'Completed' = 'Pending';
+            if (statusCode === 1) newOnChainStatus = 'Deposited';
+            else if (statusCode === 2) newOnChainStatus = 'Disputed';
+            else if (statusCode === 3) newOnChainStatus = 'Completed';
+
+            if (newOnChainStatus !== 'Pending') {
+              setStatus(newOnChainStatus);
+              // Update local storage status
+              try {
+                const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+                const updated = stored.map((item: any) => {
+                  if (item.id === escrowId) {
+                    return {
+                      ...item,
+                      status: newOnChainStatus,
+                      buyer: buyerAddr && buyerAddr !== '0x0000000000000000000000000000000000000000' ? buyerAddr : item.buyer,
+                    };
+                  }
+                  return item;
+                });
+                localStorage.setItem('lexius_user_escrows', JSON.stringify(updated));
+              } catch (e) {}
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[PaymentPage] On-chain sync error:', err);
+      }
     };
 
     syncEscrowStatus();
     window.addEventListener('storage', syncEscrowStatus);
     window.addEventListener('lexius_escrow_updated', syncEscrowStatus);
-    const interval = setInterval(syncEscrowStatus, 2000);
+    const interval = setInterval(syncEscrowStatus, 3000);
 
     return () => {
+      isSubscribed = false;
       window.removeEventListener('storage', syncEscrowStatus);
       window.removeEventListener('lexius_escrow_updated', syncEscrowStatus);
       clearInterval(interval);
