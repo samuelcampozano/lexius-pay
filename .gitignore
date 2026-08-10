@@ -47,7 +47,10 @@ PROJECT_CONTEXT.md
 *_GUIDE.md
 *_CONTEXT.md
 
-# Agent & AI tooling
-.agents/
-skills-lock.json
-rustup-init.exe
+# Presentations, Pitch Decks & Media
+presentation/
+presentation*/
+*.pptx
+*.ppt
+*pitch*
+Lexius_Pay_Pitch_Deck.pptx
