@@ -6,6 +6,47 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lexius-frontend-stagin
 
 let bot: Telegraf | null = null;
 
+// In-memory user store mapping username (lowercase, without @) -> chatId
+export const userStore = new Map<string, number | string>();
+
+/** Register or update a user's chatId by username */
+export function registerUser(username?: string, chatId?: number | string): void {
+  if (username && chatId) {
+    const sanitized = String(username).trim().replace(/^@/, '').toLowerCase();
+    if (sanitized) {
+      userStore.set(sanitized, chatId);
+    }
+  }
+}
+
+/**
+ * Sanitizes input username and performs a case-insensitive search in userStore.
+ * Fallbacks to numeric ID or @sanitizedUsername if not found in store.
+ */
+export function findChatIdByUsername(rawUsername: string | number): number | string | null {
+  if (rawUsername === undefined || rawUsername === null || rawUsername === '') {
+    return null;
+  }
+
+  // If numeric ID, return as number
+  if (typeof rawUsername === 'number' || (!isNaN(Number(rawUsername)) && String(rawUsername).trim() !== '')) {
+    return Number(rawUsername);
+  }
+
+  // 1. Sanitizar eliminando el símbolo '@' y espacios en blanco
+  const sanitizedUsername = String(rawUsername).trim().replace(/^@/, '');
+  if (!sanitizedUsername) return null;
+
+  // 2. Búsqueda insensible a mayúsculas/minúsculas en el store en memoria
+  const foundChatId = userStore.get(sanitizedUsername.toLowerCase());
+  if (foundChatId) {
+    return foundChatId;
+  }
+
+  // Fallback direct format for Telegram Bot API (@username)
+  return `@${sanitizedUsername}`;
+}
+
 export function getBot(): Telegraf {
   if (!bot) {
     if (!BOT_TOKEN) {
@@ -169,6 +210,9 @@ export async function initBot(app: import('express').Express): Promise<void> {
 
   // Register /start command
   b.start(async (ctx: any) => {
+    if (ctx.from?.username && ctx.chat?.id) {
+      registerUser(ctx.from.username, ctx.chat.id);
+    }
     await sendWelcomeMessage(ctx.chat.id);
   });
 

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { sendEscrowCard, updateEscrowCard } from '../services/telegram';
+import { sendEscrowCard, updateEscrowCard, findChatIdByUsername } from '../services/telegram';
 
 const router = Router();
 
@@ -12,20 +12,28 @@ const escrowCardStore = new Map<string, { chatId: string | number; messageId: nu
  */
 router.post('/send-escrow-card', async (req: Request, res: Response) => {
   try {
-    const { chatId, escrowId, description, amount, sellerName, seller } = req.body;
+    const { chatId, username, escrowId, description, amount, sellerName, seller } = req.body;
+    const rawUsername = username || chatId;
 
-    if (!chatId || !escrowId) {
+    if (!rawUsername || !escrowId) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: chatId, escrowId',
+        error: 'Missing required fields: username or chatId, escrowId',
       });
     }
 
-    // Auto-format username string if leading @ is missing
-    const formattedChatId =
-      typeof chatId === 'string' && !chatId.startsWith('@') && isNaN(Number(chatId))
-        ? `@${chatId}`
-        : chatId;
+    // 1. Sanitizar eliminando el símbolo '@' y espacios en blanco
+    const sanitizedUsername = String(rawUsername).trim().replace(/^@/, '');
+
+    // 2. Buscar en la base de datos / memoria de forma insensible a mayúsculas y minúsculas (Case-Insensitive)
+    const formattedChatId = findChatIdByUsername(sanitizedUsername);
+
+    if (!formattedChatId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Telegram user or chat not found. Make sure the user has started a conversation with the bot first.',
+      });
+    }
 
     const result = await sendEscrowCard({
       chatId: formattedChatId,
