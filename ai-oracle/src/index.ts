@@ -11,7 +11,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+// ✅ CORS CORREGIDO Y BLINDADO PARA EVITAR BLOQUEOS EN NAVEGADORES
+const allowedOrigins = [
+  'https://lexius-frontend-staging-265650435557.us-central1.run.app', // Frontend Staging
+  'https://lexiuspay.app',                                           // Frontend Producción
+  'http://localhost:3000',                                            // Entorno local
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permitir peticiones sin origen (como llamadas de Telegram, apps móviles o Postman/Curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by Lexius Pay CORS Policy'));
+    }
+  },
+  credentials: true, // Requerido para Privy, Passkeys e intercambio de cookies seguras
+}));
+
 app.use(express.json({ limit: '10mb' }));
 
 // 1. Registramos las rutas normales
