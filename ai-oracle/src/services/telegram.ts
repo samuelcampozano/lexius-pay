@@ -57,9 +57,17 @@ export function getBot(): Telegraf {
   return bot;
 }
 
-/** Build the Mini App deep link URL */
-export function buildMiniAppUrl(action: string, escrowId: string): string {
-  return `https://t.me/${BOT_USERNAME}/app?startapp=${action}_${escrowId}`;
+/** Build the direct WebApp URL for Telegram WebApp buttons with dynamic parameters */
+export function buildMiniAppUrl(action: string, escrowId: string, params?: { amount?: string; description?: string; seller?: string; sellerName?: string }): string {
+  const baseUrl = process.env.FRONTEND_URL || 'https://lexius-frontend-staging-265650435557.us-central1.run.app';
+  const query = new URLSearchParams();
+  query.set('tmaAction', action);
+  if (params?.amount) query.set('amount', params.amount);
+  if (params?.description) query.set('description', params.description);
+  if (params?.seller) query.set('seller', params.seller);
+  if (params?.sellerName) query.set('sellerName', params.sellerName);
+
+  return `${baseUrl}/pay/${String(escrowId)}?${query.toString()}`;
 }
 
 /** Send initial escrow card with Pay button */
@@ -88,12 +96,12 @@ export async function sendEscrowCard(params: {
     `_Funds will be held in a smart contract escrow until the buyer confirms receipt._`,
   ].join('\n');
 
-  const payUrl = buildMiniAppUrl('deposit', escrowId);
+  const webAppUrl = buildMiniAppUrl('deposit', String(escrowId), { amount, description, seller, sellerName });
 
   const msg = await b.telegram.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
-      [Markup.button.url(`💳 Pay ${amount} USDC`, payUrl)],
+      [Markup.button.webApp(`💳 Pay ${amount} USDC`, webAppUrl)],
     ]),
   });
 
@@ -117,7 +125,7 @@ export async function updateEscrowCard(params: {
 
   switch (newStatus) {
     case 'deposited': {
-      const releaseUrl = buildMiniAppUrl('release', escrowId);
+      const releaseUrl = buildMiniAppUrl('release', String(escrowId), { amount, description });
       text = [
         `🔒 *Funds Secured*`,
         ``,
@@ -130,7 +138,7 @@ export async function updateEscrowCard(params: {
         `_Click below to release funds after confirming receipt._`,
       ].join('\n');
       keyboard = Markup.inlineKeyboard([
-        [Markup.button.url('🔓 Release Funds', releaseUrl)],
+        [Markup.button.webApp('🔓 Release Funds', releaseUrl)],
       ]);
       break;
     }
@@ -177,7 +185,7 @@ export async function updateEscrowCard(params: {
 /** Send welcome message when user starts the bot */
 export async function sendWelcomeMessage(chatId: number | string): Promise<void> {
   const b = getBot();
-  const appUrl = `https://t.me/${BOT_USERNAME}/app`;
+  const baseUrl = process.env.FRONTEND_URL || 'https://lexius-frontend-staging-265650435557.us-central1.run.app';
   
   const text = [
     `🛡️ *Welcome to Lexius Pay!*`,
@@ -194,7 +202,7 @@ export async function sendWelcomeMessage(chatId: number | string): Promise<void>
   await b.telegram.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
-      [Markup.button.url('🚀 Open Lexius Pay', appUrl)],
+      [Markup.button.webApp('🚀 Open Lexius Pay', baseUrl)],
     ]),
   });
 }

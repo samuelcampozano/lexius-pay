@@ -91,7 +91,10 @@ export function getTmaStartParam(): string | null {
 export function parseTmaStartParam(param: string): { action: string; escrowId: string } | null {
   if (!param) return null;
   const underscoreIndex = param.indexOf('_');
-  if (underscoreIndex === -1) return null;
+  if (underscoreIndex === -1) {
+    // Single ID format e.g. startapp=15 -> default action 'deposit'
+    return { action: 'deposit', escrowId: param };
+  }
   const action = param.slice(0, underscoreIndex);
   const escrowId = param.slice(underscoreIndex + 1);
   if (!action || !escrowId) return null;
