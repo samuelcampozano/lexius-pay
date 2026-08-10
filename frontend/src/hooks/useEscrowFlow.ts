@@ -176,6 +176,8 @@ export function useEscrowFlow() {
       let needsCreation = false;
       let requiredUsdcUnits = usdcUnits;
 
+      let alreadyDepositedOnChain = false;
+
       // 2. Check on-chain escrow state to ensure escrow exists and get required amount
       try {
         const count = (await publicClient.readContract({
@@ -202,10 +204,12 @@ export function useEscrowFlow() {
             requiredUsdcUnits = amountOnChain;
           }
 
-          if (
+          if (statusOnChain >= 1) {
+            alreadyDepositedOnChain = true;
+          } else if (
             !buyerOnChain ||
             buyerOnChain === '0x0000000000000000000000000000000000000000' ||
-            (statusOnChain === 0 && buyerOnChain.toLowerCase() !== activeWalletAddress.toLowerCase())
+            buyerOnChain.toLowerCase() !== activeWalletAddress.toLowerCase()
           ) {
             needsCreation = true;
           }
@@ -213,6 +217,13 @@ export function useEscrowFlow() {
       } catch (checkErr) {
         console.warn('[useEscrowFlow] Error checking on-chain state, assuming needs creation:', checkErr);
         needsCreation = true;
+      }
+
+      if (alreadyDepositedOnChain) {
+        console.log(`[useEscrowFlow] Escrow #${targetEscrowId} ya se encuentra depositado on-chain.`);
+        setFlowStep('success');
+        await fetchBalances();
+        return '0x0000000000000000000000000000000000000000000000000000000000000000';
       }
 
       // 3. Check current USDC allowance for Stylus Escrow Contract against actual required units
