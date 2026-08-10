@@ -188,21 +188,29 @@ export async function sendWelcomeMessage(chatId: number | string): Promise<void>
   const baseUrl = process.env.FRONTEND_URL || 'https://lexius-frontend-staging-265650435557.us-central1.run.app';
   
   const text = [
-    `🛡️ *Welcome to Lexius Pay!*`,
+    `🛡️ *Bienvenido a Lexius Pay!*`,
     ``,
-    `The first autonomous AI-powered P2P escrow on Arbitrum Stylus.`,
+    `El primer sistema autónomo de Custodia P2P con IA sobre Arbitrum Stylus.`,
     ``,
-    `🔗 Create escrow links for safe P2P trades`,
-    `🤖 AI Oracle resolves disputes automatically`,
-    `⚡ Powered by WASM smart contracts`,
+    `✨ *Opciones de Acceso Rápido Privy Web2.5:*`,
+    `• ✈️ *Telegram Fast Account:* Creación instantánea sin contraseñas`,
+    `• 🔍 *Google OAuth:* Inicio de sesión con 1-Clic`,
+    `• 💼 *Billeteras / Claves Privadas:* Importa MetaMask, Rabby o tu Key`,
     ``,
-    `Tap the button below to launch the app! 🚀`,
+    `Elige una opción a continuación o abre la aplicación:`,
   ].join('\n');
+
+  const fastTelegramUrl = buildMiniAppUrl('privy', 'telegram');
+  const googleLoginUrl = buildMiniAppUrl('privy', 'google');
+  const walletImportUrl = buildMiniAppUrl('privy', 'wallet');
 
   await b.telegram.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
-      [Markup.button.webApp('🚀 Open Lexius Pay', baseUrl)],
+      [Markup.button.url('⚡ Creación Rápida con Telegram', fastTelegramUrl)],
+      [Markup.button.url('🌐 Iniciar sesión con Google', googleLoginUrl)],
+      [Markup.button.url('🔑 Importar / Conectar Billetera', walletImportUrl)],
+      [Markup.button.url('🚀 Abrir Lexius Pay App', baseUrl)],
     ]),
   });
 }

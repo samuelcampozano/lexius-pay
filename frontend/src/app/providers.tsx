@@ -15,14 +15,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <PrivyProvider
         appId={privyAppId}
         config={{
-          loginMethods: ['google', 'telegram', 'wallet'],
+          loginMethods: ['telegram', 'google', 'email', 'wallet'],
           appearance: {
             theme: 'dark',
-            accentColor: '#3b82f6',
+            accentColor: '#00e5ff',
+            logo: 'https://raw.githubusercontent.com/samuelcampozano/lexius-pay/main/frontend/public/lexius-logo.png',
             showWalletLoginFirst: false,
           },
           embeddedWallets: {
             createOnLogin: 'users-without-wallets',
+            requireUserPasswordOnCreate: false,
           },
           defaultChain: arbitrumSepolia,
           supportedChains: [arbitrumSepolia],
