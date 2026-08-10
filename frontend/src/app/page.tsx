@@ -19,10 +19,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { createPublicClient, http } from 'viem';
+import { arbitrumSepolia } from 'viem/chains';
 import { useLanguage } from '@/context/LanguageContext';
 import { cacheWalletAddress, getCachedWalletAddress } from '@/lib/telegram';
 import UseCaseSelector from '@/components/UseCaseSelector';
 import EscrowSimulator from '@/components/EscrowSimulator';
+import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
 
 export default function HomePage() {
   const { lang, t } = useLanguage();
@@ -72,7 +75,7 @@ export default function HomePage() {
   const [simulatingAI, setSimulatingAI] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  const handleCreateLink = (e: React.FormEvent) => {
+  const handleCreateLink = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // If no seller address provided and user isn't logged in, prompt Privy login so seller gets paid!
@@ -86,7 +89,28 @@ export default function HomePage() {
       storedEscrows = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
     } catch (e) {}
 
-    const nextIdNum = storedEscrows.length + 1;
+    let nextIdNum = storedEscrows.length + 1;
+
+    // Fetch actual on-chain escrow count from Arbitrum Sepolia to prevent ID collisions
+    try {
+      const publicClient = createPublicClient({
+        chain: arbitrumSepolia,
+        transport: http(process.env.NEXT_PUBLIC_STYLUS_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc'),
+      });
+      const count = (await publicClient.readContract({
+        address: STYLUS_ESCROW_ADDRESS,
+        abi: STYLUS_ESCROW_ABI,
+        functionName: 'getEscrowCount',
+      })) as bigint;
+
+      const onChainNextId = Number(count) + 1;
+      if (onChainNextId > nextIdNum) {
+        nextIdNum = onChainNextId;
+      }
+    } catch (err) {
+      console.warn('[handleCreateLink] Could not fetch on-chain count, using fallback local index:', err);
+    }
+
     const newEscrowId = String(nextIdNum);
     const finalSeller =
       sellerAddress.trim() ||
