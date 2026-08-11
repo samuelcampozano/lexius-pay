@@ -152,27 +152,29 @@ export async function sendEscrowCard(params: {
 }): Promise<{ messageId: number }> {
   const { chatId, escrowId, description, amount, sellerName, seller } = params;
   const b = getBot();
+  const displayName = sellerName || 'Verificado';
   
   const text = [
-    `⚖️ *Lexius Pay — Custodia P2P Activa*`,
+    `📩 *Lexius Pay — Solicitud de Pago Protegido P2P*`,
     ``,
-    `📋 *Acuerdo P2P #${escrowId}*`,
-    `📦 ${description}`,
+    `📋 *Solicitud de Pago #${escrowId}*`,
+    `📦 *Producto / Servicio:* ${description}`,
     ``,
-    `💰 *Monto:* ${amount} USDC`,
+    `💰 *Monto a Depositar:* ${amount} USDC`,
     `🌐 *Red:* Arbitrum Sepolia (Stylus WASM)`,
-    `🏪 *Vendedor:* ${sellerName || 'Verificado'}`,
+    `🏪 *Vendedor Requisitor:* ${displayName}`,
     `📍 \`${seller.slice(0, 6)}...${seller.slice(-4)}\``,
     ``,
-    `🔒 _Los fondos estarán resguardados por un contrato inteligente WASM hasta que el comprador confirme la recepción._`,
+    `💬 *Para el Comprador:*`,
+    `_El vendedor *${displayName}* te ha enviado esta solicitud de pago por *${amount} USDC*. Al presionar el botón de abajo, depositarás los fondos en el contrato inteligente WASM de Arbitrum Stylus, donde permanecerán 100% seguros hasta que recibas tu pedido a satisfacción._`,
   ].join('\n');
 
-  const webAppUrl = buildMiniAppUrl('deposit', String(escrowId), { amount, description, seller, sellerName });
+  const webAppUrl = buildMiniAppUrl('deposit', String(escrowId), { amount, description, seller, sellerName: displayName });
 
   const msg = await b.telegram.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
-      [Markup.button.webApp(`💳 Pagar ${amount} USDC`, webAppUrl)],
+      [Markup.button.webApp(`💳 Depositar y Proteger ${amount} USDC`, webAppUrl)],
     ]),
   });
 
@@ -202,51 +204,49 @@ export async function updateEscrowCard(params: {
     case 'deposited': {
       const releaseUrl = buildMiniAppUrl('release', String(escrowId), { amount, description });
       text = [
-        `🔒 *Fondos Asegurados y Resguardados*`,
+        `🔒 *Lexius Pay — Fondos Resguardados en Bóveda WASM*`,
         ``,
         `📋 *Acuerdo P2P #${escrowId}*`,
-        `📦 ${description}`,
+        `📦 *Producto:* ${description}`,
         ``,
-        `💰 *Monto:* ${amount} USDC (Bloqueado en Stylus WASM)`,
+        `💰 *Monto Bloqueado:* ${amount} USDC (En Contrato Stylus WASM)`,
         `🌐 *Red:* Arbitrum Sepolia`,
         ``,
-        `✅ _El comprador ha depositado los fondos exitosamente en el contrato inteligente._`,
-        `🚚 _El vendedor ya puede realizar el envío o entrega._`,
-        `🔓 _Haz clic abajo para liberar los fondos una vez recibido el producto._`,
+        `✅ *Estado para el Vendedor:* ¡El comprador ya ha depositado los fondos! Ya puedes realizar el despacho con garantía de cobro.`,
+        `🔓 *Estado para el Comprador:* Tus fondos están protegidos. Una vez recibido el pedido a satisfacción, libera el pago abajo.`,
       ].join('\n');
       keyboard = Markup.inlineKeyboard([
-        [Markup.button.webApp('🔓 Liberar Fondos al Vendedor', releaseUrl)],
+        [Markup.button.webApp('🔓 Confirmar Recepción y Liberar Pago', releaseUrl)],
       ]);
-      pushText = `🔔 *Notificación de Lexius Pay*\n\n¡Se han congelado *${amount} USDC* en el contrato Stylus WASM para la transacción #${escrowId}! El vendedor ya puede realizar el envío.`;
+      pushText = `🔔 *Notificación de Lexius Pay*\n\n¡Se han congelado *${amount} USDC* en el contrato Stylus WASM para la orden #${escrowId}! El comprador ya realizó el pago y el vendedor puede despachar.`;
       break;
     }
     case 'completed':
       text = [
-        `🎉 *¡Acuerdo Completado Exitosamente!*`,
+        `🎉 *Lexius Pay — Acuerdo Completado Exitosamente*`,
         ``,
         `📋 *Acuerdo P2P #${escrowId}*`,
-        `📦 ${description}`,
+        `📦 *Producto:* ${description}`,
         ``,
-        `💰 *Monto:* ${amount} USDC (Liberados al Vendedor)`,
+        `💰 *Monto Transferido:* ${amount} USDC (Enviados al Vendedor)`,
         `🌐 *Red:* Arbitrum Sepolia`,
         ``,
-        `✨ _Gracias por operar de forma segura con Lexius Pay y Arbitrum Stylus._`,
+        `✨ _El comprador confirmó la recepción a satisfacción y los fondos se liberaron al vendedor._`,
       ].join('\n');
-      pushText = `🔔 *Notificación de Lexius Pay*\n\n¡Pago de *${amount} USDC* liberado exitosamente al vendedor en la transacción #${escrowId}! Transacción finalizada.`;
+      pushText = `🔔 *Notificación de Lexius Pay*\n\n¡Pago de *${amount} USDC* liberado exitosamente al vendedor en la transacción #${escrowId}! Transacción completada con éxito.`;
       break;
     case 'disputed':
       text = [
-        `🚨 *¡Disputa Iniciada!*`,
+        `🚨 *Lexius Pay — Disputa Abierta en Bóveda*`,
         ``,
         `📋 *Acuerdo P2P #${escrowId}*`,
-        `📦 ${description}`,
+        `📦 *Producto:* ${description}`,
         ``,
-        `💰 *Monto:* ${amount} USDC (Retenidos en Custodia)`,
-        `🤖 *Agente IA:* El Oráculo IA Lexius está analizando la evidencia enviada por las partes.`,
-        ``,
-        `⚖️ _Se emitirá una resolución justa mediante firma ecrecover en la blockchain._`,
+        `💰 *Monto Retenido:* ${amount} USDC (Bóveda Bloqueada)`,
+        `⏱️ *Plazo Bilateral:* 12 Horas para adjuntar pruebas de reclamo y guía de despacho.`,
+        `🤖 *Mediador IA:* GPT-4o Vision evaluará los comprobantes y firmará un veredicto ECDSA.`,
       ].join('\n');
-      pushText = `🔔 *Notificación de Lexius Pay*\n\n⚠️ Se ha iniciado una disputa sobre la transacción #${escrowId}. El Oráculo IA Lexius responderá a la brevedad.`;
+      pushText = `🔔 *Notificación de Lexius Pay*\n\n⚠️ Se ha iniciado una disputa sobre la orden #${escrowId}. Ambas partes tienen 12 horas para subir sus evidencias.`;
       break;
   }
 
