@@ -1,7 +1,7 @@
 'use client';
 
 import { useWallets } from '@privy-io/react-auth';
-import { createWalletClient, createPublicClient, custom, http, parseEther } from 'viem';
+import { createWalletClient, createPublicClient, custom, http, parseEther, parseGwei } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
 import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
 
@@ -35,6 +35,32 @@ export function useStylusContract() {
     });
   };
 
+  /** Helper to estimate dynamic EIP-1559 gas fee parameters to avoid RPC base fee mismatch */
+  const getSafeFeeParams = async () => {
+    try {
+      const publicClient = getPublicClient();
+      const fees = await publicClient.estimateFeesPerGas();
+      const block = await publicClient.getBlock();
+      const baseFee = block.baseFeePerGas || parseGwei('0.02');
+      const priorityFee = (fees.maxPriorityFeePerGas && fees.maxPriorityFeePerGas > parseGwei('0.05'))
+        ? fees.maxPriorityFeePerGas
+        : parseGwei('0.05');
+
+      const calculatedMaxFee = baseFee * BigInt(3) + priorityFee;
+      const safeMaxFeePerGas = calculatedMaxFee > parseGwei('0.2') ? calculatedMaxFee : parseGwei('0.2');
+
+      return {
+        maxFeePerGas: safeMaxFeePerGas,
+        maxPriorityFeePerGas: priorityFee,
+      };
+    } catch (e) {
+      return {
+        maxFeePerGas: parseGwei('0.2'),
+        maxPriorityFeePerGas: parseGwei('0.05'),
+      };
+    }
+  };
+
   // ═══════════════════════════════════════════════
   // WRITE FUNCTIONS (require wallet signature)
   // ═══════════════════════════════════════════════
@@ -47,12 +73,14 @@ export function useStylusContract() {
     detailsHash: `0x${string}`
   ) => {
     const client = await getClient();
+    const fees = await getSafeFeeParams();
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'createEscrow',
       args: [buyer, seller, amount, detailsHash],
       gas: BigInt(350000),
+      ...fees,
     });
     return txHash;
   };
@@ -60,12 +88,14 @@ export function useStylusContract() {
   /** Deposit funds into an escrow (buyer calls this) */
   const deposit = async (escrowId: bigint) => {
     const client = await getClient();
+    const fees = await getSafeFeeParams();
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'deposit',
       args: [escrowId],
       gas: BigInt(350000),
+      ...fees,
     });
     return txHash;
   };
@@ -73,12 +103,14 @@ export function useStylusContract() {
   /** Release funds to the seller (buyer confirms receipt) */
   const release = async (escrowId: bigint) => {
     const client = await getClient();
+    const fees = await getSafeFeeParams();
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'release',
       args: [escrowId],
       gas: BigInt(350000),
+      ...fees,
     });
     return txHash;
   };
@@ -86,12 +118,14 @@ export function useStylusContract() {
   /** Refund funds to the buyer (seller cancels) */
   const refund = async (escrowId: bigint) => {
     const client = await getClient();
+    const fees = await getSafeFeeParams();
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'refund',
       args: [escrowId],
       gas: BigInt(350000),
+      ...fees,
     });
     return txHash;
   };
@@ -99,12 +133,14 @@ export function useStylusContract() {
   /** Raise a dispute on an active escrow */
   const raise_dispute = async (escrowId: bigint) => {
     const client = await getClient();
+    const fees = await getSafeFeeParams();
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'raiseDispute',
       args: [escrowId],
       gas: BigInt(350000),
+      ...fees,
     });
     return txHash;
   };
@@ -112,12 +148,14 @@ export function useStylusContract() {
   /** Cancel an escrow before deposit */
   const cancel_escrow = async (escrowId: bigint) => {
     const client = await getClient();
+    const fees = await getSafeFeeParams();
     const txHash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'cancelEscrow',
       args: [escrowId],
       gas: BigInt(350000),
+      ...fees,
     });
     return txHash;
   };
@@ -135,12 +173,14 @@ export function useStylusContract() {
     s: `0x${string}`
   ) => {
     const client = await getClient();
+    const fees = await getSafeFeeParams();
     const hash = await client.writeContract({
       address: STYLUS_ESCROW_ADDRESS,
       abi: STYLUS_ESCROW_ABI,
       functionName: 'resolveDisputeWithSignature',
       args: [escrowId, winner, v, r, s],
       gas: BigInt(450000),
+      ...fees,
     });
     return hash;
   };

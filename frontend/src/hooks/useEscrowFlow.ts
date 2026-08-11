@@ -10,6 +10,7 @@ import {
   parseUnits,
   formatUnits,
   formatEther,
+  parseGwei,
 } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
 import {
@@ -237,6 +238,24 @@ export function useEscrowFlow() {
         ],
       })) as bigint;
 
+      // Calculate dynamic EIP-1559 gas fee parameters to prevent "max fee per gas less than block base fee" errors
+      let safeMaxFeePerGas = parseGwei('0.2');
+      let safeMaxPriorityFeePerGas = parseGwei('0.05');
+      try {
+        const fees = await publicClient.estimateFeesPerGas();
+        const block = await publicClient.getBlock();
+        const baseFee = block.baseFeePerGas || parseGwei('0.02');
+        const priorityFee = (fees.maxPriorityFeePerGas && fees.maxPriorityFeePerGas > parseGwei('0.05'))
+          ? fees.maxPriorityFeePerGas
+          : parseGwei('0.05');
+        
+        const calculatedMaxFee = baseFee * BigInt(3) + priorityFee;
+        safeMaxFeePerGas = calculatedMaxFee > parseGwei('0.2') ? calculatedMaxFee : parseGwei('0.2');
+        safeMaxPriorityFeePerGas = priorityFee;
+      } catch (feeErr) {
+        console.warn('[useEscrowFlow] Error estimating gas fees, using safe fallbacks:', feeErr);
+      }
+
       // Approve USDC spend if allowance is less than required units
       if (currentAllowance < requiredUsdcUnits) {
         setIsApproving(true);
@@ -250,6 +269,8 @@ export function useEscrowFlow() {
           functionName: 'approve',
           args: [STYLUS_ESCROW_ADDRESS, maxAllowanceUnits],
           gas: BigInt(120000),
+          maxFeePerGas: safeMaxFeePerGas,
+          maxPriorityFeePerGas: safeMaxPriorityFeePerGas,
         });
 
         console.log(`[useEscrowFlow] Aprobación enviada: ${approveHash}. Esperando confirmación del bloque...`);
@@ -282,7 +303,9 @@ export function useEscrowFlow() {
               usdcUnits, 
               dummyDetails
             ],
-            gas: BigInt(350000)
+            gas: BigInt(350000),
+            maxFeePerGas: safeMaxFeePerGas,
+            maxPriorityFeePerGas: safeMaxPriorityFeePerGas,
           });
           
           console.log(`[useEscrowFlow] Transacción de creación enviada: ${createTxHash}. Esperando confirmación del bloque...`);
@@ -317,6 +340,8 @@ export function useEscrowFlow() {
         functionName: 'deposit',
         args: [targetEscrowId],
         gas: BigInt(350000),
+        maxFeePerGas: safeMaxFeePerGas,
+        maxPriorityFeePerGas: safeMaxPriorityFeePerGas,
       });
 
       console.log(`[useEscrowFlow] Stylus Deposit Tx sent: ${depositHash}`);
