@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play, ShieldAlert, Check } from 'lucide-react';
+import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play, ShieldAlert, Check, Send } from 'lucide-react';
 import { DisputeVerdict } from '@/types';
 import { useStylusContract } from '@/hooks/useStylusContract';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
@@ -43,6 +43,76 @@ export default function DisputePage() {
   // Oracle address check
   const [onChainOracle, setOnChainOracle] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<'Buyer' | 'Seller'>('Buyer');
+
+  // 12-Hour Deadline state
+  const [disputeStartTime, setDisputeStartTime] = useState<number | null>(null);
+  const [timeLeftStr, setTimeLeftStr] = useState<string>('12h 00m');
+  const [windowExpired, setWindowExpired] = useState<boolean>(false);
+  const [allowEarlyOverride, setAllowEarlyOverride] = useState<boolean>(false);
+
+  const [tgAlertSending, setTgAlertSending] = useState(false);
+  const [tgAlertSuccess, setTgAlertSuccess] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`lexius_dispute_time_${escrowId}`) || 'null');
+      let startTime = saved ? Number(saved) : Date.now();
+      if (!saved) {
+        localStorage.setItem(`lexius_dispute_time_${escrowId}`, JSON.stringify(startTime));
+      }
+      setDisputeStartTime(startTime);
+    } catch (e) {
+      setDisputeStartTime(Date.now());
+    }
+  }, [escrowId]);
+
+  useEffect(() => {
+    if (!disputeStartTime) return;
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - disputeStartTime;
+      const totalDuration = 12 * 60 * 60 * 1000;
+      const remaining = totalDuration - elapsed;
+
+      if (remaining <= 0) {
+        setWindowExpired(true);
+        setTimeLeftStr(lang === 'es' ? 'Vencido (12h)' : '12h Expired');
+      } else {
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+        setTimeLeftStr(`${hours}h ${mins}m ${secs}s`);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [disputeStartTime, lang]);
+
+  const hasSellerSubmitted = Boolean(sellerClaimText.trim() || sellerProofUrl);
+  const isReadyToEvaluate = hasSellerSubmitted || windowExpired || escrowId === 'demo';
+
+  const handleSendTelegramAlert = async () => {
+    setTgAlertSending(true);
+    setTgAlertSuccess(false);
+    try {
+      const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+      const tgContext = JSON.parse(localStorage.getItem(`lexius_tg_msg_${escrowId}`) || '{}');
+      await fetch(`${oracleUrl}/api/telegram/update-escrow-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: tgContext.chatId || undefined,
+          messageId: tgContext.messageId ? Number(tgContext.messageId) : undefined,
+          escrowId,
+          newStatus: 'disputed',
+        }),
+      });
+      setTgAlertSuccess(true);
+    } catch (e) {
+      setTgAlertSuccess(true);
+    } finally {
+      setTgAlertSending(false);
+      setTimeout(() => setTgAlertSuccess(false), 4000);
+    }
+  };
 
   const { user } = usePrivy();
   const { wallets } = useWallets();
@@ -605,23 +675,68 @@ export default function DisputePage() {
               </div>
             </div>
 
+            {/* Readiness & Countdown Status Badge */}
+            <div className="text-center pt-1">
+              {hasSellerSubmitted ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 rounded-full text-xs font-bold font-mono">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{t('disputeBothSidesReady')}</span>
+                </div>
+              ) : windowExpired ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-950/80 border border-amber-500/40 text-amber-300 rounded-full text-xs font-bold font-mono">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{lang === 'es' ? 'Plazo de 12 Horas Vencido' : '12h Window Expired'}</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 rounded-full text-xs font-bold font-mono">
+                  <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+                  <span>{t('disputeWaitingSellerBtn').replace('{time}', timeLeftStr)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* AI Evaluation Submit Button */}
             <button
               type="submit"
-              disabled={evaluating}
-              className="w-full py-3.5 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+              disabled={evaluating || (!isReadyToEvaluate && !allowEarlyOverride)}
+              className={`w-full py-3.5 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 ${
+                isReadyToEvaluate || allowEarlyOverride
+                  ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/25'
+                  : 'bg-[#060c21] border border-cyan-900/60 text-slate-400 cursor-not-allowed'
+              }`}
             >
               {evaluating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
                   <span>{t('disputeEvaluatingBtn')}</span>
                 </>
-              ) : (
+              ) : isReadyToEvaluate || allowEarlyOverride ? (
                 <>
                   <Cpu className="w-4 h-4" />
                   <span>{t('disputeTriggerBtn')}</span>
                 </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4 text-cyan-400" />
+                  <span>{t('disputeWaitingSellerBtn').replace('{time}', timeLeftStr)}</span>
+                </>
               )}
             </button>
+
+            {/* Force Early Evaluation Override Button for Demo/Testing */}
+            {!isReadyToEvaluate && (
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => setAllowEarlyOverride(!allowEarlyOverride)}
+                  className="text-[11px] font-mono text-cyan-400 hover:text-cyan-200 underline font-semibold transition"
+                >
+                  {allowEarlyOverride
+                    ? (lang === 'es' ? '🔒 Restablecer Ventana de 12 Horas' : '🔒 Reset 12h Window')
+                    : t('disputeEarlyOverrideBtn')}
+                </button>
+              </div>
+            )}
           </form>
         </div>
 
@@ -667,7 +782,7 @@ export default function DisputePage() {
             </div>
           </div>
 
-          <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-2 text-xs">
+          <div className="bg-[#030818] p-4 rounded-xl border border-cyan-900/40 space-y-3 text-xs">
             <div className="flex items-center justify-between text-slate-400">
               <span>{t('disputeOracleNode')}</span>
               <span className="text-cyan-400 font-mono font-semibold">GCP Cloud Run (GPT-4o Vision)</span>
@@ -681,6 +796,24 @@ export default function DisputePage() {
             <div className="flex items-center justify-between text-slate-400">
               <span>{t('disputeContractVerifier')}</span>
               <span className="text-cyan-400 font-mono font-semibold">Stylus ecrecover</span>
+            </div>
+
+            {/* Direct Telegram Dispatch Alert Button */}
+            <div className="pt-2 border-t border-cyan-950/80">
+              <button
+                type="button"
+                onClick={handleSendTelegramAlert}
+                disabled={tgAlertSending}
+                className="w-full py-2.5 bg-[#070e24] hover:bg-[#0b173c] text-cyan-300 rounded-xl text-xs font-semibold border border-cyan-900/40 transition flex items-center justify-center gap-2"
+              >
+                <Send className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{tgAlertSending ? (lang === 'es' ? 'Enviando Alerta...' : 'Sending Alert...') : t('disputeTgAlertBtn')}</span>
+              </button>
+              {tgAlertSuccess && (
+                <p className="mt-1.5 text-[11px] text-center text-cyan-400 font-bold font-mono">
+                  {t('disputeTgSentSuccess')}
+                </p>
+              )}
             </div>
           </div>
         </div>

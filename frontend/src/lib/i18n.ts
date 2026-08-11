@@ -188,6 +188,11 @@ export const dictionary = {
     disputeSellerRole: '(Vendedor)',
     disputeWindowTitle: '⏱️ Ventana de Evidencia Bilateral (Plazo 12 Horas)',
     disputeWindowDesc: 'Notificación enviada por Telegram a la contraparte. Ambos participantes pueden aportar sus evidencias de entrega o reclamo antes del análisis final.',
+    disputeWaitingSellerBtn: '⏳ Esperando Evidencia del Vendedor ({time})',
+    disputeEarlyOverrideBtn: '⚡ Forzar Resolución Inmediata (Modo Demo)',
+    disputeBothSidesReady: '✅ Evidencia de Ambas Partes Cargada',
+    disputeTgAlertBtn: '📱 Notificar al Vendedor por Telegram',
+    disputeTgSentSuccess: '¡Notificación enviada al bot de Telegram!',
 
     // Pay page
     payTitle: 'Acuerdo de Escrow Lexius',
@@ -418,6 +423,11 @@ export const dictionary = {
     disputeSellerRole: '(Seller)',
     disputeWindowTitle: '⏱️ Bilateral Evidence Window (12-Hour Deadline)',
     disputeWindowDesc: 'Notification dispatched via Telegram to counterparty. Both participants can submit shipping receipts or evidence before triggering AI resolution.',
+    disputeWaitingSellerBtn: '⏳ Waiting for Seller Evidence ({time})',
+    disputeEarlyOverrideBtn: '⚡ Force Immediate Resolution (Demo Mode)',
+    disputeBothSidesReady: '✅ Both Parties Evidence Loaded',
+    disputeTgAlertBtn: '📱 Notify Seller on Telegram',
+    disputeTgSentSuccess: 'Notification dispatched to Telegram bot!',
 
     // Pay page
     payTitle: 'Lexius Escrow Agreement',
