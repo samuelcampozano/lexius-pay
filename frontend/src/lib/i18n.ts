@@ -179,6 +179,15 @@ export const dictionary = {
     disputePackagingRuleDesc: 'Las fotos aisladas sin embalaje ni etiqueta de envío serán marcadas como inconsistentes.',
     disputeFraudAlertTitle: '⚠️ Alerta Anti-Fraude: Riesgo Alto Detectado',
     disputeAuthenticityScore: 'Autenticidad de Evidencia: {score}%',
+    disputeOutcomeBuyerWin: '🎉 Veredicto a Favor del Comprador (¡Reembolso Autorizado!)',
+    disputeOutcomeBuyerWinDesc: 'La IA analizó la evidencia de mercadería dañada o faltante y aprobó el reembolso de los fondos. Haz clic abajo para ejecutar la transferencia en Arbitrum Stylus.',
+    disputeOutcomeSellerWin: '🛡️ Veredicto a Favor del Vendedor (Liberación de Fondos)',
+    disputeOutcomeSellerWinDesc: 'La IA verificó las pruebas de despacho y etiquetado del vendedor frente al reclamo. Se aprueba la transferencia al Vendedor.',
+    disputeYouRole: '(¡Tú!)',
+    disputeBuyerRole: '(Comprador)',
+    disputeSellerRole: '(Vendedor)',
+    disputeWindowTitle: '⏱️ Ventana de Evidencia Bilateral (Plazo 12 Horas)',
+    disputeWindowDesc: 'Notificación enviada por Telegram a la contraparte. Ambos participantes pueden aportar sus evidencias de entrega o reclamo antes del análisis final.',
 
     // Pay page
     payTitle: 'Acuerdo de Escrow Lexius',
@@ -400,6 +409,15 @@ export const dictionary = {
     disputePackagingRuleDesc: 'Isolated photos without packaging or courier labels will be flagged as uncontextual.',
     disputeFraudAlertTitle: '⚠️ Anti-Fraud Alert: High Fraud Risk Flagged',
     disputeAuthenticityScore: 'Evidence Authenticity: {score}%',
+    disputeOutcomeBuyerWin: '🎉 Verdict in Favor of Buyer (Refund Authorized!)',
+    disputeOutcomeBuyerWinDesc: 'AI Vision analyzed the damaged or missing merchandise evidence and authorized a full refund. Click below to execute the payout on Arbitrum Stylus.',
+    disputeOutcomeSellerWin: '🛡️ Verdict in Favor of Seller (Funds Released)',
+    disputeOutcomeSellerWinDesc: 'AI Vision verified seller dispatch proof and shipping label against the claim. Transfer to Seller authorized.',
+    disputeYouRole: '(You!)',
+    disputeBuyerRole: '(Buyer)',
+    disputeSellerRole: '(Seller)',
+    disputeWindowTitle: '⏱️ Bilateral Evidence Window (12-Hour Deadline)',
+    disputeWindowDesc: 'Notification dispatched via Telegram to counterparty. Both participants can submit shipping receipts or evidence before triggering AI resolution.',
 
     // Pay page
     payTitle: 'Lexius Escrow Agreement',
