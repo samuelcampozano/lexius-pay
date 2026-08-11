@@ -250,11 +250,13 @@ export async function updateEscrowCard(params: {
       break;
   }
 
+  const targetChatId = resolveChatId(chatId);
+
   // 1. Try editing existing card message if messageId is available
   if (messageId) {
     try {
       await b.telegram.editMessageText(
-        chatId,
+        targetChatId,
         messageId,
         undefined,
         text,
@@ -271,7 +273,7 @@ export async function updateEscrowCard(params: {
   // 2. Always send direct push notification message to ensure status updates are NEVER missed
   try {
     if (pushText) {
-      await b.telegram.sendMessage(chatId, pushText, { parse_mode: 'Markdown' });
+      await b.telegram.sendMessage(targetChatId, pushText, { parse_mode: 'Markdown' });
     }
   } catch (err) {
     console.warn(`[Telegram Bot] Push notification failed for #${escrowId}:`, err);

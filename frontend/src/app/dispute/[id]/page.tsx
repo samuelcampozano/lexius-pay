@@ -48,8 +48,7 @@ export default function DisputePage() {
   const [disputeStartTime, setDisputeStartTime] = useState<number | null>(null);
   const [timeLeftStr, setTimeLeftStr] = useState<string>('12h 00m');
   const [windowExpired, setWindowExpired] = useState<boolean>(false);
-  const [allowEarlyOverride, setAllowEarlyOverride] = useState<boolean>(false);
-
+  const [targetTelegramInput, setTargetTelegramInput] = useState('');
   const [tgAlertSending, setTgAlertSending] = useState(false);
   const [tgAlertSuccess, setTgAlertSuccess] = useState(false);
 
@@ -64,6 +63,16 @@ export default function DisputePage() {
     } catch (e) {
       setDisputeStartTime(Date.now());
     }
+  }, [escrowId]);
+
+  // Prepopulate targetTelegramInput from saved tgContext
+  useEffect(() => {
+    try {
+      const tgContext = JSON.parse(localStorage.getItem(`lexius_tg_msg_${escrowId}`) || '{}');
+      if (tgContext.chatId) {
+        setTargetTelegramInput(String(tgContext.chatId));
+      }
+    } catch (e) {}
   }, [escrowId]);
 
   useEffect(() => {
@@ -95,11 +104,13 @@ export default function DisputePage() {
     try {
       const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
       const tgContext = JSON.parse(localStorage.getItem(`lexius_tg_msg_${escrowId}`) || '{}');
+      const targetChat = targetTelegramInput.trim() || tgContext.chatId;
+
       await fetch(`${oracleUrl}/api/telegram/update-escrow-status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chatId: tgContext.chatId || undefined,
+          chatId: targetChat || undefined,
           messageId: tgContext.messageId ? Number(tgContext.messageId) : undefined,
           escrowId,
           newStatus: 'disputed',
@@ -704,9 +715,9 @@ export default function DisputePage() {
             {/* AI Evaluation Submit Button */}
             <button
               type="submit"
-              disabled={evaluating || (!isReadyToEvaluate && !allowEarlyOverride)}
+              disabled={evaluating || !isReadyToEvaluate}
               className={`w-full py-3.5 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 ${
-                isReadyToEvaluate || allowEarlyOverride
+                isReadyToEvaluate
                   ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/25'
                   : 'bg-[#060c21] border border-cyan-900/60 text-slate-400 cursor-not-allowed'
               }`}
@@ -716,7 +727,7 @@ export default function DisputePage() {
                   <RefreshCw className="w-4 h-4 animate-spin" />
                   <span>{t('disputeEvaluatingBtn')}</span>
                 </>
-              ) : isReadyToEvaluate || allowEarlyOverride ? (
+              ) : isReadyToEvaluate ? (
                 <>
                   <Cpu className="w-4 h-4" />
                   <span>{t('disputeTriggerBtn')}</span>
@@ -728,21 +739,6 @@ export default function DisputePage() {
                 </>
               )}
             </button>
-
-            {/* Force Early Evaluation Override Button for Demo/Testing */}
-            {!isReadyToEvaluate && (
-              <div className="text-center pt-1">
-                <button
-                  type="button"
-                  onClick={() => setAllowEarlyOverride(!allowEarlyOverride)}
-                  className="text-[11px] font-mono text-cyan-400 hover:text-cyan-200 underline font-semibold transition"
-                >
-                  {allowEarlyOverride
-                    ? (lang === 'es' ? '🔒 Restablecer Ventana de 12 Horas' : '🔒 Reset 12h Window')
-                    : t('disputeEarlyOverrideBtn')}
-                </button>
-              </div>
-            )}
           </form>
         </div>
 
@@ -804,17 +800,29 @@ export default function DisputePage() {
               <span className="text-cyan-400 font-mono font-semibold">Stylus ecrecover</span>
             </div>
 
-            {/* Direct Telegram Dispatch Alert Button */}
-            <div className="pt-2 border-t border-cyan-950/80">
-              <button
-                type="button"
-                onClick={handleSendTelegramAlert}
-                disabled={tgAlertSending}
-                className="w-full py-2.5 bg-[#070e24] hover:bg-[#0b173c] text-cyan-300 rounded-xl text-xs font-semibold border border-cyan-900/40 transition flex items-center justify-center gap-2"
-              >
-                <Send className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{tgAlertSending ? (lang === 'es' ? 'Enviando Alerta...' : 'Sending Alert...') : t('disputeTgAlertBtn')}</span>
-              </button>
+            {/* Direct Telegram Dispatch Alert Box with Custom Username / Chat ID Input */}
+            <div className="pt-3 border-t border-cyan-950/80 space-y-2">
+              <label className="block text-[11px] font-semibold text-cyan-300">
+                {lang === 'es' ? '📱 Destinatario Telegram (@usuario o Chat ID):' : '📱 Telegram Target (@username or Chat ID):'}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="@usuario o Chat ID"
+                  value={targetTelegramInput}
+                  onChange={(e) => setTargetTelegramInput(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-[#020612] border border-cyan-900/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={handleSendTelegramAlert}
+                  disabled={tgAlertSending}
+                  className="px-3 py-2 bg-[#070e24] hover:bg-[#0b173c] disabled:opacity-50 text-cyan-300 rounded-xl text-xs font-semibold border border-cyan-900/40 transition flex items-center justify-center gap-1.5 shrink-0 shadow"
+                >
+                  <Send className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{tgAlertSending ? (lang === 'es' ? 'Enviando...' : 'Sending...') : (lang === 'es' ? 'Enviar Alerta' : 'Send Alert')}</span>
+                </button>
+              </div>
               {tgAlertSuccess && (
                 <p className="mt-1.5 text-[11px] text-center text-cyan-400 font-bold font-mono">
                   {t('disputeTgSentSuccess')}
