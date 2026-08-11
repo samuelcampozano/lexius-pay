@@ -174,6 +174,12 @@ export default function DisputePage() {
 
         const buyerOnChain = escrowInfo[0]?.toLowerCase();
         const sellerOnChain = escrowInfo[1]?.toLowerCase();
+        const statusOnChain = escrowInfo[3];
+
+        // If status on-chain is Deposited (1), clear any stale local verdict to allow fresh AI evaluation
+        if (statusOnChain === 1) {
+          setVerdict(null);
+        }
 
         if (activeWallet) {
           if (activeWallet === sellerOnChain && activeWallet !== buyerOnChain) {

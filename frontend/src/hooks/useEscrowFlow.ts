@@ -186,7 +186,7 @@ export function useEscrowFlow() {
           functionName: 'getEscrowCount',
         })) as bigint;
 
-        if (targetEscrowId >= count) {
+        if (targetEscrowId > count) {
           needsCreation = true;
         } else {
           const escrowInfo = (await publicClient.readContract({
