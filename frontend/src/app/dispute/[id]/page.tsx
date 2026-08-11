@@ -547,16 +547,12 @@ export default function DisputePage() {
           </div>
         </div>
 
-        {/* Demo Role Switcher Toggle Button */}
+        {/* Authentic Active Role Badge */}
         <div className="shrink-0 pt-1 sm:pt-0">
-          <button
-            type="button"
-            onClick={() => setCurrentUserRole(prev => prev === 'Buyer' ? 'Seller' : 'Buyer')}
-            className="px-3.5 py-2 bg-[#070e24] hover:bg-[#0b173c] text-cyan-300 text-xs font-semibold rounded-xl border border-cyan-900/40 transition flex items-center gap-2 shadow"
-          >
-            <span>{currentUserRole === 'Buyer' ? '👤 ' + (lang === 'es' ? 'Ver como Comprador' : 'View as Buyer') : '🏪 ' + (lang === 'es' ? 'Ver como Vendedor' : 'View as Seller')}</span>
-            <span className="text-[10px] bg-cyan-950 px-1.5 py-0.5 rounded text-cyan-400 font-mono">({lang === 'es' ? 'Alternar' : 'Toggle'})</span>
-          </button>
+          <div className="px-3.5 py-2 bg-[#070e24] text-cyan-300 text-xs font-semibold rounded-xl border border-cyan-900/40 flex items-center gap-2 shadow">
+            <span>{currentUserRole === 'Buyer' ? '👤 ' + (lang === 'es' ? 'Rol: Comprador (Reclamante)' : 'Role: Buyer (Claimant)') : '🏪 ' + (lang === 'es' ? 'Rol: Vendedor (Despacho)' : 'Role: Seller (Dispatch)')}</span>
+            <span className="text-[10px] bg-cyan-950 px-2 py-0.5 rounded text-cyan-400 font-mono">({lang === 'es' ? 'Verificado' : 'Verified'})</span>
+          </div>
         </div>
       </div>
 

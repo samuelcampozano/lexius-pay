@@ -120,14 +120,21 @@ export default function PaymentPage() {
     let isSubscribed = true;
 
     const syncEscrowStatus = async () => {
-      // 1. Local Storage Sync
+      // 1. Local Storage Sync & Dispute Data Check
       try {
         const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
         const item = stored.find((rec: any) => rec.id === escrowId);
-        if (item && isSubscribed) {
-          setStoredRecord(item);
-          if (item.status) {
-            setStatus(item.status);
+        const disputeData = JSON.parse(localStorage.getItem(`lexius_dispute_data_${escrowId}`) || '{}');
+
+        if (isSubscribed) {
+          if (item) {
+            setStoredRecord(item);
+            if (item.status) {
+              setStatus(item.status);
+            }
+          }
+          if (disputeData.claimText || disputeData.verdict) {
+            setStatus('Disputed');
           }
         }
       } catch (e) {}
@@ -146,7 +153,7 @@ export default function PaymentPage() {
           functionName: 'getEscrowCount',
         })) as bigint;
 
-        if (numericId < count) {
+        if (numericId <= count) {
           const escrowInfo = (await publicClient.readContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,
