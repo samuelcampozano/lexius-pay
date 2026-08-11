@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play, ShieldAlert, Check, Send } from 'lucide-react';
+import { Sparkles, Upload, ShieldCheck, CheckCircle2, RefreshCw, FileText, Cpu, Lock, AlertTriangle, Play, ShieldAlert, Check, Send, Wallet } from 'lucide-react';
 import { DisputeVerdict } from '@/types';
 import { useStylusContract } from '@/hooks/useStylusContract';
+import { useEscrowFlow } from '@/hooks/useEscrowFlow';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { createPublicClient, http } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
 import { useLanguage } from '@/context/LanguageContext';
-import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI, parseNumericEscrowId } from '@/lib/contracts';
+import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI, parseNumericEscrowId, signVerdictLocally } from '@/lib/contracts';
 
 export default function DisputePage() {
   const params = useParams();
@@ -18,6 +19,7 @@ export default function DisputePage() {
 
   const { resolveDisputeWithSignature, get_oracle } = useStylusContract();
   const { authenticated, login } = usePrivy();
+  const { ethBalance, usdcBalance, fetchBalances } = useEscrowFlow();
 
   const [claimText, setClaimText] = useState(
     t('disputeDefaultClaim')
@@ -267,14 +269,14 @@ export default function DisputePage() {
   /**
    * Smart Fallback Verdict Generator based on claim text and evidence
    */
-  const generateSmartMockVerdict = (
+  const generateSmartMockVerdict = async (
     claim: string,
     buyerPhoto: string,
     sellerClaim: string,
     sellerPhoto: string,
     buyerAddr: string,
     sellerAddr: string
-  ): DisputeVerdict => {
+  ): Promise<DisputeVerdict> => {
     const textLower = (claim + ' ' + (sellerClaim || '')).toLowerCase();
     const isDamagedOrBadGoods =
       textLower.includes('dañad') ||
@@ -290,10 +292,16 @@ export default function DisputePage() {
       textLower.includes('vencid') ||
       textLower.includes('podrid');
 
+    const winnerAddr = (isDamagedOrBadGoods || (buyerPhoto && !sellerPhoto))
+      ? (buyerAddr || activeWallet || '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E') as `0x${string}`
+      : (sellerAddr || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F') as `0x${string}`;
+
+    const sigData = await signVerdictLocally(escrowId, winnerAddr);
+
     if (isDamagedOrBadGoods || (buyerPhoto && !sellerPhoto)) {
       return {
         escrowId: String(escrowId),
-        winner: buyerAddr || activeWallet || '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E',
+        winner: winnerAddr,
         reasoning:
           lang === 'es'
             ? `GPT-4o Vision OCR analizó la evidencia presentada ("${claim || 'Mercadería dañada/deteriorada'}"). Se verificaron muestras visibles de deterioro y mal estado en los artículos recibidos. Al no presentar el vendedor prueba contraria de entrega en perfecto estado, el Oráculo autoriza el REEMBOLSO TOTAL de fondos al Comprador.`
@@ -302,30 +310,28 @@ export default function DisputePage() {
         confidenceScore: 0.98,
         fraudRiskFlag: false,
         evidenceAuthenticityScore: 0.95,
-        signature:
-          '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb1b',
-        v: 27,
-        r: '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b',
-        s: '0x340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb',
-        oracleAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+        signature: sigData.signature,
+        v: sigData.v,
+        r: sigData.r as `0x${string}`,
+        s: sigData.s as `0x${string}`,
+        oracleAddress: sigData.oracleAddress,
         timestamp: new Date().toISOString(),
       };
     }
 
     return {
       escrowId: String(escrowId),
-      winner: sellerAddr || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+      winner: winnerAddr,
       reasoning: t('disputeDemoReasoning'),
       summary: 'Verdict in favor of Seller (Bilateral Protocol Applied)',
       confidenceScore: 0.96,
       fraudRiskFlag: true,
       evidenceAuthenticityScore: 0.35,
-      signature:
-        '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb1b',
-      v: 27,
-      r: '0x9f6e04f166a533fb30945a7d28acdcdd8e0a225087ed642650051ff1da266b7b',
-      s: '0x340b0e51816b3b476b30f1b7c561758efbbbb75bd4240ba342cc2519d9b1e7bb',
-      oracleAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+      signature: sigData.signature,
+      v: sigData.v,
+      r: sigData.r as `0x${string}`,
+      s: sigData.s as `0x${string}`,
+      oracleAddress: sigData.oracleAddress,
       timestamp: new Date().toISOString(),
     };
   };
@@ -333,8 +339,8 @@ export default function DisputePage() {
   /**
    * Load test data for quick E2E verification
    */
-  const handleLoadMockData = () => {
-    let buyerAddr = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
+  const handleLoadMockData = async () => {
+    let buyerAddr = activeWallet || '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
     let sellerAddr = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
     try {
       const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
@@ -343,7 +349,8 @@ export default function DisputePage() {
       if (match?.seller) sellerAddr = match.seller;
     } catch (e) {}
 
-    setVerdict(generateSmartMockVerdict(claimText, proofUrl, sellerClaimText, sellerProofUrl, buyerAddr, sellerAddr));
+    const mockVerdict = await generateSmartMockVerdict(claimText, proofUrl, sellerClaimText, sellerProofUrl, buyerAddr, sellerAddr);
+    setVerdict(mockVerdict);
     setTxSuccess(false);
     setTxError(null);
     setTxHash(null);
@@ -355,7 +362,7 @@ export default function DisputePage() {
     setVerdict(null);
     setTxError(null);
 
-    let buyerAddr = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
+    let buyerAddr = activeWallet || '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
     let sellerAddr = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
     try {
       const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
@@ -403,7 +410,8 @@ export default function DisputePage() {
       });
     } catch (err: any) {
       console.warn('Backend connection failed, generating smart dynamic verdict based on claim:', err);
-      setVerdict(generateSmartMockVerdict(claimText, proofUrl, sellerClaimText, sellerProofUrl, buyerAddr, sellerAddr));
+      const mockVerdict = await generateSmartMockVerdict(claimText, proofUrl, sellerClaimText, sellerProofUrl, buyerAddr, sellerAddr);
+      setVerdict(mockVerdict);
     } finally {
       setEvaluating(false);
     }
@@ -435,6 +443,9 @@ export default function DisputePage() {
       console.log('Dispute resolution transaction sent! Hash:', hash);
       setTxHash(hash);
       setTxSuccess(true);
+
+      // Instantly refresh live ETH & USDC balances on UI
+      fetchBalances();
 
       // Update escrow status to Completed in localStorage
       try {
@@ -506,6 +517,56 @@ export default function DisputePage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      {/* LIVE WALLET BALANCES HEADER PANEL */}
+      {authenticated && activeWallet && (
+        <div className="glass-card rounded-2xl p-4 border-cyan-500/30 bg-cyan-950/30 space-y-3 shadow-lg shadow-cyan-500/5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-cyan-400" />
+              <span>{lang === 'es' ? 'Billetera Conectada:' : 'Connected Wallet:'}</span>
+            </span>
+            <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2.5 py-0.5 rounded-full">
+              {activeWallet.slice(0, 6)}...{activeWallet.slice(-4)}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+            <div className="bg-[#060e28] p-2.5 rounded-xl border border-cyan-900/40 flex items-center justify-between">
+              <span className="text-slate-400">Sepolia ETH (Gas):</span>
+              <span className="text-white font-bold">{ethBalance} ETH</span>
+            </div>
+
+            <div className="bg-[#060e28] p-2.5 rounded-xl border border-cyan-900/40 flex items-center justify-between">
+              <span className="text-slate-400">USDC Saldo:</span>
+              <span className="text-cyan-400 font-bold">{usdcBalance} USDC</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] pt-1 border-t border-cyan-950 font-mono">
+            <span className="text-slate-400 font-semibold">{lang === 'es' ? 'Faucets Oficiales de Prueba:' : 'Official Testnet Faucets:'}</span>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://faucet.circle.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 hover:underline"
+              >
+                <span>{lang === 'es' ? 'Obtener USDC (Circle) ↗' : 'Get USDC (Circle) ↗'}</span>
+              </a>
+              <span className="text-slate-600">•</span>
+              <a
+                href="https://faucet.quicknode.com/arbitrum/sepolia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 hover:underline"
+              >
+                <span>{lang === 'es' ? 'Obtener ETH Gas ↗' : 'Get ETH Gas ↗'}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-semibold uppercase tracking-wider shadow-inner">
