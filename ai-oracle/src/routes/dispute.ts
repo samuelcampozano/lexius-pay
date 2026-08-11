@@ -71,7 +71,31 @@ router.post('/resolve', async (req: Request, res: Response) => {
 
     console.log(`[AI Oracle] Signature generated. Oracle address: ${signedPayload.oracleAddress}`);
 
-    // Step 3: Return structured response matching the expected format
+    // Step 3: Automatically notify Telegram chat if linked
+    try {
+      const { escrowCardStore, getBot } = await import('../services/telegram');
+      const stored = escrowCardStore.get(String(escrowId));
+      if (stored) {
+        const b = getBot();
+        const isBuyerWinner = aiVerdict.winnerAddress.toLowerCase() === buyerAddress.toLowerCase();
+        const winnerLabel = isBuyerWinner ? 'Comprador' : 'Vendedor';
+        const text = [
+          `👨‍⚖️ *Veredicto Final del Oráculo IA Lexius*`,
+          ``,
+          `📋 *Acuerdo P2P #${escrowId}*`,
+          `🏆 *Ganador:* ${winnerLabel} (\`${aiVerdict.winnerAddress.slice(0, 6)}...${aiVerdict.winnerAddress.slice(-4)}\`)`,
+          `🛡️ *Nivel de Riesgo:* ${aiVerdict.fraudRiskFlag ? '⚠️ Alto' : '✅ Seguro'}`,
+          ``,
+          `📝 *Fundamentación del Agente IA:*`,
+          `_${aiVerdict.summary || aiVerdict.reasoning}_`,
+        ].join('\n');
+        await b.telegram.sendMessage(stored.chatId, text, { parse_mode: 'Markdown' });
+      }
+    } catch (tgErr) {
+      console.warn('[AI Oracle] Telegram verdict notification skipped:', tgErr);
+    }
+
+    // Step 4: Return structured response matching the expected format
     return res.status(200).json({
       success: true,
       winner: aiVerdict.winnerAddress,

@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { Telegraf, Markup } from 'telegraf';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
@@ -6,8 +8,60 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lexius-frontend-stagin
 
 let bot: Telegraf | null = null;
 
-// In-memory user store mapping username (lowercase, without @) -> chatId
+const DATA_DIR = path.join(process.cwd(), 'data');
+if (!fs.existsSync(DATA_DIR)) {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {}
+}
+
+const USERS_FILE = path.join(DATA_DIR, 'userStore.json');
+const CARDS_FILE = path.join(DATA_DIR, 'escrowCardStore.json');
+
+// Global in-memory user store mapping username (lowercase, without @) -> chatId
 export const userStore = new Map<string, number | string>();
+export const escrowCardStore = new Map<string, { chatId: string | number; messageId: number }>();
+
+// Restore from disk on startup
+try {
+  if (fs.existsSync(USERS_FILE)) {
+    const raw = fs.readFileSync(USERS_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    Object.entries(parsed).forEach(([k, v]) => userStore.set(k, v as number | string));
+    console.log(`[Telegram Bot] Loaded ${userStore.size} users from disk.`);
+  }
+} catch (e) {
+  console.warn('[Telegram Bot] Error loading userStore from disk:', e);
+}
+
+try {
+  if (fs.existsSync(CARDS_FILE)) {
+    const raw = fs.readFileSync(CARDS_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    Object.entries(parsed).forEach(([k, v]) => escrowCardStore.set(k, v as { chatId: string | number; messageId: number }));
+    console.log(`[Telegram Bot] Loaded ${escrowCardStore.size} escrow cards from disk.`);
+  }
+} catch (e) {
+  console.warn('[Telegram Bot] Error loading escrowCardStore from disk:', e);
+}
+
+function saveUserStore() {
+  try {
+    const obj = Object.fromEntries(userStore.entries());
+    fs.writeFileSync(USERS_FILE, JSON.stringify(obj, null, 2));
+  } catch (e) {
+    console.warn('[Telegram Bot] Error saving userStore to disk:', e);
+  }
+}
+
+export function saveEscrowCardStore() {
+  try {
+    const obj = Object.fromEntries(escrowCardStore.entries());
+    fs.writeFileSync(CARDS_FILE, JSON.stringify(obj, null, 2));
+  } catch (e) {
+    console.warn('[Telegram Bot] Error saving escrowCardStore to disk:', e);
+  }
+}
 
 /** Register or update a user's chatId by username */
 export function registerUser(username?: string, chatId?: number | string): void {
@@ -15,8 +69,14 @@ export function registerUser(username?: string, chatId?: number | string): void 
     const sanitized = String(username).trim().replace(/^@/, '').toLowerCase();
     if (sanitized) {
       userStore.set(sanitized, chatId);
+      saveUserStore();
+      console.log(`[Telegram Bot] Mapped username @${sanitized} -> Chat ID ${chatId}`);
     }
   }
+}
+
+export function registerUserChatId(username: string, chatId: number): void {
+  registerUser(username, chatId);
 }
 
 /**
@@ -45,6 +105,11 @@ export function findChatIdByUsername(rawUsername: string | number): number | str
 
   // Fallback direct format for Telegram Bot API (@username)
   return `@${sanitizedUsername}`;
+}
+
+export function resolveChatId(rawChatId: number | string): number | string {
+  const result = findChatIdByUsername(rawChatId);
+  return result !== null ? result : String(rawChatId);
 }
 
 export function getBot(): Telegraf {
@@ -89,17 +154,17 @@ export async function sendEscrowCard(params: {
   const b = getBot();
   
   const text = [
-    `⚖️ *Lexius Protection Active*`,
+    `⚖️ *Lexius Pay — Custodia P2P Activa*`,
     ``,
-    `📋 *Escrow #${escrowId}*`,
-    `${description}`,
+    `📋 *Acuerdo P2P #${escrowId}*`,
+    `📦 ${description}`,
     ``,
-    `💰 *Amount:* ${amount} USDC`,
-    `🔗 *Network:* Arbitrum Sepolia`,
-    `🏪 *Seller:* ${sellerName || 'N/A'}`,
+    `💰 *Monto:* ${amount} USDC`,
+    `🌐 *Red:* Arbitrum Sepolia (Stylus WASM)`,
+    `🏪 *Vendedor:* ${sellerName || 'Verificado'}`,
     `📍 \`${seller.slice(0, 6)}...${seller.slice(-4)}\``,
     ``,
-    `_Funds will be held in a smart contract escrow until the buyer confirms receipt._`,
+    `🔒 _Los fondos estarán resguardados por un contrato inteligente WASM hasta que el comprador confirme la recepción._`,
   ].join('\n');
 
   const webAppUrl = buildMiniAppUrl('deposit', String(escrowId), { amount, description, seller, sellerName });
@@ -107,9 +172,12 @@ export async function sendEscrowCard(params: {
   const msg = await b.telegram.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
-      [Markup.button.webApp(`💳 Pay ${amount} USDC`, webAppUrl)],
+      [Markup.button.webApp(`💳 Pagar ${amount} USDC`, webAppUrl)],
     ]),
   });
+
+  escrowCardStore.set(String(escrowId), { chatId, messageId: msg.message_id });
+  saveEscrowCardStore();
 
   return { messageId: msg.message_id };
 }
@@ -117,7 +185,7 @@ export async function sendEscrowCard(params: {
 /** Update an existing escrow card message based on new status */
 export async function updateEscrowCard(params: {
   chatId: number | string;
-  messageId: number;
+  messageId?: number;
   escrowId: string;
   newStatus: 'deposited' | 'completed' | 'disputed';
   amount: string;
@@ -128,64 +196,86 @@ export async function updateEscrowCard(params: {
 
   let text: string;
   let keyboard: any = undefined;
+  let pushText = '';
 
   switch (newStatus) {
     case 'deposited': {
       const releaseUrl = buildMiniAppUrl('release', String(escrowId), { amount, description });
       text = [
-        `🔒 *Funds Secured*`,
+        `🔒 *Fondos Asegurados y Resguardados*`,
         ``,
-        `📋 *Escrow #${escrowId}*`,
-        `${description}`,
+        `📋 *Acuerdo P2P #${escrowId}*`,
+        `📦 ${description}`,
         ``,
-        `💰 *${amount} USDC* locked in Stylus Escrow`,
+        `💰 *Monto:* ${amount} USDC (Bloqueado en Stylus WASM)`,
+        `🌐 *Red:* Arbitrum Sepolia`,
         ``,
-        `_The buyer has deposited the funds. Seller can now ship the item._`,
-        `_Click below to release funds after confirming receipt._`,
+        `✅ _El comprador ha depositado los fondos exitosamente en el contrato inteligente._`,
+        `🚚 _El vendedor ya puede realizar el envío o entrega._`,
+        `🔓 _Haz clic abajo para liberar los fondos una vez recibido el producto._`,
       ].join('\n');
       keyboard = Markup.inlineKeyboard([
-        [Markup.button.webApp('🔓 Release Funds', releaseUrl)],
+        [Markup.button.webApp('🔓 Liberar Fondos al Vendedor', releaseUrl)],
       ]);
+      pushText = `🔔 *Notificación de Lexius Pay*\n\n¡Se han congelado *${amount} USDC* en el contrato Stylus WASM para la transacción #${escrowId}! El vendedor ya puede realizar el envío.`;
       break;
     }
     case 'completed':
       text = [
-        `✅ *Escrow Completed!*`,
+        `🎉 *¡Acuerdo Completado Exitosamente!*`,
         ``,
-        `📋 *Escrow #${escrowId}*`,
-        `${description}`,
+        `📋 *Acuerdo P2P #${escrowId}*`,
+        `📦 ${description}`,
         ``,
-        `💰 *${amount} USDC* released to the seller`,
+        `💰 *Monto:* ${amount} USDC (Liberados al Vendedor)`,
+        `🌐 *Red:* Arbitrum Sepolia`,
         ``,
-        `_Thank you for using Lexius Pay! Your transaction is protected by Arbitrum Stylus._`,
+        `✨ _Gracias por operar de forma segura con Lexius Pay y Arbitrum Stylus._`,
       ].join('\n');
-      // No keyboard for completed
+      pushText = `🔔 *Notificación de Lexius Pay*\n\n¡Pago de *${amount} USDC* liberado exitosamente al vendedor en la transacción #${escrowId}! Transacción finalizada.`;
       break;
     case 'disputed':
       text = [
-        `⚠️ *Dispute Raised*`,
+        `🚨 *¡Disputa Iniciada!*`,
         ``,
-        `📋 *Escrow #${escrowId}*`,
-        `${description}`,
+        `📋 *Acuerdo P2P #${escrowId}*`,
+        `📦 ${description}`,
         ``,
-        `💰 *${amount} USDC* held in escrow`,
+        `💰 *Monto:* ${amount} USDC (Retenidos en Custodia)`,
+        `🤖 *Agente IA:* El Oráculo IA Lexius está analizando la evidencia enviada por las partes.`,
         ``,
-        `_The AI Oracle is analyzing the dispute evidence. A verdict will be issued shortly._`,
+        `⚖️ _Se emitirá una resolución justa mediante firma ecrecover en la blockchain._`,
       ].join('\n');
-      // No keyboard for disputed
+      pushText = `🔔 *Notificación de Lexius Pay*\n\n⚠️ Se ha iniciado una disputa sobre la transacción #${escrowId}. El Oráculo IA Lexius responderá a la brevedad.`;
       break;
   }
 
-  await b.telegram.editMessageText(
-    chatId,
-    messageId,
-    undefined,
-    text,
-    {
-      parse_mode: 'Markdown',
-      ...(keyboard || {}),
+  // 1. Try editing existing card message if messageId is available
+  if (messageId) {
+    try {
+      await b.telegram.editMessageText(
+        chatId,
+        messageId,
+        undefined,
+        text,
+        {
+          parse_mode: 'Markdown',
+          ...(keyboard || {}),
+        }
+      );
+    } catch (err) {
+      console.warn(`[Telegram Bot] Edit card message failed for #${escrowId}, sending direct notification message:`, err);
     }
-  );
+  }
+
+  // 2. Always send direct push notification message to ensure status updates are NEVER missed
+  try {
+    if (pushText) {
+      await b.telegram.sendMessage(chatId, pushText, { parse_mode: 'Markdown' });
+    }
+  } catch (err) {
+    console.warn(`[Telegram Bot] Push notification failed for #${escrowId}:`, err);
+  }
 }
 
 /** Send welcome message when user starts the bot */

@@ -204,6 +204,9 @@ export default function HomePage() {
           chatId: formattedChat,
           messageId: data.messageId,
         }));
+        if (!createdUrl.includes('chatId=')) {
+          setCreatedUrl(prev => `${prev}&chatId=${encodeURIComponent(formattedChat)}&messageId=${data.messageId}`);
+        }
         setTgShareStatus('sent');
       } else {
         setTgShareStatus('error');

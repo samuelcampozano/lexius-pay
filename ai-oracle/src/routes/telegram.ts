@@ -1,10 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { sendEscrowCard, updateEscrowCard, findChatIdByUsername } from '../services/telegram';
+import { sendEscrowCard, updateEscrowCard, findChatIdByUsername, escrowCardStore, saveEscrowCardStore } from '../services/telegram';
 
 const router = Router();
-
-// In-memory store mapping escrowId -> { chatId, messageId }
-const escrowCardStore = new Map<string, { chatId: string | number; messageId: number }>();
 
 /**
  * POST /api/telegram/send-escrow-card
