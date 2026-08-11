@@ -15,9 +15,10 @@ import {
 import { arbitrumSepolia } from 'viem/chains';
 import {
   STYLUS_ESCROW_ADDRESS,
-  STYLUS_ESCROW_ABI,
   USDC_TOKEN_ADDRESS,
+  STYLUS_ESCROW_ABI,
   USDC_MINIMAL_ABI,
+  parseNumericEscrowId,
 } from '@/lib/contracts';
 
 export type FlowStep =
@@ -170,9 +171,7 @@ export function useEscrowFlow() {
 
       let usdcUnits = parseUnits(String(amountUsdc), 6);
 
-      let targetEscrowId = BigInt(
-        escrowId === 'demo' ? '101' : escrowId.replace('#', '')
-      );
+      let targetEscrowId = parseNumericEscrowId(escrowId);
 
       let needsCreation = false;
       let requiredUsdcUnits = usdcUnits;

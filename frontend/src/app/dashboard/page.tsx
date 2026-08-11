@@ -18,7 +18,7 @@ import { createPublicClient, http } from 'viem';
 import { arbitrumSepolia } from 'viem/chains';
 import WalletLogin from '@/components/WalletLogin';
 import { useLanguage } from '@/context/LanguageContext';
-import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
+import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI, parseNumericEscrowId } from '@/lib/contracts';
 
 export interface EscrowRecord {
   id: string;
@@ -67,7 +67,7 @@ export default function DashboardPage() {
         if (!item.id || item.id === 'demo') continue;
 
         try {
-          const numericId = BigInt(item.id.replace('#', ''));
+          const numericId = parseNumericEscrowId(item.id);
           const escrowInfo = (await publicClient.readContract({
             address: STYLUS_ESCROW_ADDRESS,
             abi: STYLUS_ESCROW_ABI,

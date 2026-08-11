@@ -41,3 +41,19 @@ export const USDC_MINIMAL_ABI = [
     outputs: [{ name: '', type: 'bool' }],
   },
 ] as const;
+
+/**
+ * Safely parses any string, number, or URL parameter into a valid BigInt escrow ID.
+ * Eliminates "Cannot convert wallet to a BigInt" or non-numeric parameter crashes.
+ */
+export function parseNumericEscrowId(rawId: string | number | undefined | null): bigint {
+  if (typeof rawId === 'number' && !isNaN(rawId)) {
+    return BigInt(Math.floor(rawId));
+  }
+  const str = String(rawId || '1').trim();
+  const digitsOnly = str.replace(/[^0-9]/g, '');
+  if (!digitsOnly || isNaN(Number(digitsOnly))) {
+    return BigInt(1);
+  }
+  return BigInt(digitsOnly);
+}

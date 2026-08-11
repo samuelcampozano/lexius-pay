@@ -26,7 +26,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useStylusContract } from '@/hooks/useStylusContract';
 import { useEscrowFlow } from '@/hooks/useEscrowFlow';
 import { closeTma } from '@/lib/telegram';
-import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
+import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI, parseNumericEscrowId } from '@/lib/contracts';
 
 const fallbackBuyer = '0x3C44CdD459193653841586395bcfA5A7b42d506e';
 
@@ -139,7 +139,7 @@ export default function PaymentPage() {
           chain: arbitrumSepolia,
           transport: http(process.env.NEXT_PUBLIC_STYLUS_RPC_URL || 'https://sepolia-rollup.arbitrum.io/rpc'),
         });
-        const numericId = BigInt(escrowId.replace('#', ''));
+        const numericId = parseNumericEscrowId(escrowId);
         const count = (await publicClient.readContract({
           address: STYLUS_ESCROW_ADDRESS,
           abi: STYLUS_ESCROW_ABI,

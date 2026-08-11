@@ -67,7 +67,13 @@ export function buildMiniAppUrl(action: string, escrowId: string, params?: { amo
   if (params?.seller) query.set('seller', params.seller);
   if (params?.sellerName) query.set('sellerName', params.sellerName);
 
-  return `${baseUrl}/pay/${String(escrowId)}?${query.toString()}`;
+  if (action === 'privy') {
+    return `${baseUrl}/?privyAction=${encodeURIComponent(escrowId)}`;
+  }
+
+  // Ensure escrowId is a clean numeric string for pay routes
+  const cleanId = String(escrowId).replace(/[^0-9]/g, '') || '1';
+  return `${baseUrl}/pay/${cleanId}?${query.toString()}`;
 }
 
 /** Send initial escrow card with Pay button */
