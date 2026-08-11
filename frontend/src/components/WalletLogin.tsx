@@ -47,7 +47,11 @@ export default function WalletLogin() {
   const linkedAccounts = user?.linkedAccounts || [];
   const hasEmail = linkedAccounts.some((acc: any) => acc.type === 'email');
   const hasGoogle = linkedAccounts.some((acc: any) => acc.type === 'google_oauth');
-  const hasWallet = linkedAccounts.some((acc: any) => acc.type === 'wallet');
+  
+  // Detect external wallet (MetaMask, Coinbase Wallet, etc.) vs Privy embedded wallet
+  const hasExternalWallet = linkedAccounts.some(
+    (acc: any) => acc.type === 'wallet' && acc.walletClientType !== 'privy'
+  );
   const hasEmbeddedWallet = linkedAccounts.some(
     (acc: any) => acc.type === 'wallet' && acc.walletClientType === 'privy'
   );
@@ -93,7 +97,7 @@ export default function WalletLogin() {
     let primaryMethod = 'Google / Correo';
     if (user?.google) primaryMethod = 'Google';
     else if (user?.email) primaryMethod = 'Correo';
-    else if (user?.wallet) primaryMethod = 'Cartera Web3';
+    else if (user?.wallet && !hasEmbeddedWallet) primaryMethod = 'Cartera Web3 Externa';
     else if (user?.telegram) primaryMethod = 'Telegram';
 
     return (
@@ -151,8 +155,8 @@ export default function WalletLogin() {
                 <span>Vincular Cuentas</span>
               </div>
 
-              {/* ESCENARIO A: Inició con Google/Correo, pero NO tiene Cartera Web3 vinculada */}
-              {!hasWallet && (
+              {/* Botón de Vincular Cartera Web3 Externa (MetaMask, Coinbase Wallet, etc.) */}
+              {!hasExternalWallet && (
                 <button
                   onClick={() => {
                     linkWallet();
@@ -167,7 +171,7 @@ export default function WalletLogin() {
                 </button>
               )}
 
-              {/* ESCENARIO B: Faltan accesos sociales (Google / Correo) */}
+              {/* Botones Sociales (Google y Correo) */}
               {!hasGoogle && (
                 <button
                   onClick={() => {
@@ -226,7 +230,7 @@ export default function WalletLogin() {
               )}
 
               {/* Si todo está totalmente vinculado */}
-              {hasEmail && hasGoogle && hasWallet && hasEmbeddedWallet && (
+              {hasEmail && hasGoogle && hasExternalWallet && hasEmbeddedWallet && (
                 <div className="px-3 py-2 rounded-xl bg-cyan-950/30 border border-cyan-500/20 text-[11px] text-cyan-300 text-center font-medium">
                   ✓ Todas tus cuentas están vinculadas
                 </div>
