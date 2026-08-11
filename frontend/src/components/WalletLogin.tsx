@@ -11,6 +11,7 @@ import {
   ChevronDown,
   PlusCircle,
   Link as LinkIcon,
+  Sparkles,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -21,9 +22,9 @@ export default function WalletLogin() {
     user,
     login,
     logout,
-    linkEmail,
-    linkGoogle,
     linkWallet,
+    linkGoogle,
+    linkEmail,
     createWallet,
   } = usePrivy();
   const { wallets } = useWallets();
@@ -42,7 +43,7 @@ export default function WalletLogin() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Linked accounts evaluation
+  // Reactive constants for linked accounts
   const linkedAccounts = user?.linkedAccounts || [];
   const hasEmail = linkedAccounts.some((acc: any) => acc.type === 'email');
   const hasGoogle = linkedAccounts.some((acc: any) => acc.type === 'google_oauth');
@@ -88,6 +89,13 @@ export default function WalletLogin() {
       user?.telegram?.username ??
       shortAddr;
 
+    // Determine primary login method
+    let primaryMethod = 'Google / Correo';
+    if (user?.google) primaryMethod = 'Google';
+    else if (user?.email) primaryMethod = 'Correo';
+    else if (user?.wallet) primaryMethod = 'Cartera Web3';
+    else if (user?.telegram) primaryMethod = 'Telegram';
+
     return (
       <div className="relative inline-block" ref={menuRef}>
         {/* Main User Pill */}
@@ -123,30 +131,43 @@ export default function WalletLogin() {
           <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isMenuOpen ? 'rotate-180 text-cyan-400' : ''}`} />
         </button>
 
-        {/* Dropdown Menu for Account Linking & Settings */}
+        {/* Dropdown Panel Menu */}
         {isMenuOpen && (
-          <div className="absolute right-0 mt-2 w-64 bg-[#070e24]/95 border border-cyan-500/30 rounded-2xl p-3 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-2 px-1 flex items-center gap-1.5">
-              <LinkIcon className="w-3 h-3 text-cyan-400" />
-              <span>Vincular Cuentas</span>
+          <div className="absolute right-0 mt-2 w-72 bg-[#070e24]/95 border border-cyan-500/30 rounded-2xl p-4 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Header: Welcome & Primary Access Method */}
+            <div className="mb-3 pb-2.5 border-b border-slate-800/80">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Sesión activa vía <strong className="text-cyan-300 font-semibold">{primaryMethod}</strong></span>
+              </div>
+              <div className="text-sm font-bold text-white truncate">{displayName}</div>
+              <div className="text-[11px] font-mono text-slate-400 truncate mt-0.5">{addr || 'Sin dirección'}</div>
             </div>
 
-            <div className="space-y-1.5 mb-3">
-              {/* Link Email */}
-              {!hasEmail && (
+            {/* Account Linking Section */}
+            <div className="space-y-2 mb-4">
+              <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider px-0.5 flex items-center gap-1.5">
+                <LinkIcon className="w-3 h-3 text-cyan-400" />
+                <span>Vincular Cuentas</span>
+              </div>
+
+              {/* ESCENARIO A: Inició con Google/Correo, pero NO tiene Cartera Web3 vinculada */}
+              {!hasWallet && (
                 <button
                   onClick={() => {
-                    linkEmail();
+                    linkWallet();
                     setIsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-500/40 text-xs font-medium text-slate-200 hover:text-cyan-300 transition-all duration-150"
+                  className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500/20 via-sky-500/20 to-blue-600/20 hover:from-cyan-500/30 hover:to-blue-600/30 border border-cyan-500/50 hover:border-cyan-400 text-xs font-bold text-cyan-200 hover:text-white shadow-md shadow-cyan-500/10 transition-all duration-150 group"
                 >
-                  <Mail className="w-4 h-4 text-cyan-400" />
-                  <span>Vincular Correo</span>
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                    <span>👉 Vincular Cartera Web3 / MetaMask</span>
+                  </div>
                 </button>
               )}
 
-              {/* Link Google */}
+              {/* ESCENARIO B: Faltan accesos sociales (Google / Correo) */}
               {!hasGoogle && (
                 <button
                   onClick={() => {
@@ -177,21 +198,20 @@ export default function WalletLogin() {
                 </button>
               )}
 
-              {/* Link External Wallet */}
-              {!hasWallet && (
+              {!hasEmail && (
                 <button
                   onClick={() => {
-                    linkWallet();
+                    linkEmail();
                     setIsMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-500/40 text-xs font-medium text-slate-200 hover:text-cyan-300 transition-all duration-150"
                 >
-                  <Wallet className="w-4 h-4 text-cyan-400" />
-                  <span>Vincular Cartera Web3</span>
+                  <Mail className="w-4 h-4 text-cyan-400" />
+                  <span>Vincular Correo</span>
                 </button>
               )}
 
-              {/* Create Embedded Wallet */}
+              {/* Crear Cartera Embebida si falta */}
               {!hasEmbeddedWallet && createWallet && (
                 <button
                   onClick={() => {
@@ -205,10 +225,10 @@ export default function WalletLogin() {
                 </button>
               )}
 
-              {/* All linked state message */}
+              {/* Si todo está totalmente vinculado */}
               {hasEmail && hasGoogle && hasWallet && hasEmbeddedWallet && (
-                <div className="px-3 py-2 rounded-xl bg-slate-900/50 text-[11px] text-slate-400 text-center">
-                  ✓ Todas las cuentas vinculadas
+                <div className="px-3 py-2 rounded-xl bg-cyan-950/30 border border-cyan-500/20 text-[11px] text-cyan-300 text-center font-medium">
+                  ✓ Todas tus cuentas están vinculadas
                 </div>
               )}
             </div>
