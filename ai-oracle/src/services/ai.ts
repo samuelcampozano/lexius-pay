@@ -47,19 +47,23 @@ Judicial Rules & Anti-Fraud Protocols:
    - LatAm & Global bank vouchers (Yape, Plin, BCP, Interbank, Nequi, Daviplata, Zelle, Venmo, PayPal, Wise, etc.).
    - Check for forged fonts, edited amounts, fake operation numbers, or barcode serial mismatches.
 
-5. Output Language:
-   - Write the "reason" field in the SAME language (Spanish or English) as the dispute claim text.
+5. Rich Explainability & Output Language:
+   - Write the "reason" field in a highly detailed, professional, smart, and explainable format in the SAME language (Spanish or English) as the dispute claim text.
+   - Structure the "reason" into 3 clear sections:
+     a) 🔍 [Inspección Visual & Multiespectral OCR / Visual Inspection]: Specific visual details observed in photos or documents.
+     b) 📜 [Protocolo Bi-lateral & Regla Anti-Fraude / Bilateral Evaluation]: How claim vs dispatch proof was weighed.
+     c) 🏛️ [Veredicto Judicial & Ejecución Stylus / Judicial Verdict]: The final legal ruling authorizing Payout Release or Full Refund.
 
 Output Format Rules:
 - Respond ONLY with a valid single JSON object containing:
   - "winner": (string wallet address of the winner: buyerAddress or sellerAddress)
-  - "reason": (string concise judicial reasoning explaining why winner won based on evidence & packaging rule)
+  - "reason": (string rich, highly explainable judicial reasoning formatted with 🔍, 📜, 🏛️ emojis and structured analysis)
   - "confidenceScore": (number between 0.0 and 1.0)
   - "fraudRiskFlag": (boolean: true if suspicious stock photo or uncontextual claim detected, false otherwise)
   - "evidenceAuthenticityScore": (number between 0.0 and 1.0 assessing evidence credibility)
 
 Example JSON Output:
-{"winner":"0x71C7656EC7ab88b098defB751B7401B5f6d8976F","reason":"Seller provided valid Olva Courier dispatch receipt #74819 with matching shipping label. Buyer submitted an uncontextual stock photo without packaging or waybill. Under the Contextual Packaging Rule, the buyer claim is rejected.","confidenceScore":0.96,"fraudRiskFlag":true,"evidenceAuthenticityScore":0.35}`;
+{"winner":"0x71C7656EC7ab88b098defB751B7401B5f6d8976F","reason":"🔍 Inspección Visual & OCR: Se verificó la guía de despacho de Olva Courier #74819 con etiqueta de envío rotulada al destino del comprador. La foto adjuntada por el comprador muestra un producto aislado sin embalaje del envío ni código postal. 📜 Protocolo Bi-lateral de Carga de la Prueba: Bajo la Regla Anti-Fraude de Empaque Contextual, las imágenes sin embalaje de transporte no constituyen prueba fehaciente de manipulación en tránsito por el vendedor. 🏛️ Veredicto Judicial Stylus: Se desestima el reclamo por falta de contexto postal y se autoriza la LIBERACIÓN DE FONDOS al Vendedor.","confidenceScore":0.96,"fraudRiskFlag":true,"evidenceAuthenticityScore":0.35}`;
 
 export async function evaluateDisputeWithAI(
   params: DisputeEvidenceInput
