@@ -90,6 +90,17 @@ export default function DashboardPage() {
             nextItems[i] = { ...item, status: newStatus };
             updated = true;
           }
+
+          // Check Oracle server dispute status
+          try {
+            const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+            const res = await fetch(`${oracleUrl}/api/dispute/status?escrowId=${item.id}`);
+            const disputeRes = await res.json();
+            if (disputeRes?.isDisputed && nextItems[i].status !== 'Disputed' && nextItems[i].status !== 'Completed') {
+              nextItems[i] = { ...nextItems[i], status: 'Disputed' };
+              updated = true;
+            }
+          } catch (e) {}
         } catch (e) {
           // Non-blocking on-chain read error for single item
         }

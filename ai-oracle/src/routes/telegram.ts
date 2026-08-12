@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { sendEscrowCard, updateEscrowCard, findChatIdByUsername, escrowCardStore, saveEscrowCardStore } from '../services/telegram';
+import { disputeStore } from './dispute';
 
 const router = Router();
 
@@ -105,6 +106,21 @@ router.post('/update-escrow-status', async (req: Request, res: Response) => {
         error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
       });
     }
+
+    // Sync state into disputeStore for cross-device awareness
+    const existingRecord = disputeStore.get(String(escrowId)) || {
+      escrowId: String(escrowId),
+      isDisputed: newStatus === 'disputed',
+      status: newStatus as any,
+      updatedAt: new Date().toISOString(),
+    };
+
+    disputeStore.set(String(escrowId), {
+      ...existingRecord,
+      isDisputed: newStatus === 'disputed' || existingRecord.isDisputed,
+      status: newStatus as any,
+      updatedAt: new Date().toISOString(),
+    });
 
     await updateEscrowCard({
       chatId,

@@ -208,7 +208,7 @@ export default function DisputePage() {
 
     syncRoleFromBlockchain();
 
-    // Load any existing dispute data for this escrow
+    // Load existing dispute data from local storage AND from Oracle server
     try {
       const saved = JSON.parse(localStorage.getItem(`lexius_dispute_data_${escrowId}`) || '{}');
       if (saved.claimText) setClaimText(saved.claimText);
@@ -216,6 +216,19 @@ export default function DisputePage() {
       if (saved.sellerClaimText) setSellerClaimText(saved.sellerClaimText);
       if (saved.sellerProofUrl) setSellerProofUrl(saved.sellerProofUrl);
       if (saved.verdict) setVerdict(saved.verdict);
+
+      const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+      fetch(`${oracleUrl}/api/dispute/status?escrowId=${escrowId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.dispute) {
+            if (data.dispute.claimText) setClaimText(data.dispute.claimText);
+            if (data.dispute.proofUrl) setProofUrl(data.dispute.proofUrl);
+            if (data.dispute.sellerClaimText) setSellerClaimText(data.dispute.sellerClaimText);
+            if (data.dispute.sellerProofUrl) setSellerProofUrl(data.dispute.sellerProofUrl);
+          }
+        })
+        .catch(() => {});
     } catch (e) {}
 
     // Notify Telegram bot that escrow is in dispute
@@ -235,7 +248,7 @@ export default function DisputePage() {
     } catch (e) {}
   }, [escrowId, activeWallet]);
 
-  // Persist bilateral evidence to localStorage whenever modified
+  // Persist bilateral evidence to localStorage AND Oracle backend whenever modified
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -248,8 +261,22 @@ export default function DisputePage() {
           verdict,
         })
       );
+
+      const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+      fetch(`${oracleUrl}/api/dispute/save-evidence`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          escrowId,
+          claimText,
+          proofUrl,
+          sellerClaimText,
+          sellerProofUrl,
+          role: currentUserRole,
+        }),
+      }).catch(() => {});
     } catch (e) {}
-  }, [escrowId, claimText, proofUrl, sellerClaimText, sellerProofUrl, verdict]);
+  }, [escrowId, claimText, proofUrl, sellerClaimText, sellerProofUrl, verdict, currentUserRole]);
 
   // Fetch the authorized oracle address from the Stylus contract on Sepolia
   useEffect(() => {

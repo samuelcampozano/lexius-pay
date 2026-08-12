@@ -123,4 +123,105 @@ router.post('/resolve', async (req: Request, res: Response) => {
   }
 });
 
+export interface DisputeRecord {
+  escrowId: string;
+  isDisputed: boolean;
+  status: 'disputed' | 'completed' | 'pending';
+  claimText?: string;
+  proofUrl?: string;
+  sellerClaimText?: string;
+  sellerProofUrl?: string;
+  updatedAt: string;
+}
+
+export const disputeStore = new Map<string, DisputeRecord>();
+
+/**
+ * GET /api/dispute/status?escrowId=35
+ * Returns real-time dispute status and evidence across devices
+ */
+router.get('/status', (req: Request, res: Response) => {
+  const escrowId = String(req.query.escrowId || '');
+  if (!escrowId) {
+    return res.status(400).json({ success: false, error: 'escrowId query parameter required' });
+  }
+
+  const record = disputeStore.get(escrowId);
+  if (!record) {
+    return res.status(200).json({
+      success: true,
+      escrowId,
+      isDisputed: false,
+      status: 'pending',
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    escrowId,
+    isDisputed: record.isDisputed,
+    status: record.status,
+    dispute: record,
+  });
+});
+
+/**
+ * POST /api/dispute/save-evidence
+ * Saves buyer or seller evidence on backend and alerts Telegram
+ */
+router.post('/save-evidence', async (req: Request, res: Response) => {
+  try {
+    const { escrowId, claimText, proofUrl, sellerClaimText, sellerProofUrl, role } = req.body;
+    if (!escrowId) {
+      return res.status(400).json({ success: false, error: 'escrowId required' });
+    }
+
+    const existing = disputeStore.get(String(escrowId)) || {
+      escrowId: String(escrowId),
+      isDisputed: true,
+      status: 'disputed',
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updatedRecord: DisputeRecord = {
+      ...existing,
+      isDisputed: true,
+      status: 'disputed',
+      claimText: claimText !== undefined ? claimText : existing.claimText,
+      proofUrl: proofUrl !== undefined ? proofUrl : existing.proofUrl,
+      sellerClaimText: sellerClaimText !== undefined ? sellerClaimText : existing.sellerClaimText,
+      sellerProofUrl: sellerProofUrl !== undefined ? sellerProofUrl : existing.sellerProofUrl,
+      updatedAt: new Date().toISOString(),
+    };
+
+    disputeStore.set(String(escrowId), updatedRecord);
+
+    // Notify Telegram card if available
+    try {
+      const { escrowCardStore, updateEscrowCard } = await import('../services/telegram');
+      const stored = escrowCardStore.get(String(escrowId));
+      if (stored) {
+        await updateEscrowCard({
+          chatId: stored.chatId,
+          messageId: stored.messageId,
+          escrowId: String(escrowId),
+          newStatus: 'disputed',
+          amount: '10',
+          description: 'Escrow Agreement',
+        });
+      }
+    } catch (tgErr) {
+      console.warn('[AI Oracle] Save evidence TG notify skipped:', tgErr);
+    }
+
+    return res.status(200).json({
+      success: true,
+      escrowId,
+      record: updatedRecord,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default router;

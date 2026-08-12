@@ -120,7 +120,7 @@ export default function PaymentPage() {
     let isSubscribed = true;
 
     const syncEscrowStatus = async () => {
-      // 1. Local Storage Sync & Dispute Data Check
+      // 1. Local Storage Sync & Oracle Backend Dispute Status Check
       try {
         const stored = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
         const item = stored.find((rec: any) => rec.id === escrowId);
@@ -137,6 +137,33 @@ export default function PaymentPage() {
             setStatus('Disputed');
           }
         }
+
+        // Query Oracle server for real-time dispute status across devices
+        const oracleUrl = process.env.NEXT_PUBLIC_AI_ORACLE_URL || 'http://localhost:8080';
+        fetch(`${oracleUrl}/api/dispute/status?escrowId=${escrowId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data?.isDisputed && isSubscribed) {
+              setStatus('Disputed');
+              try {
+                const storedArr = JSON.parse(localStorage.getItem('lexius_user_escrows') || '[]');
+                let updated = false;
+                const newArr = storedArr.map((rec: any) => {
+                  if (rec.id === escrowId && rec.status !== 'Disputed' && rec.status !== 'Completed') {
+                    updated = true;
+                    return { ...rec, status: 'Disputed' };
+                  }
+                  return rec;
+                });
+                if (updated) {
+                  localStorage.setItem('lexius_user_escrows', JSON.stringify(newArr));
+                  window.dispatchEvent(new Event('storage'));
+                  window.dispatchEvent(new Event('lexius_escrow_updated'));
+                }
+              } catch (err) {}
+            }
+          })
+          .catch(() => {});
       } catch (e) {}
 
       // 2. Real-Time On-Chain Blockchain Sync from Arbitrum Sepolia
