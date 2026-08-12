@@ -37,9 +37,9 @@ export function usePrivyAuth() {
   const { login, logout, authenticated, ready, user, linkGoogle } = usePrivy();
   const { wallets } = useWallets();
 
-  const embeddedWallet =
-    wallets.find((w) => w.walletClientType === 'privy') || wallets[0];
-  const walletAddress = embeddedWallet?.address;
+  const activeWallet =
+    wallets.find((w) => w.walletClientType !== 'privy') || wallets[0];
+  const walletAddress = activeWallet?.address;
 
   /**
    * Smart login that detects the TMA context.
@@ -69,7 +69,8 @@ export function usePrivyAuth() {
     authenticated,
     ready,
     user,
-    embeddedWallet,
+    activeWallet,
+    embeddedWallet: activeWallet,
     walletAddress,
     isTMA: isTelegramWebView(),
   };

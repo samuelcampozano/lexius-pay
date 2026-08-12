@@ -46,26 +46,25 @@ export function useEscrowFlow() {
   const [usdcBalance, setUsdcBalance] = useState<string>('0.00');
   const [txHash, setTxHash] = useState<string | null>(null);
 
-  /** Active embedded wallet address */
+  /** Active wallet (prioritizes external wallets like MetaMask over Privy embedded wallet) */
+  const activeWallet =
+    wallets.find((w) => w.walletClientType !== 'privy') || wallets[0];
   const activeWalletAddress =
-    wallets.find((w) => w.walletClientType === 'privy')?.address ||
-    wallets[0]?.address ||
-    user?.wallet?.address ||
-    '';
+    activeWallet?.address || user?.wallet?.address || '';
 
-  /** Get Viem WalletClient connected dynamically to Privy embedded wallet */
+  /** Get Viem WalletClient connected dynamically to active wallet */
   const getWalletClient = async () => {
-    const embeddedWallet =
-      wallets.find((w) => w.walletClientType === 'privy') || wallets[0];
-    if (!embeddedWallet) {
-      throw new Error('No Privy embedded wallet connected');
+    const activeWallet =
+      wallets.find((w) => w.walletClientType !== 'privy') || wallets[0];
+    if (!activeWallet) {
+      throw new Error('No wallet connected');
     }
 
-    await embeddedWallet.switchChain(arbitrumSepolia.id);
-    const ethereumProvider = await embeddedWallet.getEthereumProvider();
+    await activeWallet.switchChain(arbitrumSepolia.id);
+    const ethereumProvider = await activeWallet.getEthereumProvider();
 
     return createWalletClient({
-      account: embeddedWallet.address as `0x${string}`,
+      account: activeWallet.address as `0x${string}`,
       chain: arbitrumSepolia,
       transport: custom(ethereumProvider),
     });

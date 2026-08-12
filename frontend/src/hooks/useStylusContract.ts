@@ -12,16 +12,16 @@ import { STYLUS_ESCROW_ADDRESS, STYLUS_ESCROW_ABI } from '@/lib/contracts';
 export function useStylusContract() {
   const { wallets } = useWallets();
 
-  /** Get a viem WalletClient from the user's Privy embedded wallet */
+  /** Get a viem WalletClient from the user's active wallet */
   const getClient = async () => {
-    const embeddedWallet = wallets.find((w) => w.walletClientType === 'privy') || wallets[0];
-    if (!embeddedWallet) throw new Error('No embedded wallet available');
+    const activeWallet = wallets.find((w) => w.walletClientType !== 'privy') || wallets[0];
+    if (!activeWallet) throw new Error('No wallet connected');
 
-    await embeddedWallet.switchChain(arbitrumSepolia.id);
-    const ethereumProvider = await embeddedWallet.getEthereumProvider();
+    await activeWallet.switchChain(arbitrumSepolia.id);
+    const ethereumProvider = await activeWallet.getEthereumProvider();
 
     return createWalletClient({
-      account: embeddedWallet.address as `0x${string}`,
+      account: activeWallet.address as `0x${string}`,
       chain: arbitrumSepolia,
       transport: custom(ethereumProvider),
     });

@@ -52,16 +52,16 @@ export function useClientSwap() {
   const [depositing, setDepositing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /** Get Viem WalletClient connected dynamically to the user's active Privy wallet */
+  /** Get Viem WalletClient connected dynamically to the user's active wallet */
   const getWalletClient = async () => {
-    const embeddedWallet = wallets.find((w) => w.walletClientType === 'privy') || wallets[0];
-    if (!embeddedWallet) throw new Error('No Privy embedded wallet connected');
+    const activeWallet = wallets.find((w) => w.walletClientType !== 'privy') || wallets[0];
+    if (!activeWallet) throw new Error('No wallet connected');
 
-    await embeddedWallet.switchChain(arbitrumSepolia.id);
-    const ethereumProvider = await embeddedWallet.getEthereumProvider();
+    await activeWallet.switchChain(arbitrumSepolia.id);
+    const ethereumProvider = await activeWallet.getEthereumProvider();
 
     return createWalletClient({
-      account: embeddedWallet.address as `0x${string}`,
+      account: activeWallet.address as `0x${string}`,
       chain: arbitrumSepolia,
       transport: custom(ethereumProvider),
     });

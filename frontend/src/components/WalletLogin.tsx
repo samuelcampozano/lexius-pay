@@ -77,9 +77,10 @@ export default function WalletLogin() {
 
   // ── Authenticated State ───────────────────────────────────────────────────
   if (authenticated) {
-    const embeddedWallet =
-      wallets.find((w) => w.walletClientType === 'privy') || wallets[0];
-    const addr = embeddedWallet?.address;
+    const activeWallet =
+      wallets.find((w) => w.walletClientType !== 'privy') || wallets[0];
+    const isExternalWallet = activeWallet && activeWallet.walletClientType !== 'privy';
+    const addr = activeWallet?.address || user?.wallet?.address;
     const shortAddr = addr
       ? `${addr.slice(0, 6)}…${addr.slice(-4)}`
       : 'Wallet';
@@ -87,18 +88,19 @@ export default function WalletLogin() {
     const googleMeta = user?.google as
       | { name?: string; picture?: string }
       | undefined;
-    const displayName =
-      googleMeta?.name ??
-      user?.email?.address ??
-      user?.telegram?.username ??
-      shortAddr;
+
+    // Display Name: If using an external wallet (MetaMask), display short address
+    const displayName = isExternalWallet
+      ? shortAddr
+      : (googleMeta?.name ?? user?.email?.address ?? user?.telegram?.username ?? shortAddr);
 
     // Determine primary login method
-    let primaryMethod = 'Google / Correo';
-    if (user?.google) primaryMethod = 'Google';
-    else if (user?.email) primaryMethod = 'Correo';
-    else if (user?.wallet && !hasEmbeddedWallet) primaryMethod = 'Cartera Web3 Externa';
-    else if (user?.telegram) primaryMethod = 'Telegram';
+    let primaryMethod = isExternalWallet ? 'Cartera Web3 Externa' : 'Google / Correo';
+    if (!isExternalWallet) {
+      if (user?.google) primaryMethod = 'Google';
+      else if (user?.email) primaryMethod = 'Correo';
+      else if (user?.telegram) primaryMethod = 'Telegram';
+    }
 
     return (
       <div className="relative inline-block" ref={menuRef}>
@@ -109,7 +111,7 @@ export default function WalletLogin() {
         >
           {/* Avatar / status dot */}
           <div className="relative flex-shrink-0">
-            {googleMeta?.picture ? (
+            {googleMeta?.picture && !isExternalWallet ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={googleMeta.picture}
