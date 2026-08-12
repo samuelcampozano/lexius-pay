@@ -126,17 +126,9 @@ export default function DashboardPage() {
         const stored: EscrowRecord[] = JSON.parse(
           localStorage.getItem('lexius_user_escrows') || '[]'
         );
-        let userItems = stored;
-        if (activeWallet) {
-          userItems = stored.filter(
-            (item) =>
-              !item.seller ||
-              item.seller.toLowerCase() === activeWallet ||
-              item.buyer?.toLowerCase() === activeWallet
-          );
-        }
-        setEscrows(userItems);
-        syncOnChainStatuses(userItems);
+        // Load all escrows stored in local browser session
+        setEscrows(stored);
+        syncOnChainStatuses(stored);
       } catch (e) {
         setEscrows([]);
       }
